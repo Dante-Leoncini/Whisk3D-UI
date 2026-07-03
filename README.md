@@ -1,5 +1,9 @@
 # Whisk3D UI
 
+<p align="center">
+    <img src="logo_outlined.svg" width="400" alt="Whisk3D logo">
+</p>
+
 **Whisk3D UI** es una biblioteca ligera de interfaces gráficas multiplataforma construida sobre **Whisk3D Core**. Proporciona los componentes básicos necesarios para crear interfaces de usuario para aplicaciones y videojuegos.
 
 El proyecto nació originalmente por la necesidad de contar con una única interfaz gráfica que funcionara de la misma manera en **Windows, Linux, Android y Symbian**, evitando mantener una implementación distinta para cada plataforma. Con el tiempo, muchas partes del código demostraron ser útiles de forma independiente, por lo que Whisk3D UI terminó convirtiéndose en un proyecto separado que puede reutilizarse en cualquier aplicación basada en Whisk3D Core.
