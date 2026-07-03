@@ -9,6 +9,7 @@
 El proyecto nació originalmente por la necesidad de contar con una única interfaz gráfica que funcionara de la misma manera en **Windows, Linux, Android y Symbian**, evitando mantener una implementación distinta para cada plataforma. Con el tiempo, muchas partes del código demostraron ser útiles de forma independiente, por lo que Whisk3D UI terminó convirtiéndose en un proyecto separado que puede reutilizarse en cualquier aplicación basada en Whisk3D Core.
 
 **NOTA: este proyecto aun no esta listo para produccion.** actualmente me encuentro limpiando y simplificando este codigo ya que tiene mucho codigo que es de Whisk3D editor. por ejemplo el tema de los colores o que ituliza o esta pensado para usar el atlas de Whisk3D Editor. Seguramente haga ejemplos de uso del codigo y de paso haga una limpieza del codigo.
+Mas adelante armare ejemplos de como usarlo.
 
 En lugar de ser un framework de interfaz complejo, Whisk3D UI busca ofrecer las herramientas fundamentales que la mayoría de los proyectos necesitan, entre ellas:
 

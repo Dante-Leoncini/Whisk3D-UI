@@ -170,7 +170,7 @@ void PopupMenu::Render(){
 
     w3dEngine::Translatef((GLfloat)borderGS, (GLfloat)borderGS, 0);
     if (!titulo.empty()){
-        // cabecera (como los menus de Blender)
+        // cabecera
         w3dEngine::Color4f(ListaColores[static_cast<int>(ColorID::blanco)][0],
                   ListaColores[static_cast<int>(ColorID::blanco)][1],
                   ListaColores[static_cast<int>(ColorID::blanco)][2], 1.0f);
