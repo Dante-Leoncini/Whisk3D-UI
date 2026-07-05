@@ -10,53 +10,34 @@
 #ifdef W3D_SYMBIAN
     #include <GLES/gl.h>
 #else
-    #include <GL/gl.h>     // Para GLubyte, GLfixed si hace falta
+    #include <GL/gl.h>
     #include <cstdint>
 #endif
 
-// ----------------------
-//   ENUM de IDs
-// ----------------------
-// dialecto C++03 compartido (RVCT no tiene enum class)
+// Paleta de la UI (roles genericos). Dialecto C++03 compartido (RVCT no tiene enum class).
 struct ColorID {
     enum Enum {
-    background,
-    blanco,
-    accent,
-    accentDark,
-    negro,
-    gris,
-    naranjaFace,
-    headerColor,
-    negroTransparente,
-    grisUI,
-    rojoEje,
-    LineaPiso,
-    LineaPisoRoja,
-    LineaPisoVerde,
-    ColorTransformX,
-    ColorTransformY,
-    ColorTransformZ,
-    normalVertex,  // overlay normales: amarillo saturado (promedio por posicion)
-    normalCustom,  // overlay normales: magenta (normal guardada por vertice)
-    normalFace,    // overlay normales: cian (normal de la cara/triangulo)
-    seleccionInactiva // contorno de un mesh SELECCIONADO pero NO activo (verde-rojizo)
+        background,
+        blanco,
+        accent,
+        accentDark,
+        negro,
+        gris,
+        headerColor,
+        negroTransparente,
+        grisUI,
+        Count
     };
     Enum v;
     ColorID(Enum e) : v(e) {}
     operator Enum() const { return v; }
 };
 
-// ----------------------
-//   Arrays declarados
-// ----------------------
-extern GLubyte ListaColoresUbyte[21][4];
+extern GLubyte ListaColoresUbyte[ColorID::Count][4];
+extern float ListaColores[ColorID::Count][4];
 
-// carga la paleta desde un skin.ini (portable C++03, lo usan los 4 OS).
-// formato: "nombre r g b a" por linea. Devuelve false si no pudo abrir.
+// Carga la paleta de la UI desde un skin.ini ("nombre r g b a" por linea; ignora
+// los nombres que no reconoce). Devuelve false si no pudo abrir el archivo.
 bool loadColorsW3d(const char* aPath);
-void SincronizarRenderColores(); // UI (ListaColores) -> gRenderColors del core (los 4 OS)
-
-extern float ListaColores[21][4];
 
 #endif // COLORES_H

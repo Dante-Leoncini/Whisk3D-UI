@@ -320,7 +320,15 @@ void PopupMenu::SincronizarSubmenu(){
 
 bool PopupMenu::MouseMove(int mx, int my){
     if (!abierto) return false;
-    // si el mouse esta sobre ESTE menu, manda este menu: resalta la fila y
+    // PRIORIDAD al submenu abierto: si el mouse cae sobre el, lo maneja el submenu y NO se recalcula la fila de
+    // ESTE menu. Los submenus anchos se SOLAPAN sobre el padre al clampearse contra el borde de pantalla; sin esta
+    // prioridad, moverse por el submenu caia dentro del bounding box del padre -> le cambiaba la opcion y cerraba
+    // el submenu (no se podia usar "Set Parent To"). El submenu se dibuja ENCIMA, asi que el hover es suyo.
+    if (submenuAbierto && submenuAbierto->abierto && submenuAbierto->Contains(mx, my)){
+        submenuAbierto->MouseMove(mx, my);
+        return true;
+    }
+    // si el mouse esta sobre ESTE menu (y no sobre el submenu), manda este menu: resalta la fila y
     // abre/cierra el submenu segun corresponda (sin click)
     if (Contains(mx, my)){
         int oy = titulo.empty() ? 0 : (RenglonHeightGS + gapGS);
@@ -331,7 +339,7 @@ bool PopupMenu::MouseMove(int mx, int my){
         SincronizarSubmenu();
         return true;
     }
-    // si no, y hay un submenu abierto, el mouse puede estar sobre el
+    // fuera de este menu: el mouse puede estar sobre un sub-submenu mas profundo (que se extiende mas alla del submenu directo)
     if (submenuAbierto && submenuAbierto->abierto){
         if (submenuAbierto->MouseMove(mx, my)) return true;
     }
