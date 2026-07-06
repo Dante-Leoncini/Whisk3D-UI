@@ -26,13 +26,13 @@ class PropText : public PropertieBase {
         void RenderPropertiBox(Card* propertiBox) {
             if (oculto) return;
             propertiBox->Render(false);
-            glTranslatef(0, RenglonHeightGS + gapGS, 0);
+            w3dEngine::Translatef(0, RenglonHeightGS + gapGS, 0);
         }
         void RenderPropertiBoxBorder(Card* propertiBox) {
             if (oculto) return;
-            glTranslatef(0, -RenglonHeightGS - gapGS, 0);
+            w3dEngine::Translatef(0, -RenglonHeightGS - gapGS, 0);
             propertiBox->RenderBorder(false);
-            glTranslatef(0, RenglonHeightGS + gapGS, 0);
+            w3dEngine::Translatef(0, RenglonHeightGS + gapGS, 0);
         }
         void RenderPropertiValue(Card* propertiBox) {
             if (oculto) return;
@@ -49,12 +49,12 @@ class PropText : public PropertieBase {
                     shown = field.text.substr(0, field.caret) + "|" + field.text.substr(field.caret);
                 RenderBitmapText(shown, textAlign::left, boxW);
             }
-            glTranslatef(0, RenglonHeightGS + gapGS, 0);
+            w3dEngine::Translatef(0, RenglonHeightGS + gapGS, 0);
         }
         void RenderPropertiLabel(Card* propertiBox) {
             if (oculto) return;
             RenderBitmapText(name, textAlign::right, PropColEtiqueta - bordersGS);
-            glTranslatef(0, RenglonHeightGS + gapGS, 0);
+            w3dEngine::Translatef(0, RenglonHeightGS + gapGS, 0);
         }
 };
 

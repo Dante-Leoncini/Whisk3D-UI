@@ -1,6 +1,8 @@
 #ifndef SPRITES_H
 #define SPRITES_H
 
+#include "w3dGraphics.h" // w3dEngine (dibujo por la abstraccion, backend ES2 en web)
+
 class Sprite {
 	public:
 	    GLfloat uvs[8] = {
@@ -55,10 +57,12 @@ class Sprite {
 		}
 
 		void Render() const {
-			// Dibujar con TRIANGLE_STRIP (dos triángulos)
-			glTexCoordPointer(2, GL_FLOAT, 0, uvs);
-    		glVertexPointer(2, GL_SHORT, 0, vertices);
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+			// el quad como 2 triangulos indexados (TL,TR,BL,BR): ES2/WebGL no dibuja
+			// client-arrays en TRIANGLE_STRIP, asi que expandimos el strip a indices.
+			static const unsigned char idx[6] = { 0,1,2,  2,1,3 };
+			w3dEngine::TexCoordPointer2f(0, uvs);
+			w3dEngine::VertexPointer2s(0, vertices);
+			w3dEngine::DrawTrianglesByte(6, idx);
 		}
 };
 

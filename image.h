@@ -2,6 +2,7 @@
 #define IMAGE_H
 
 #include "icons.h"
+#include "w3dGraphics.h" // w3dEngine (Color4ub / BindTexture)
 
 class Image {
 	public:
@@ -30,8 +31,8 @@ class Image {
 		}
 
 		void Render() const {
-			glColor4ub(color[0], color[1], color[2], parent.opacity);
-			glBindTexture(GL_TEXTURE_2D, Textures[TextureID]->iID);
+			w3dEngine::Color4ub(color[0], color[1], color[2], parent.opacity);
+			w3dEngine::BindTexture(Textures[TextureID]->iID);
 
 			//esto se hace despues del bind de la textura. sino no le afecta
 			if (interpolacion == closest){
