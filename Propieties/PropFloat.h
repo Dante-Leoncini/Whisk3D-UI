@@ -3,12 +3,16 @@
 
 #include "PropertieBase.h"
 #include "WhiskUI/card.h"
+#include "WhiskUI/TextField.h" // edicion por TEXTO del valor (click / OK -> tipear + enter)
 
 class PropFloat : public PropertieBase {
     public:
         PropFloat(const std::string& Name, const std::string& Unit = "");
 
         float* value;
+        TextField field;            // edicion por texto: al hacer click/OK se enfoca con TODO seleccionado (tipear
+                                    // reemplaza), se escribe el numero y Enter lo aplica (mas rapido que arrastrar).
+        void IniciarEdicionTexto(); // enfoca el campo con el valor actual formateado + SelectAll
         bool Seleccionable() { return value != NULL; }
         float originalValue;
         std::string unit;
@@ -53,5 +57,12 @@ class PropFloat : public PropertieBase {
         void RenderPropertiLabel(Card* propertiBox) override;
         int Resize(int w) override;
 };
+
+// edicion numerica por TEXTO (analogo al rename): mientras esta activa el input llega por g_textFieldActivo
+// (SDL_TEXTINPUT en PC; en Symbian las teclas 0-9 y * las rutea el contenedor). Enter aplica, Esc cancela.
+extern PropFloat* g_propFloatEditando; // el PropFloat que se esta editando por texto (NULL = ninguno)
+bool NumEditActivo();
+void NumEditCommit();  // parsea el texto -> Set(valor) (dispara onChange)
+void NumEditCancel();  // descarta: el valor queda como estaba
 
 #endif

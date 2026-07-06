@@ -1,5 +1,41 @@
 #include "PropFloat.h"
 #include "w3dGraphics.h"
+#include <cstdio>   // snprintf (valor -> texto)
+#include <cstdlib>  // atof (texto -> valor)
+
+// ==== edicion numerica por TEXTO (click/OK -> tipear + enter). g_textFieldActivo apunta al field de este prop ====
+PropFloat* g_propFloatEditando = NULL;
+
+void PropFloat::IniciarEdicionTexto(){
+    if (!value) return;
+    originalValue = *value;               // por si se cancela con Esc
+    char buf[32];
+    if (entero) snprintf(buf, sizeof(buf), "%d", (int)(*value + 0.5f));
+    else        snprintf(buf, sizeof(buf), "%g", *value); // compacto: "0", "2", "1.45"
+    field.SetText(buf);
+    field.SelectAll();                    // TODO seleccionado: la 1ra tecla reemplaza
+    g_textFieldActivo = &field;           // el input (SDL_TEXTINPUT / teclas del Nokia) entra a este campo
+    g_propFloatEditando = this;
+    editando = true;
+}
+
+bool NumEditActivo(){ return g_propFloatEditando != NULL; }
+
+void NumEditCommit(){
+    if (g_propFloatEditando){
+        PropFloat* p = g_propFloatEditando;
+        p->Set((float)atof(p->field.text.c_str())); // texto vacio/invalido -> 0 (atof)
+        p->editando = false;
+    }
+    g_propFloatEditando = NULL;
+    g_textFieldActivo = NULL;
+}
+
+void NumEditCancel(){
+    if (g_propFloatEditando) g_propFloatEditando->editando = false; // NO aplica: el valor queda como estaba
+    g_propFloatEditando = NULL;
+    g_textFieldActivo = NULL;
+}
 
 PropFloat::PropFloat(const std::string& Name, const std::string& Unit):
     unit(Unit), PropertieBase(Name){
@@ -56,6 +92,19 @@ void PropFloat::RenderPropertiValue(Card* propertiBox){
     if (value){
         int boxW = propertiBox->width - bordersGS;
         textAlign al = centrado ? textAlign::center : textAlign::left;
+        // EDITANDO POR TEXTO: mostrar el campo (con TODO seleccionado en accent, o con caret) en vez del valor.
+        if (g_propFloatEditando == this && g_textFieldActivo == &field){
+            if (field.selectAll){
+                w3dEngine::Color4fv(ListaColores[static_cast<int>(ColorID::accent)]); // todo sel: tipear reemplaza
+                RenderBitmapText(field.text, al, boxW);
+                w3dEngine::Color4fv(ListaColores[static_cast<int>(ColorID::blanco)]);
+            } else {
+                std::string shown = field.text.substr(0, field.caret) + "|" + field.text.substr(field.caret);
+                RenderBitmapText(shown, al, boxW);
+            }
+            w3dEngine::Translatef(0, RenglonHeightGS + gapGS, 0);
+            return;
+        }
         if (flechas){
             // < a la izquierda y > a la derecha (el hit-test del click lo hace
             // el contenedor, que conoce el rect del box)
