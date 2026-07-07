@@ -27,6 +27,7 @@ PopupMenu::PopupMenu(){
     y = 0;
     width = 10;
     height = 10;
+    reservaDerecha = 0;
     selectIndex = -1;
     abierto = false;
     submenuAbierto = NULL;
@@ -109,8 +110,15 @@ void PopupMenu::Resize(){
     // si ninguna opcion tiene icono, el lugar queda libre para el texto
     width = bordersGS + gapGS * 2 + maxChars * CharacterWidthGS;
     if (hayIconos) width += IconSizeGS + gapGS;
-    if (rightCol > 0) width += rightCol + gapGS * 2;
-    if (hayFloat) width += 80 * GlobalScale + gapGS; // barra del slider
+    // columna DERECHA (tildes/flecha submenu/atajo + slider): se reserva para que el label se trunque
+    // antes y no la tape (clave en vertical, donde el menu se clampea a la pantalla)
+    reservaDerecha = 0;
+    if (rightCol > 0){ width += rightCol + gapGS * 2; reservaDerecha += rightCol + gapGS * 2; }
+    if (hayFloat){ width += 80 * GlobalScale + gapGS; reservaDerecha += 80 * GlobalScale + gapGS; }
+    // NUNCA mas ancho que la pantalla (en vertical el menu Overlays se salia y las tildes de la derecha
+    // quedaban fuera de vista). Al achicarse, el label se recorta del lado DERECHO (RenderBitmapText left).
+    int maxW = MenuPantallaW - gapGS * 2;
+    if (width > maxW) width = maxW;
     height = bordersGS + (int)items.size() * (RenglonHeightGS + gapGS) - gapGS;
     if (!titulo.empty()) height += RenglonHeightGS + gapGS; // la cabecera
 
@@ -230,8 +238,12 @@ void PopupMenu::Render(){
         if (items[i]->icon >= 0){
             W3dDrawStrip4(IconMesh, IconsUV[items[i]->icon]->uvs);
         }
+        int textStartX = gapGS + (hayIconos ? IconSizeGS + gapGS : 0);
         if (hayIconos) w3dEngine::Translatef((GLfloat)(IconSizeGS + gapGS), 0, 0);
-        RenderBitmapText(items[i]->text, textAlign::left, width);
+        // el texto se corta ANTES de la columna derecha (tildes/slider) -> recorte del lado DERECHO
+        int labelMax = width - textStartX - reservaDerecha - gapGS;
+        if (labelMax < CharacterWidthGS) labelMax = CharacterWidthGS;
+        RenderBitmapText(items[i]->text, textAlign::left, labelMax);
         w3dEngine::PopMatrix();
         if (items[i]->submenu){
             // indicador de submenu a la derecha

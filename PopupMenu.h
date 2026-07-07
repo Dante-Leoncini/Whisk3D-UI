@@ -54,6 +54,9 @@ class PopupMenu {
         std::string titulo; // cabecera opcional ("Set Parent To", etc)
         int x, y;           // posicion ABSOLUTA en pantalla
         int width, height;
+        int reservaDerecha; // px reservados a la derecha (tildes/flecha submenu/slider): el label se
+                            // trunca ANTES de esta columna (sino, al clampear el ancho a la pantalla,
+                            // el texto tapaba las tildes y no se veia si estaban marcadas)
         int selectIndex;    // opcion resaltada (-1 = ninguna)
         bool abierto;
         PopupMenu* submenuAbierto;
