@@ -34,15 +34,9 @@ class Image {
 			w3dEngine::Color4ub(color[0], color[1], color[2], parent.opacity);
 			w3dEngine::BindTexture(Textures[TextureID]->iID);
 
-			//esto se hace despues del bind de la textura. sino no le afecta
-			if (interpolacion == closest){
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			}
-			else {
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			}
+			// esto se hace despues del bind de la textura. sino no le afecta.
+			// via la abstraccion (no GL directo): closest=NEAREST, si no LINEAR.
+			w3dEngine::TexFilter(interpolacion != closest);
 
 			img.Render();
 		}
