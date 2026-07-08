@@ -315,6 +315,12 @@ void PopupMenu::Render(){
 // abre/cierra el submenu segun la fila resaltada: la opcion con submenu lo
 // abre con solo resaltarla (mouse o flechas); al pasar a otra fila se cierra
 // (o se abre el submenu de la nueva). Sin necesidad de click.
+// TACTIL: un submenu se abre por "hover" (el dedo al apoyarse). En pantallas angostas el submenu se clampea
+// y SOLAPA al padre, justo bajo el dedo -> el click del MISMO toque caia en un item del submenu (se apretaba
+// solo). Este flag marca "recien abierto": el click inmediato NO selecciona, solo deja el submenu abierto.
+// Se limpia al MOVER el puntero DENTRO del submenu (asi con mouse, mover+click sigue seleccionando normal).
+static bool g_submenuAcabaDeAbrir = false;
+
 void PopupMenu::SincronizarSubmenu(){
     MenuItem* it = (selectIndex >= 0 && selectIndex < (int)items.size())
                    ? items[selectIndex] : NULL;
@@ -327,6 +333,7 @@ void PopupMenu::SincronizarSubmenu(){
                    y + borderGS + oy + selectIndex * (RenglonHeightGS + gapGS),
                    MenuPantallaW, MenuPantallaH);
         submenuAbierto = sub;
+        g_submenuAcabaDeAbrir = true; // el proximo click sobre este submenu solo lo deja abierto (no selecciona)
     }
 }
 
@@ -337,6 +344,7 @@ bool PopupMenu::MouseMove(int mx, int my){
     // prioridad, moverse por el submenu caia dentro del bounding box del padre -> le cambiaba la opcion y cerraba
     // el submenu (no se podia usar "Set Parent To"). El submenu se dibuja ENCIMA, asi que el hover es suyo.
     if (submenuAbierto && submenuAbierto->abierto && submenuAbierto->Contains(mx, my)){
+        g_submenuAcabaDeAbrir = false; // el puntero se movio DENTRO del submenu: ya es un target deliberado
         submenuAbierto->MouseMove(mx, my);
         return true;
     }
@@ -367,6 +375,9 @@ bool PopupMenu::MouseMove(int mx, int my){
 int PopupMenu::Click(int mx, int my){
     if (submenuAbierto && submenuAbierto->abierto &&
         submenuAbierto->Contains(mx, my)){
+        // el submenu se ACABA de abrir por este mismo toque (y quedo solapado bajo el dedo): NO seleccionar,
+        // solo dejarlo abierto. El proximo toque ya si elige un item (tactil = 2 toques para submenus).
+        if (g_submenuAcabaDeAbrir){ g_submenuAcabaDeAbrir = false; return -1; }
         int id = submenuAbierto->Click(mx, my);
         // si el submenu selecciono algo terminal (se cerro solo), cerramos
         // tambien ESTE menu para que no quede el primero abierto
