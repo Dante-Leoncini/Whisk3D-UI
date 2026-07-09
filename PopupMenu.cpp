@@ -6,6 +6,18 @@ PopupMenu* MenuAbierto = NULL;
 int MenuPantallaW = 100000;
 int MenuPantallaH = 100000;
 
+// px que ocupa la COLUMNA DERECHA de un item (flecha submenu / tilde / slider / atajo).
+// El atajo se dibuja a la IZQUIERDA de la flecha o la tilde (ver Render), por eso se suman.
+// Se usa item-por-item: el ancho del menu es el MINIMO que hace entrar cada fila (no una
+// columna unica compartida) y el label se recorta justo antes de ESTA columna.
+static int MenuItemDerecha(const MenuItem* it){
+    if (it->valorFloat) return 80 * GlobalScale + gapGS; // slider (no convive con atajo)
+    int icono = (it->submenu || it->checkbox) ? IconSizeGS : 0;
+    int atajo = (int)it->atajo.size() * CharacterWidthGS;
+    if (atajo > 0) return (icono > 0) ? icono + gapGS + atajo : atajo;
+    return icono;
+}
+
 MenuItem::MenuItem(const std::string& Text, int Id, int Icon, PopupMenu* Submenu,
                    bool* Checkbox){
     // (eran inicializadores de clase: C++03)
@@ -76,47 +88,26 @@ MenuItem* PopupMenu::AgregarFloat(const std::string& text, int id, float* valor,
 
 void PopupMenu::Resize(){
     bool hayIconos = false;
-    bool haySub = false;
-    bool hayCheck = false;
-    bool hayFloat = false;
-    int maxChars = 0;
-    int maxAtajo = 0;
+    // ANCHO MINIMO ITEM POR ITEM: para cada fila = label + (si tiene) su columna derecha
+    // (flecha/tilde/slider/atajo). El ancho del menu es el MAYOR de esas filas, NO
+    // maxLabel + maxColumnaDerecha por separado (eso lo hacia demasiado ancho cuando el
+    // label mas largo y el atajo/slider mas ancho estaban en filas distintas -> "Overlays").
+    int maxFila = 0;
     for (size_t i = 0; i < items.size(); i++){
         if (items[i]->icon >= 0) hayIconos = true;
-        if (items[i]->submenu) haySub = true;
-        if (items[i]->checkbox) hayCheck = true;
-        if (items[i]->valorFloat) hayFloat = true;
-        if ((int)items[i]->text.size() > maxChars)
-            maxChars = (int)items[i]->text.size();
-        if ((int)items[i]->atajo.size() > maxAtajo)
-            maxAtajo = (int)items[i]->atajo.size();
+        int fila = (int)items[i]->text.size() * CharacterWidthGS;
+        int der = MenuItemDerecha(items[i]);
+        if (der > 0) fila += gapGS * 2 + der; // separacion label <-> columna derecha
+        if (fila > maxFila) maxFila = fila;
     }
-    if ((int)titulo.size() > maxChars) maxChars = (int)titulo.size();
-    // columna derecha UNICA, alineada al borde: flecha de submenu, check o
-    // atajo (nunca dos en la misma fila) -> ancho = el mayor de ellos
-    int rightCol = 0;
-    if (haySub || hayCheck) rightCol = IconSizeGS;
-    if (maxAtajo * CharacterWidthGS > rightCol) rightCol = maxAtajo * CharacterWidthGS;
-    // si una opcion tiene submenu (flecha) Y atajo a la vez (ej. "Delete" -> X + flecha), el atajo
-    // se dibuja A LA IZQUIERDA de la flecha (ver Render) -> reservar lugar para los dos juntos
-    int maxAtajoSub = 0;
-    for (size_t i = 0; i < items.size(); i++)
-        if (items[i]->submenu && (int)items[i]->atajo.size() > maxAtajoSub)
-            maxAtajoSub = (int)items[i]->atajo.size();
-    if (maxAtajoSub > 0){
-        int both = IconSizeGS + gapGS + maxAtajoSub * CharacterWidthGS;
-        if (both > rightCol) rightCol = both;
-    }
-    // si ninguna opcion tiene icono, el lugar queda libre para el texto
-    width = bordersGS + gapGS * 2 + maxChars * CharacterWidthGS;
+    if ((int)titulo.size() * CharacterWidthGS > maxFila) // la cabecera no tiene columna derecha
+        maxFila = (int)titulo.size() * CharacterWidthGS;
+    // si alguna fila tiene icono, TODAS reservan la columna izquierda (los labels se alinean)
+    width = bordersGS + gapGS * 2 + maxFila;
     if (hayIconos) width += IconSizeGS + gapGS;
-    // columna DERECHA (tildes/flecha submenu/atajo + slider): se reserva para que el label se trunque
-    // antes y no la tape (clave en vertical, donde el menu se clampea a la pantalla)
-    reservaDerecha = 0;
-    if (rightCol > 0){ width += rightCol + gapGS * 2; reservaDerecha += rightCol + gapGS * 2; }
-    if (hayFloat){ width += 80 * GlobalScale + gapGS; reservaDerecha += 80 * GlobalScale + gapGS; }
-    // NUNCA mas ancho que la pantalla (en vertical el menu Overlays se salia y las tildes de la derecha
-    // quedaban fuera de vista). Al achicarse, el label se recorta del lado DERECHO (RenderBitmapText left).
+    reservaDerecha = 0; // ya no se usa una reserva unica: el recorte del label es por item (ver Render)
+    // NUNCA mas ancho que la pantalla (Android/Symbian). Al achicarse, el label se recorta del
+    // lado DERECHO (RenderBitmapText left), justo antes de la columna derecha de esa fila.
     int maxW = MenuPantallaW - gapGS * 2;
     if (width > maxW) width = maxW;
     height = bordersGS + (int)items.size() * (RenglonHeightGS + gapGS) - gapGS;
@@ -240,8 +231,10 @@ void PopupMenu::Render(){
         }
         int textStartX = gapGS + (hayIconos ? IconSizeGS + gapGS : 0);
         if (hayIconos) w3dEngine::Translatef((GLfloat)(IconSizeGS + gapGS), 0, 0);
-        // el texto se corta ANTES de la columna derecha (tildes/slider) -> recorte del lado DERECHO
-        int labelMax = width - textStartX - reservaDerecha - gapGS;
+        // el texto se corta ANTES de la columna derecha de ESTA fila (tildes/slider/atajo) ->
+        // recorte del lado DERECHO. Reserva por item (no una columna unica compartida).
+        int derItem = MenuItemDerecha(items[i]);
+        int labelMax = width - textStartX - (derItem > 0 ? derItem + gapGS * 2 : 0) - gapGS;
         if (labelMax < CharacterWidthGS) labelMax = CharacterWidthGS;
         RenderBitmapText(items[i]->text, textAlign::left, labelMax);
         w3dEngine::PopMatrix();
@@ -299,6 +292,7 @@ void PopupMenu::Render(){
                       ListaColores[static_cast<int>(ColorID::grisUI)][2], 0.5f);
             int atajoDX = width - bordersGS - gapGS;
             if (items[i]->submenu) atajoDX -= IconSizeGS + gapGS; // dejar la flecha del submenu a la derecha del atajo
+            if (items[i]->checkbox) atajoDX -= IconSizeGS + gapGS; // dejar la tilde a la derecha del atajo (no superponer)
             w3dEngine::PushMatrix();
             w3dEngine::Translatef((GLfloat)atajoDX, 0, 0);
             RenderBitmapText(items[i]->atajo, textAlign::right, width);
