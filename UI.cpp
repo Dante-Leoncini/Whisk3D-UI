@@ -32,6 +32,7 @@ int dy = 0;
 bool LAltPressed = false;
 bool LShiftPressed = false;
 bool LCtrlPressed = false;
+bool g_viewEditMode = false;
 
 bool UITactil = false; // default: modo compacto (N95)
 

@@ -37,6 +37,10 @@ extern bool LAltPressed;
 extern bool LShiftPressed;
 extern bool LCtrlPressed;
 
+// modo VIEW (toggle tactil de Edit Mode): con 1 dedo se ORBITA/panea/zoom aunque haya una operacion de
+// edicion en curso (mover/rotar/extrude/strip) SIN cancelarla. Se apaga y segui editando desde el nuevo angulo.
+extern bool g_viewEditMode;
+
 // modo "pantalla tactil": botones/barras mas grandes (area de click y drag mas
 // grande para el dedo) sin engrosar los bordes. Apagado (default) = modo
 // compacto, pensado para el N95 (botones y barra mas bajos).
