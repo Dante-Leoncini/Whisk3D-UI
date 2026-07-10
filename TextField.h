@@ -22,12 +22,20 @@ struct TextField {
         if (caret < 0) caret = 0; if (caret > (int)text.size()) caret = (int)text.size();
         text.insert(text.begin() + caret, (char)c); caret++;
     }
+    // borrar/mover son UTF-8-aware: una "ñ" (2 bytes) o cualquier char multibyte se trata como UNA unidad
+    // (los bytes de continuacion son 10xxxxxx = (b & 0xC0)==0x80). Asi el teclado en español no deja medio glifo.
     void Backspace()  { if (selectAll) { text.clear(); caret = 0; selectAll = false; return; }
-                        if (caret > 0 && caret <= (int)text.size()) { text.erase(text.begin() + caret - 1); caret--; } }
+                        if (caret <= 0 || caret > (int)text.size()) return;
+                        int n = 1; while (caret - n > 0 && ((unsigned char)text[caret-n] & 0xC0) == 0x80) n++;
+                        text.erase(text.begin() + caret - n, text.begin() + caret); caret -= n; }
     void DelForward() { if (selectAll) { text.clear(); caret = 0; selectAll = false; return; }
-                        if (caret >= 0 && caret < (int)text.size()) text.erase(text.begin() + caret); }
-    void CaretIzq()   { if (selectAll) { selectAll = false; caret = 0; return; } if (caret > 0) caret--; }            // deselecciona al inicio
-    void CaretDer()   { if (selectAll) { selectAll = false; caret = (int)text.size(); return; } if (caret < (int)text.size()) caret++; } // al final
+                        if (caret < 0 || caret >= (int)text.size()) return;
+                        int n = 1; while (caret + n < (int)text.size() && ((unsigned char)text[caret+n] & 0xC0) == 0x80) n++;
+                        text.erase(text.begin() + caret, text.begin() + caret + n); }
+    void CaretIzq()   { if (selectAll) { selectAll = false; caret = 0; return; }
+                        if (caret > 0) { caret--; while (caret > 0 && ((unsigned char)text[caret] & 0xC0) == 0x80) caret--; } } // deselecciona al inicio
+    void CaretDer()   { if (selectAll) { selectAll = false; caret = (int)text.size(); return; }
+                        if (caret < (int)text.size()) { caret++; while (caret < (int)text.size() && ((unsigned char)text[caret] & 0xC0) == 0x80) caret++; } } // al final
 };
 
 extern TextField* g_textFieldActivo;  // el campo enfocado (NULL = ninguno)

@@ -12,10 +12,11 @@
 class PropText : public PropertieBase {
     public:
         TextField field;
-        bool oculto; // true = no ocupa fila (lo usa el campo de rename: visible solo al renombrar)
+        bool oculto;        // true = no ocupa fila (lo usa el campo de rename: visible solo al renombrar)
+        void (*onClick)();  // NULL = campo editable normal; si no, al clickear se llama esto (ej: Path -> Browse) y NO se edita
 
         PropText(const std::string& Name, const std::string& valor = "")
-            : PropertieBase(Name) { field.SetText(valor); oculto = false; }
+            : PropertieBase(Name) { field.SetText(valor); oculto = false; onClick = 0; }
 
         PropertyType GetType() { return PropertyType::Text; }
         int Resize(int w) { if (oculto) return 0; width = w; return RenglonHeightGS + gapGS; }
