@@ -30,6 +30,7 @@ int PropListMeshParts::ListaCount() const {
     if (modo == 1) return (int)mesh->uvMaps.size();
     if (modo == 2) return (int)mesh->colorLayers.size();
     if (modo == 3) return (int)mesh->modificadores.size();    // stack de modificadores
+    if (modo == 4) return (int)mesh->vertexGroups.size();     // grupos de vertices (huesos del rig)
     return (int)mesh->materialsGroup.size();
 }
 std::string PropListMeshParts::ListaNombre(int i) const {
@@ -37,6 +38,7 @@ std::string PropListMeshParts::ListaNombre(int i) const {
     if (modo == 1) return (i < (int)mesh->uvMaps.size())      ? mesh->uvMaps[i]->nombre   : std::string();
     if (modo == 2) return (i < (int)mesh->colorLayers.size()) ? mesh->colorLayers[i]->nombre : std::string();
     if (modo == 3) return mesh->NombreModificador(i);         // sin exponer la clase Modifier (metodo del Mesh)
+    if (modo == 4) return (i < (int)mesh->vertexGroups.size())? mesh->vertexGroups[i]->nombre : std::string();
     return (i < (int)mesh->materialsGroup.size())             ? mesh->materialsGroup[i].name : std::string();
 }
 void PropListMeshParts::ListaSeleccionar(int i) {
@@ -45,6 +47,7 @@ void PropListMeshParts::ListaSeleccionar(int i) {
     if (modo == 1)      { mesh->uvMapActivo = i; mesh->AplicarCapasAlRender(); } // re-hornea la UV activa
     else if (modo == 2) { mesh->colorActivo = i; mesh->AplicarCapasAlRender(); } // re-hornea el color activo
     else if (modo == 3) { mesh->modificadorActivo = i; }                         // modificadores: solo cambia el activo
+    else if (modo == 4) { mesh->grupoActivo = i; }                               // grupos de vertices: solo el activo
     else RebindMaterialMeshPart();                                              // mesh parts: re-bind material
 }
 
@@ -166,6 +169,7 @@ int PropListMeshParts::Resize(int w){
     // los modos uvmaps/colors siguen el ACTIVO de la malla (selectIndex refleja uvMapActivo/colorActivo)
     if (mesh && modo == 1) selectIndex = mesh->uvMapActivo;
     else if (mesh && modo == 2) selectIndex = mesh->colorActivo;
+    else if (mesh && modo == 4) selectIndex = mesh->grupoActivo;
     if (mesh && ListaCount() > 0){
         // VENTANA de filasMax filas como maximo (el resto scrollea)
         int n = ListaCount();
