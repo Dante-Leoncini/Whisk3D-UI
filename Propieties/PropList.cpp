@@ -60,22 +60,26 @@ void PropListMeshParts::AjustarVentana(){
 };
 
 void PropListMeshParts::RenderPropertiBox(Card* propertiBox){
+    if (!mesh || ListaCount() == 0) return; // lista vacia: no ocupa fila ni se dibuja (ver Resize)
     w3dEngine::Translatef((GLfloat)-PropColEtiqueta, 0, 0);
     listBox->Render(false);
     w3dEngine::Translatef((GLfloat)PropColEtiqueta, listBox->height + gapGS, 0);
 }
 
 void PropListMeshParts::RenderPropertiBoxBorder(Card* propertiBox){
+    if (!mesh || ListaCount() == 0) return;
     w3dEngine::Translatef((GLfloat)-PropColEtiqueta, -listBox->height - gapGS, 0);
     listBox->RenderBorder(false);
     w3dEngine::Translatef((GLfloat)PropColEtiqueta, listBox->height + gapGS, 0);
 };
 
 void PropListMeshParts::RenderPropertiValue(Card* propertiBox){
+    if (!mesh || ListaCount() == 0) return;
     w3dEngine::Translatef(0, listBox->height + gapGS, 0);
 }
 
 void PropListMeshParts::RenderPropertiLabel(Card* propertiBox){
+    if (!mesh || ListaCount() == 0) return; // lista vacia: sin label/scroll
     if (mesh){
         int n = ListaCount();
         int visibles = n < filasMax ? n : filasMax;
@@ -155,6 +159,9 @@ void PropListMeshParts::button_down(){
 
 int PropListMeshParts::Resize(int w){
     width = w -bordersGS;
+    // LISTA VACIA (ej: modificadores sin ninguno): NO ocupa fila (0) y no se dibuja -> queda solo el boton "Add",
+    // sin el recuadro aplastado y vacio que parecia un error (pedido Dante). Igual que un PropText 'oculto'.
+    if (!mesh || ListaCount() == 0){ listBox->Resize(w - bordersGS, 0); return 0; }
     int altura = bordersGS;
     // los modos uvmaps/colors siguen el ACTIVO de la malla (selectIndex refleja uvMapActivo/colorActivo)
     if (mesh && modo == 1) selectIndex = mesh->uvMapActivo;
