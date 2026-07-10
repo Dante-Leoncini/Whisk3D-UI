@@ -23,7 +23,7 @@ extern GLshort IconLineMesh[8];
 extern int IconSize;
 extern int IconSizeGS;
 
-const size_t ICON_TOTAL = 40; // (constexpr es C++11)
+const size_t ICON_TOTAL = 41; // (constexpr es C++11)
 
 // dialecto C++03 compartido
 struct IconType {
@@ -67,7 +67,8 @@ struct IconType {
     pivotCursor,     // Transform Pivot: cursor 3D
     notifError,      // notificacion de ERROR (se pinta rojo)
     notifOk,         // notificacion OK/exito (se pinta verde)
-    modificador      // pestania "Modificadores" en Properties
+    modificador,     // pestania "Modificadores" en Properties
+    armature         // esqueleto (Add > Armature / outliner)
     };
     Enum v;
     IconType(Enum e) : v(e) {}
