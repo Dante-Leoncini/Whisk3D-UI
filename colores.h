@@ -26,6 +26,7 @@ struct ColorID {
         headerColor,
         negroTransparente,
         grisUI,
+        grisLinea, // gris medio (0x494949) para lineas del timeline
         Count
     };
     Enum v;

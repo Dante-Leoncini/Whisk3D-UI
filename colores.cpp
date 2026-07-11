@@ -13,7 +13,8 @@ float ListaColores[ColorID::Count][4] = {
     { 0.12f,  0.12f,  0.12f,  1.0f  },  // gris
     { 0.22f,  0.22f,  0.22f,  1.0f  },  // headerColor
     { 0.0f,   0.0f,   0.0f,   0.25f },  // negroTransparente
-    { 0.757f, 0.757f, 0.757f, 1.0f  }   // grisUI
+    { 0.757f, 0.757f, 0.757f, 1.0f  },  // grisUI
+    { 0.286f, 0.286f, 0.286f, 1.0f  }   // grisLinea (0x494949)
 };
 
 GLubyte ListaColoresUbyte[ColorID::Count][4] = {
@@ -25,7 +26,8 @@ GLubyte ListaColoresUbyte[ColorID::Count][4] = {
     { (GLubyte)(0.12*255),  (GLubyte)(0.12*255),  (GLubyte)(0.12*255),  255 },
     { (GLubyte)(0.22*255),  (GLubyte)(0.22*255),  (GLubyte)(0.22*255),  255 },
     { 0, 0, 0, (GLubyte)(0.25*255) },
-    { (GLubyte)(0.757*255), (GLubyte)(0.757*255), (GLubyte)(0.757*255), 255 }
+    { (GLubyte)(0.757*255), (GLubyte)(0.757*255), (GLubyte)(0.757*255), 255 },
+    { 0x49, 0x49, 0x49, 255 }
 };
 
 static int W3dColorIdPorNombre(const std::string& n) {
@@ -38,6 +40,7 @@ static int W3dColorIdPorNombre(const std::string& n) {
     if (n == "headerColor") return ColorID::headerColor;
     if (n == "negroTransparente") return ColorID::negroTransparente;
     if (n == "grisUI") return ColorID::grisUI;
+    if (n == "grisLinea") return ColorID::grisLinea;
     return -1;
 }
 

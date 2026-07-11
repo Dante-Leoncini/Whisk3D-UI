@@ -5,6 +5,8 @@
 #include "WhiskUI/card.h"
 #include "objects/Mesh.h"
 
+class Armature; // objects/Armature.h (lista de clips de animacion, modo 5)
+
 class PropList : public PropertieBase {
     public:
         Card* listBox;
@@ -24,9 +26,10 @@ class PropListMeshParts : public PropList {
         PropListMeshParts(const std::string& Name);
 
         Mesh* mesh;
+        Armature* arm;  // fuente cuando modo == 5 (clips de animacion del esqueleto)
         int filasMax;   // alto de la VENTANA (ajustable arrastrando)
         int scrollFila; // primera fila visible
-        int modo;       // 0 = mesh parts (materialsGroup); 1 = UV maps; 2 = capas de color
+        int modo;       // 0 = mesh parts; 1 = UV maps; 2 = colores; 3 = modificadores; 4 = vertex groups; 5 = animaciones (armature)
         void AjustarVentana(); // mantiene la seleccion a la vista
         // segun 'modo' lee la lista correcta (la MISMA lista para parts/uvmaps/colors):
         int         ListaCount() const;       // cantidad de items

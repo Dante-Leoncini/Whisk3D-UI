@@ -1,5 +1,7 @@
 #include "PropList.h"
 #include "w3dGraphics.h"
+#include "objects/Armature.h"                 // modo 5: clips de animacion del esqueleto
+#include "animation/SkeletalAnimation.h"      // SkeletalAnimation (name de cada clip)
 
 PropList::PropList(const std::string& Name):
     PropertieBase(Name){
@@ -19,13 +21,16 @@ extern void RebindMaterialMeshPart(); // Properties.cpp
 PropListMeshParts::PropListMeshParts(const std::string& Name):
     PropList(Name){
     mesh = NULL; // (era inicializador de clase: C++03)
+    arm = NULL;  // fuente cuando modo == 5 (clips de animacion del esqueleto)
     filasMax = 3;
     scrollFila = 0;
     modo = 0;    // por defecto: mesh parts (materialsGroup)
 };
 
-// la MISMA lista sirve para parts / uv maps / color layers (segun 'modo')
+// la MISMA lista sirve para parts / uv maps / color layers / anim clips (segun 'modo')
 int PropListMeshParts::ListaCount() const {
+    if (modo == 5) return arm ? (int)arm->animations.size() : 0; // clips de animacion (armature)
+    if (modo == 6) return arm ? (int)arm->bones.size() : 0;      // huesos (Pose Mode)
     if (!mesh) return 0;
     if (modo == 1) return (int)mesh->uvMaps.size();
     if (modo == 2) return (int)mesh->colorLayers.size();
@@ -34,6 +39,8 @@ int PropListMeshParts::ListaCount() const {
     return (int)mesh->materialsGroup.size();
 }
 std::string PropListMeshParts::ListaNombre(int i) const {
+    if (modo == 5) return (arm && i >= 0 && i < (int)arm->animations.size()) ? arm->animations[i]->name : std::string();
+    if (modo == 6) return (arm && i >= 0 && i < (int)arm->bones.size()) ? arm->bones[i].name : std::string();
     if (!mesh || i < 0) return std::string();
     if (modo == 1) return (i < (int)mesh->uvMaps.size())      ? mesh->uvMaps[i]->nombre   : std::string();
     if (modo == 2) return (i < (int)mesh->colorLayers.size()) ? mesh->colorLayers[i]->nombre : std::string();
@@ -43,6 +50,9 @@ std::string PropListMeshParts::ListaNombre(int i) const {
 }
 void PropListMeshParts::ListaSeleccionar(int i) {
     selectIndex = i;
+    if (modo == 5) { if (arm) arm->animActiva = i; return; }                     // clips: solo cambia el activo
+    if (modo == 6) { if (arm){ for (size_t b=0;b<arm->bones.size();b++) arm->bones[b].select = false;  // hueso: activo + select
+                               if (i>=0 && i<(int)arm->bones.size()){ arm->bones[i].select = true; arm->boneActivo = i; } } return; }
     if (!mesh) return;
     if (modo == 1)      { mesh->uvMapActivo = i; mesh->AplicarCapasAlRender(); } // re-hornea la UV activa
     else if (modo == 2) { mesh->colorActivo = i; mesh->AplicarCapasAlRender(); } // re-hornea el color activo
@@ -53,7 +63,7 @@ void PropListMeshParts::ListaSeleccionar(int i) {
 
 // la ventana sigue a la seleccion (y nunca pasa del final)
 void PropListMeshParts::AjustarVentana(){
-    if (!mesh || ListaCount() == 0) { scrollFila = 0; return; }
+    if (ListaCount() == 0) { scrollFila = 0; return; }
     int n = ListaCount();
     int visibles = n < filasMax ? n : filasMax;
     if (scrollFila > n - visibles) scrollFila = n - visibles;
@@ -63,27 +73,27 @@ void PropListMeshParts::AjustarVentana(){
 };
 
 void PropListMeshParts::RenderPropertiBox(Card* propertiBox){
-    if (!mesh || ListaCount() == 0) return; // lista vacia: no ocupa fila ni se dibuja (ver Resize)
+    if (ListaCount() == 0) return; // lista vacia: no ocupa fila ni se dibuja (ver Resize)
     w3dEngine::Translatef((GLfloat)-PropColEtiqueta, 0, 0);
     listBox->Render(false);
     w3dEngine::Translatef((GLfloat)PropColEtiqueta, listBox->height + gapGS, 0);
 }
 
 void PropListMeshParts::RenderPropertiBoxBorder(Card* propertiBox){
-    if (!mesh || ListaCount() == 0) return;
+    if (ListaCount() == 0) return;
     w3dEngine::Translatef((GLfloat)-PropColEtiqueta, -listBox->height - gapGS, 0);
     listBox->RenderBorder(false);
     w3dEngine::Translatef((GLfloat)PropColEtiqueta, listBox->height + gapGS, 0);
 };
 
 void PropListMeshParts::RenderPropertiValue(Card* propertiBox){
-    if (!mesh || ListaCount() == 0) return;
+    if (ListaCount() == 0) return;
     w3dEngine::Translatef(0, listBox->height + gapGS, 0);
 }
 
 void PropListMeshParts::RenderPropertiLabel(Card* propertiBox){
-    if (!mesh || ListaCount() == 0) return; // lista vacia: sin label/scroll
-    if (mesh){
+    if (ListaCount() == 0) return; // lista vacia: sin label/scroll
+    {
         int n = ListaCount();
         int visibles = n < filasMax ? n : filasMax;
         w3dEngine::Translatef((GLfloat)(-PropColEtiqueta + gapGS + gapGS), borderGS, 0);
@@ -164,13 +174,15 @@ int PropListMeshParts::Resize(int w){
     width = w -bordersGS;
     // LISTA VACIA (ej: modificadores sin ninguno): NO ocupa fila (0) y no se dibuja -> queda solo el boton "Add",
     // sin el recuadro aplastado y vacio que parecia un error (pedido Dante). Igual que un PropText 'oculto'.
-    if (!mesh || ListaCount() == 0){ listBox->Resize(w - bordersGS, 0); return 0; }
+    if (ListaCount() == 0){ listBox->Resize(w - bordersGS, 0); return 0; }
     int altura = bordersGS;
-    // los modos uvmaps/colors siguen el ACTIVO de la malla (selectIndex refleja uvMapActivo/colorActivo)
+    // los modos uvmaps/colors/anim siguen el ACTIVO de su fuente (selectIndex refleja uvMapActivo/colorActivo/etc)
     if (mesh && modo == 1) selectIndex = mesh->uvMapActivo;
     else if (mesh && modo == 2) selectIndex = mesh->colorActivo;
     else if (mesh && modo == 4) selectIndex = mesh->grupoActivo;
-    if (mesh && ListaCount() > 0){
+    else if (arm && modo == 5) selectIndex = arm->animActiva;
+    else if (arm && modo == 6) selectIndex = arm->boneActivo;
+    if (ListaCount() > 0){
         // VENTANA de filasMax filas como maximo (el resto scrollea)
         int n = ListaCount();
         int visibles = n < filasMax ? n : filasMax;

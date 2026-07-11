@@ -9,6 +9,7 @@ Button::Button(const std::string& Text, int Icon, bool Adaptar){
     adaptar = Adaptar;
     desplegable = false;
     centrado = false;
+    cuadrado = false;
     visible = true;
     hover = false;
     focoMenu = false;
@@ -43,6 +44,7 @@ void Button::Resize(int maxW){
     // mas alto que un renglon: el icono queda centrado con aire arriba y
     // abajo. La altura depende del modo (tactil: mas alto; compacto: 2px menos)
     height = UIBotonAltura();
+    if (cuadrado) width = height; // botones de icono cuadrados (transporte del timeline)
     card->Resize(width, height);
 }
 

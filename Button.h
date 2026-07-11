@@ -31,6 +31,7 @@ class Button {
         bool adaptar;    // true: el ancho sigue al contenido
         bool desplegable; // true: flecha abajo a la derecha (abre un menu)
         bool centrado;    // true: icono+texto centrados (OK/Cancel/etc)
+        bool cuadrado;    // true: fuerza ancho = alto (botones de icono cuadrados, ej: transporte del timeline)
         bool visible;     // false: no se dibuja ni ocupa lugar en la barra
                           // (ej: el menu "Object" sin nada seleccionado)
         bool hover;
