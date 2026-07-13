@@ -1,12 +1,14 @@
 #include "bitmapText.h"
 #include "w3dGraphics.h"
 #include <stdio.h>
+#include <vector>
 
+// BATCH: se hornea el offset X de cada glifo en las posiciones y se emite UN SOLO DrawTrianglesArray por string, en vez
+// de 1 draw-call + Translatef POR CARACTER. Es el multiplicador principal del conteo de draw-calls de toda la UI (cada
+// etiqueta/valor pasa de ~8-12 draws a 1). Mismo camino GL que ya usa el N95 (TRIANGLES, float, client-array): no toca
+// el backend. Los buffers son static (reusados entre llamadas: sin alloc por frame).
 void RenderBitmapText(const std::string& text, textAlign align, int maxPixels){
     if (!WhiskFont) return;
-    // triangulos float por la abstraccion (la fase 2D del N95 no dibuja STRIP ni SHORT)
-    w3dEngine::BindTexture(WhiskFont->getTexture());
-    w3dEngine::VertexPointer2f(0, WhiskFont->getMeshTri());
 
     const int cw = CharacterWidthGS;
     int maxChars = maxPixels / cw;
@@ -21,8 +23,9 @@ void RenderBitmapText(const std::string& text, textAlign align, int maxPixels){
     }
 
     int drawChars = totalChars > maxChars ? maxChars : totalChars;
+    if (drawChars <= 0) return;
 
-    // 2) si es right, saltar los que no entran
+    // 2) si es right, saltar los que no entran (empezar por el 1er glifo visible)
     size_t start = 0;
     if (align == textAlign::right && totalChars > drawChars) {
         int skip = totalChars - drawChars;
@@ -33,31 +36,36 @@ void RenderBitmapText(const std::string& text, textAlign align, int maxPixels){
         start = j;
     }
 
-    w3dEngine::PushMatrix();
+    // 3) offset X inicial segun alineacion (antes era un Translatef; ahora se hornea en las posiciones)
+    float x0 = 0.0f;
+    if (align == textAlign::right)       x0 = (float)(-drawChars * cw);
+    else if (align == textAlign::center) x0 = (float)((maxPixels - drawChars * cw) / 2);
 
-    // 3) mover cursor inicial SOLO UNA VEZ
-    if (align == textAlign::right) {
-        w3dEngine::Translatef(-drawChars * cw, 0, 0);
-    } else if (align == textAlign::center) {
-        w3dEngine::Translatef((GLfloat)((maxPixels - drawChars * cw) / 2), 0, 0);
-    }
-
-    // 4) dibujar NORMAL, siempre hacia adelante
+    // 4) armar UN buffer de posiciones + UVs para todos los glifos (offset x = drawn*cw horneado)
+    static std::vector<GLfloat> vbuf, ubuf; // reusados (sin alloc por frame tras el warmup)
+    vbuf.clear(); ubuf.clear();
+    const GLfloat* quad = WhiskFont->getMeshTri(); // 6 verts * (x,y) = 12 floats, glifo base en el origen
     i = start;
     int drawn = 0;
     while (i < text.size() && drawn < drawChars) {
         uint16_t cp = UTF8_Char(text.c_str(), i);
-
         if (cp != 0x20) {
-            w3dEngine::TexCoordPointer2f(0, WhiskFont->getUVTri(cp));
-            w3dEngine::DrawTrianglesArray(6);
+            const GLfloat* uv = WhiskFont->getUVTri(cp); // 6 verts * (u,v) = 12 floats
+            float dx = x0 + (float)(drawn * cw);
+            for (int v = 0; v < 6; v++) {
+                vbuf.push_back(quad[v*2] + dx); vbuf.push_back(quad[v*2+1]);
+                ubuf.push_back(uv[v*2]);        ubuf.push_back(uv[v*2+1]);
+            }
         }
-
-        w3dEngine::Translatef(cw, 0, 0);
         drawn++;
     }
+    if (vbuf.empty()) return; // string todo espacios
 
-    w3dEngine::PopMatrix();
+    // 5) UN draw-call para el string entero
+    w3dEngine::BindTexture(WhiskFont->getTexture());
+    w3dEngine::VertexPointer2f(0, &vbuf[0]);
+    w3dEngine::TexCoordPointer2f(0, &ubuf[0]);
+    w3dEngine::DrawTrianglesArray((int)(vbuf.size() / 2));
 }
 
 void RenderBitmapFloat(float value, textAlign align, int maxPixels, const std::string& unit){
