@@ -9,6 +9,7 @@ class PropButton : public PropertieBase {
     public:
         Button* button;
         bool oculto; // true: no ocupa fila (material por defecto)
+        bool gris;   // true: se dibuja atenuado y NO ejecuta su accion (ej: Render Animation sin animaciones)
         void (*action)(); // que hace el boton al activarse (o NULL)
 
         PropButton(const std::string& Name, int Icon = -1);

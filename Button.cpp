@@ -8,6 +8,7 @@ Button::Button(const std::string& Text, int Icon, bool Adaptar){
     icon = Icon;
     adaptar = Adaptar;
     desplegable = false;
+    caretMenu = false;
     centrado = false;
     cuadrado = false;
     visible = true;
@@ -36,7 +37,7 @@ void Button::Resize(int maxW){
     if (icon >= 0) contenido += IconSizeGS;
     if (icon >= 0 && !text.empty()) contenido += gapGS;
     contenido += (int)text.size() * CharacterWidthGS;
-    // (la flecha del desplegable se saco: ocupaba espacio y no hace falta)
+    if (caretMenu) contenido += IconSizeGS + gapGS; // la flechita opcional suma ancho (sino trunca el texto)
 
     width = adaptar ? contenido : maxW;
     if (width > maxW) width = maxW; // tope: el tamano del contenedor
@@ -88,6 +89,8 @@ void Button::Render(){
     }
     w3dEngine::Translatef((GLfloat)x0, 0, 0);
     int disponible = width - x0 - gapGS;
+    // caret opcional: reservar lugar a la derecha para la flecha abajo (afordancia de menu)
+    if (caretMenu && !editField) disponible -= IconSizeGS + gapGS;
     const float* tc = colorTexto ? colorTexto
         : (focoMenu ? ListaColores[static_cast<int>(ColorID::accent)]
         : (hover ? blanco : ListaColores[static_cast<int>(ColorID::grisUI)]));
@@ -122,7 +125,14 @@ void Button::Render(){
     }
     w3dEngine::PopMatrix();
 
-    // (la flecha del desplegable se saco para ahorrar espacio en la barra)
+    // caret opcional: triangulo hacia abajo a la derecha (deja claro que abre un menu). OPT-IN via caretMenu
+    if (caretMenu && !editField) {
+        w3dEngine::PushMatrix();
+        w3dEngine::Color4f(tc[0], tc[1], tc[2], 1.0f);
+        w3dEngine::Translatef((GLfloat)(width - gapGS - IconSizeGS), (GLfloat)((height - IconSizeGS) / 2), 0);
+        W3dDrawStrip4(IconMesh, IconsUV[static_cast<int>(IconType::arrow)]->uvs); // 'arrow' apunta abajo por defecto
+        w3dEngine::PopMatrix();
+    }
 
     // dejar el color como lo esperan las filas de propiedades
     w3dEngine::Color4f(fondo[0], fondo[1], fondo[2], 1.0f);

@@ -6,6 +6,7 @@ PropButton::PropButton(const std::string& Name, int Icon):
     // ancho maximo de la columna (no se adapta al texto)
     button = new Button(Name, Icon, false);
     oculto = false;
+    gris = false;
     action = NULL;
 }
 
@@ -24,6 +25,7 @@ int PropButton::Resize(int w){
 }
 
 bool PropButton::EditPropertie(){
+    if (gris) return false;   // atenuado (ej: Render Animation sin animaciones): no ejecuta la accion
     if (action) action(); // la accion del boton (click o enter)
     return false; // un boton no entra en modo edicion
 }
@@ -32,7 +34,11 @@ void PropButton::RenderPropertiBox(Card* propertiBox){
     if (oculto) return;
     // el boton arranca en el borde izquierdo del cuerpo del grupo
     w3dEngine::Translatef((GLfloat)-PropColEtiqueta, 0, 0);
+    static const float grisAtenuado[4] = {0.35f, 0.35f, 0.35f, 1.0f};
+    const float* txtPrev = button->colorTexto;
+    if (gris) button->colorTexto = grisAtenuado; // texto+icono atenuados
     button->Render();
+    if (gris) button->colorTexto = txtPrev;
     w3dEngine::Translatef((GLfloat)PropColEtiqueta, (GLfloat)(button->height + gapGS), 0);
 }
 

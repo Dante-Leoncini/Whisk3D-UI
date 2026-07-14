@@ -29,7 +29,9 @@ class Button {
         std::string text;
         int icon;        // IconType o -1 (sin icono)
         bool adaptar;    // true: el ancho sigue al contenido
-        bool desplegable; // true: flecha abajo a la derecha (abre un menu)
+        bool desplegable; // true: abre un menu (logica; NO dibuja flecha por si solo)
+        bool caretMenu;   // true: dibuja la flechita abajo-derecha (afordancia de dropdown). OPT-IN: apagado por
+                          // defecto (en la barra del viewport se come mucho espacio); se prende donde no queda claro
         bool centrado;    // true: icono+texto centrados (OK/Cancel/etc)
         bool cuadrado;    // true: fuerza ancho = alto (botones de icono cuadrados, ej: transporte del timeline)
         bool visible;     // false: no se dibuja ni ocupa lugar en la barra
