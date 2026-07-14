@@ -378,6 +378,11 @@ void PopupMenu::Render(){
 // solo). Este flag marca "recien abierto": el click inmediato NO selecciona, solo deja el submenu abierto.
 // Se limpia al MOVER el puntero DENTRO del submenu (asi con mouse, mover+click sigue seleccionando normal).
 static bool g_submenuAcabaDeAbrir = false;
+// un TAP DELIBERADO sobre un item (ej: soltar sobre un clip de un submenu SCROLLABLE, ruteado por el drag-soltar) NO
+// debe bloquearse por este guard: el guard es solo para el MISMO toque que ABRE el submenu solapado bajo el dedo. Sin
+// esto, en el desplegable de las PROPIEDADES (panel derecho) el submenu se abre a la IZQUIERDA sobre el cursor y el
+// tap caia en el guard -> "no se selecciona, queda en Escena". El timeline (submenu hacia arriba) no lo sufria.
+void MenuLimpiarGuardAbrir(){ g_submenuAcabaDeAbrir = false; }
 
 void PopupMenu::SincronizarSubmenu(){
     MenuItem* it = (selectIndex >= 0 && selectIndex < (int)items.size())
