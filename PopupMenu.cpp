@@ -41,6 +41,7 @@ PopupMenu::PopupMenu(){
     height = 10;
     reservaDerecha = 0;
     selectIndex = -1;
+    scroll = 0;
     abierto = false;
     submenuAbierto = NULL;
     action = NULL;
@@ -110,14 +111,49 @@ void PopupMenu::Resize(){
     // lado DERECHO (RenderBitmapText left), justo antes de la columna derecha de esa fila.
     int maxW = MenuPantallaW - gapGS * 2;
     if (width > maxW) width = maxW;
-    height = bordersGS + (int)items.size() * (RenglonHeightGS + gapGS) - gapGS;
-    if (!titulo.empty()) height += RenglonHeightGS + gapGS; // la cabecera
+    int rowH = RenglonHeightGS + gapGS;
+    int tituloH = titulo.empty() ? 0 : rowH;
+    height = bordersGS + tituloH + (int)items.size() * rowH - gapGS;
+    // CLAMP: nunca mas alto que la pantalla (menu con 129 clips) -> se recorta a un nro ENTERO de filas y aparece
+    // scrollbar. Sin esto el menu se salia por abajo y el hover caia en el viewport (abria el timeline). Con aire.
+    int maxH = MenuPantallaH - RenglonHeightGS;
+    if (height > maxH){
+        int visRows = (maxH - bordersGS - tituloH + gapGS) / rowH; if (visRows < 1) visRows = 1;
+        height = bordersGS + tituloH + visRows * rowH - gapGS;
+    }
+    int ms = MaxScroll();
+    if (scroll < 0) scroll = 0; if (scroll > ms) scroll = ms;
 
     card->Resize(width, height);
     highlight->Resize(width - bordersGS, RenglonHeightGS + GlobalScale);
 }
 
+// cuantas filas de ITEMS entran en la ventana visible (segun el alto ya clampeado)
+int PopupMenu::FilasVisibles() const {
+    int rowH = RenglonHeightGS + gapGS;
+    int tituloH = titulo.empty() ? 0 : rowH;
+    int v = (height - bordersGS - tituloH + gapGS) / rowH;
+    return v < 1 ? 1 : v;
+}
+int PopupMenu::MaxScroll() const {
+    int m = (int)items.size() - FilasVisibles();
+    return m < 0 ? 0 : m;
+}
+void PopupMenu::Wheel(int dir){
+    if (submenuAbierto && submenuAbierto->abierto){ submenuAbierto->Wheel(dir); return; } // el submenu es el foco
+    int ms = MaxScroll();
+    scroll -= dir; // rueda arriba (dir +1) -> ver items ANTERIORES (scroll baja)
+    if (scroll < 0) scroll = 0; if (scroll > ms) scroll = ms;
+}
+void PopupMenu::AsegurarVisible(){
+    if (selectIndex < 0) return;
+    if (selectIndex < scroll) scroll = selectIndex;
+    else { int v = FilasVisibles(); if (selectIndex >= scroll + v) scroll = selectIndex - v + 1; }
+    int ms = MaxScroll(); if (scroll < 0) scroll = 0; if (scroll > ms) scroll = ms;
+}
+
 void PopupMenu::Abrir(int sx, int sy, int pantallaW, int pantallaH){
+    scroll = 0; // arranca desde arriba
     Resize();
     x = sx;
     y = sy;
@@ -195,8 +231,11 @@ void PopupMenu::Render(){
         }
         w3dEngine::Translatef(0, (GLfloat)(RenglonHeightGS + gapGS), 0);
     }
-    for (size_t i = 0; i < items.size(); i++){
-        bool resaltada = ((int)i == selectIndex);
+    // solo las filas VISIBLES [scroll .. scroll+FilasVisibles): asi el menu no se sale de la pantalla
+    int _first = scroll, _last = scroll + FilasVisibles();
+    if (_first < 0) _first = 0; if (_last > (int)items.size()) _last = (int)items.size();
+    for (int i = _first; i < _last; i++){
+        bool resaltada = (i == selectIndex);
         if (resaltada){
             w3dEngine::Color4f(ListaColores[static_cast<int>(ColorID::headerColor)][0],
                       ListaColores[static_cast<int>(ColorID::headerColor)][1],
@@ -302,6 +341,31 @@ void PopupMenu::Render(){
     }
     w3dEngine::PopMatrix();
 
+    // SCROLLBAR (si hay mas items que los visibles): thumb proporcional pegado al borde derecho
+    if (MaxScroll() > 0){
+        int rowH = RenglonHeightGS + gapGS;
+        int tituloH = titulo.empty() ? 0 : rowH;
+        int trackTop = borderGS + tituloH, trackH = height - bordersGS - tituloH;
+        int nItems = items.empty() ? 1 : (int)items.size();
+        int thumbH = trackH * FilasVisibles() / nItems; if (thumbH < GlobalScale * 6) thumbH = GlobalScale * 6;
+        int ms = MaxScroll();
+        int thumbY = trackTop + (ms > 0 ? scroll * (trackH - thumbH) / ms : 0);
+        int sbW = GlobalScale * 2, sbX = width - borderGS - sbW;
+        const float* ac = ListaColores[static_cast<int>(ColorID::grisUI)];
+        float x0 = (float)sbX, x1 = (float)(sbX + sbW), y0 = (float)thumbY, y1 = (float)(thumbY + thumbH);
+        GLfloat sb[18] = { x0,y0,0, x1,y0,0, x1,y1,0,  x0,y0,0, x1,y1,0, x0,y1,0 };
+        w3dEngine::PushMatrix();
+        w3dEngine::Translatef((GLfloat)x, (GLfloat)y, 0);
+        w3dEngine::Color4f(ac[0], ac[1], ac[2], 0.85f);
+        w3dEngine::Disable(w3dEngine::Texture2D);
+        w3dEngine::DisableArray(w3dEngine::TexCoordArray);
+        w3dEngine::VertexPointer3f(0, sb);
+        w3dEngine::DrawTrianglesArray(6);
+        w3dEngine::EnableArray(w3dEngine::TexCoordArray);
+        w3dEngine::Enable(w3dEngine::Texture2D);
+        w3dEngine::PopMatrix();
+    }
+
     // el submenu abierto se dibuja encima
     if (submenuAbierto && submenuAbierto->abierto) submenuAbierto->Render();
 }
@@ -324,7 +388,7 @@ void PopupMenu::SincronizarSubmenu(){
     if (sub){
         int oy = titulo.empty() ? 0 : (RenglonHeightGS + gapGS);
         sub->Abrir(x + width - gapGS,
-                   y + borderGS + oy + selectIndex * (RenglonHeightGS + gapGS),
+                   y + borderGS + oy + (selectIndex - scroll) * (RenglonHeightGS + gapGS), // fila VISIBLE
                    MenuPantallaW, MenuPantallaH);
         submenuAbierto = sub;
         g_submenuAcabaDeAbrir = true; // el proximo click sobre este submenu solo lo deja abierto (no selecciona)
@@ -346,7 +410,7 @@ bool PopupMenu::MouseMove(int mx, int my){
     // abre/cierra el submenu segun corresponda (sin click)
     if (Contains(mx, my)){
         int oy = titulo.empty() ? 0 : (RenglonHeightGS + gapGS);
-        int fila = (my - y - borderGS - oy) / (RenglonHeightGS + gapGS);
+        int fila = scroll + (my - y - borderGS - oy) / (RenglonHeightGS + gapGS); // + scroll: fila absoluta
         if (fila < 0) fila = 0;
         if (fila >= (int)items.size()) fila = (int)items.size() - 1;
         selectIndex = fila;
@@ -386,7 +450,7 @@ int PopupMenu::Click(int mx, int my){
         return -1;
     }
     int oy = titulo.empty() ? 0 : (RenglonHeightGS + gapGS);
-    int fila = (my - y - borderGS - oy) / (RenglonHeightGS + gapGS);
+    int fila = scroll + (my - y - borderGS - oy) / (RenglonHeightGS + gapGS); // + scroll: fila absoluta
     if (fila < 0 || fila >= (int)items.size()) return -1;
     selectIndex = fila;
     // SLIDER: click en la barra setea el valor segun la X (no cierra el menu)
@@ -436,12 +500,14 @@ void PopupMenu::button_down(){
     if (submenuAbierto){ submenuAbierto->Cerrar(); submenuAbierto = NULL; }
     selectIndex++;
     if (selectIndex >= (int)items.size()) selectIndex = 0;
+    AsegurarVisible(); // scroll para que el resaltado quede a la vista (menus largos)
 }
 
 void PopupMenu::button_up(){
     if (submenuAbierto){ submenuAbierto->Cerrar(); submenuAbierto = NULL; }
     selectIndex--;
     if (selectIndex < 0) selectIndex = (int)items.size() - 1;
+    AsegurarVisible();
 }
 
 MenuItem* PopupMenu::ItemActual(){
@@ -470,7 +536,7 @@ bool PopupMenu::AbrirSubmenuActual(){
     if (it->gris && !*it->gris) return false; // deshabilitado
     int oy = titulo.empty() ? 0 : (RenglonHeightGS + gapGS);
     it->submenu->Abrir(x + width - gapGS,
-                       y + borderGS + oy + selectIndex * (RenglonHeightGS + gapGS),
+                       y + borderGS + oy + (selectIndex - scroll) * (RenglonHeightGS + gapGS), // fila VISIBLE
                        MenuPantallaW, MenuPantallaH);
     it->submenu->selectIndex = 0; // pre-seleccion (Abrir lo deja en -1)
     submenuAbierto = it->submenu;

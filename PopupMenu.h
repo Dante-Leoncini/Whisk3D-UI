@@ -58,6 +58,7 @@ class PopupMenu {
                             // trunca ANTES de esta columna (sino, al clampear el ancho a la pantalla,
                             // el texto tapaba las tildes y no se veia si estaban marcadas)
         int selectIndex;    // opcion resaltada (-1 = ninguna)
+        int scroll;         // primera fila VISIBLE (>0 cuando el menu es mas alto que la pantalla -> scrollbar)
         bool abierto;
         PopupMenu* submenuAbierto;
         Card* card;
@@ -94,6 +95,11 @@ class PopupMenu {
         int Enter();                // idem Click sobre la opcion resaltada
         void button_up();
         void button_down();
+        // SCROLL (menus mas altos que la pantalla, ej: armature con 129 clips):
+        void Wheel(int dir);        // rueda: +1 arriba / -1 abajo, una fila (delega al submenu abierto)
+        int  FilasVisibles() const; // cuantas filas de items entran en la ventana visible
+        int  MaxScroll() const;     // scroll maximo (0 = entra todo, sin scrollbar)
+        void AsegurarVisible();     // ajusta scroll para que selectIndex quede visible (nav por teclado)
 
         // navegacion por teclado (Symbian/keypad y PC):
         MenuItem* ItemActual();          // opcion resaltada o NULL
