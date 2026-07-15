@@ -50,7 +50,8 @@ std::string PropListMeshParts::ListaNombre(int i) const {
 }
 void PropListMeshParts::ListaSeleccionar(int i) {
     selectIndex = i;
-    if (modo == 5) { if (arm) arm->animActiva = i; return; }                     // clips: solo cambia el activo
+    if (modo == 5) { if (arm){ arm->animActiva = i;                              // clip: activo + sincroniza la seleccion
+                               if (OnSeleccionarAnimClip) OnSeleccionarAnimClip(arm, i); } return; } // app-wide (timeline + Start/End)
     if (modo == 6) { if (arm){ for (size_t b=0;b<arm->bones.size();b++) arm->bones[b].select = false;  // hueso: activo + select
                                if (i>=0 && i<(int)arm->bones.size()){ arm->bones[i].select = true; arm->boneActivo = i; } } return; }
     if (!mesh) return;
