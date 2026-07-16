@@ -60,7 +60,8 @@ void CrearIconos(int texW, int texH){
         { 106, 23, 10, 10 }, // notifError (cruz, se pinta rojo)
         { 106, 12, 10, 10 }, // notifOk (check, se pinta verde)
         {  95,  1, 10, 10 }, // modificador (pestania Modificadores)
-        {  73, 69, 10, 10 }  // armature (esqueleto) - arte que paso Dante
+        {  73, 69, 10, 10 }, // armature (esqueleto) - arte que paso Dante
+        {  95, 10, 10, 10 }  // keyframe (rombo) - arte que paso Dante
     };
 
     // limpia por si se llama más de una vez

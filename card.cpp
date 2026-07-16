@@ -1,6 +1,8 @@
 #include "card.h"
 #include "w3dGraphics.h"
 #include "WhiskUI/glesdraw.h"
+#include "WhiskUI/colores.h"    // ListaColores (colores del checkbox)
+#include "WhiskUI/bitmapText.h" // RenderBitmapText (el tilde)
 
 // UVs e indices
 GLubyte CardIndices[] = {
@@ -161,4 +163,27 @@ void Card::RenderObjectTab() {
 }
 void Card::RenderBorderTab() {
     W3dDrawElemsB(mesh, CardTabBordeUV, CardBorderIndices, 48);
+}
+// ---------------------------------------------------------------------------
+//  EL checkbox del editor (ver card.h). Tamaño y colores viven SOLO aca.
+// ---------------------------------------------------------------------------
+int CheckboxLado(){ return RenglonHeightGS; }
+const float* CheckboxColorCaja(bool on){
+    return ListaColores[static_cast<int>(on ? ColorID::grisUI : ColorID::background)];
+}
+const float* CheckboxColorTilde(){ return ListaColores[static_cast<int>(ColorID::background)]; }
+const char*  CheckboxTilde(){ return "\xE2\x9C\x94"; }
+
+void DibujarCheckbox(int lado, bool on){
+    static Card* caja = NULL;
+    if (!caja) caja = new Card(NULL, lado, lado);
+    caja->Resize(lado, lado);
+    const float* c = CheckboxColorCaja(on);
+    w3dEngine::Color4f(c[0], c[1], c[2], 1.0f);
+    caja->RenderObject(false);
+    if (on){
+        const float* t = CheckboxColorTilde();
+        w3dEngine::Color4f(t[0], t[1], t[2], 1.0f);
+        RenderBitmapText(CheckboxTilde(), textAlign::center, lado);
+    }
 }

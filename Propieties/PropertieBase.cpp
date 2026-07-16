@@ -2,13 +2,17 @@
 #include "w3dGraphics.h"
 #include "WhiskUI/glesdraw.h"
 
-void CardTitulo(GLfloat* icon, const std::string& texto, int maxPixels){
+void CardTitulo(GLfloat* icon, const std::string& texto, int maxPixels, GLfloat* iconExtra){
     //icono de la coleccion
     W3dDrawStrip4(IconMesh, icon); // (shim: strip+short no dibujan en N95)
 
-    //texto render
     w3dEngine::PushMatrix();
     w3dEngine::Translatef(IconSizeGS + gapGS, 0, 0);
+    if (iconExtra){                       // icono propio de la tarjeta (ej: el rombo de "Keyframe")
+        W3dDrawStrip4(IconMesh, iconExtra);
+        w3dEngine::Translatef(IconSizeGS + gapGS, 0, 0);
+        maxPixels -= IconSizeGS + gapGS;  // el texto tiene menos lugar: se trunca antes
+    }
     RenderBitmapText(texto, textAlign::left, maxPixels);
     w3dEngine::PopMatrix();
 }

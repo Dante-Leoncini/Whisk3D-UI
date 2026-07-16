@@ -71,7 +71,7 @@ void GroupPropertie::selectLastIndexProperty(){
     selectIndex = properties.size() - 1;
 }
 
-GroupPropertie::GroupPropertie(const std::string& Name): name(Name) {
+GroupPropertie::GroupPropertie(const std::string& Name): name(Name), icono(-1) {
     // C++03: defaults (name viene del init-list)
     open = true;
     visible = true;
@@ -176,10 +176,12 @@ void GroupPropertie::RenderPropertiBox(){
 
         if (properties[i]->GetType() == PropertyType::Bool){
             cardToUse = checkBox;
-            if (static_cast<PropBool*>(properties[i])->value && *static_cast<PropBool*>(properties[i])->value){
-                w3dEngine::Color4f(ListaColores[static_cast<int>(ColorID::grisUI)][0],
-                            ListaColores[static_cast<int>(ColorID::grisUI)][1],
-                            ListaColores[static_cast<int>(ColorID::grisUI)][2], 1.0f);
+            // el relleno sale de CheckboxColorCaja (card.h), el MISMO que usan los menus: un solo lugar decide
+            // como se ve un checkbox encendido/apagado en todo el editor
+            bool on = (static_cast<PropBool*>(properties[i])->value && *static_cast<PropBool*>(properties[i])->value);
+            if (on){
+                const float* c = CheckboxColorCaja(true);
+                w3dEngine::Color4f(c[0], c[1], c[2], 1.0f);
             }
         }
         else if (properties[i]->GetType() == PropertyType::Color){
@@ -317,7 +319,8 @@ void GroupPropertie::Render(){
         open
             ? IconsUV[static_cast<size_t>(IconType::arrow)]->uvs
             : IconsUV[static_cast<size_t>(IconType::arrowRight)]->uvs,
-        name, maxPixelsTitle
+        name, maxPixelsTitle,
+        (icono >= 0) ? IconsUV[static_cast<size_t>(icono)]->uvs : NULL
     );
 
     w3dEngine::Translatef(0, RenglonHeightGS + gapGS, 0);

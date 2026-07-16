@@ -22,6 +22,7 @@ class GroupPropertie {
         float anchoValores;
         int colEtiqueta; // donde empieza la columna de valores
         std::string name;
+        int icono;       // IconType de la tarjeta, o -1 = sin icono (default). Va entre la flecha y el titulo.
         Card* card;
         Card* propertiBox;
         Card* checkBox;

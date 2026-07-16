@@ -45,7 +45,9 @@ struct PropertyType {
 // de ancho completo la usan para volver al borde izquierdo)
 extern int PropColEtiqueta;
 
-void CardTitulo(GLfloat* icon, const std::string& texto, int maxPixels = 1920);
+// Titulo de una tarjeta: [flecha abrir/cerrar] [icono opcional] texto.
+// iconExtra = NULL -> no se dibuja y el texto no reserva su lugar (la tarjeta queda igual que siempre).
+void CardTitulo(GLfloat* icon, const std::string& texto, int maxPixels = 1920, GLfloat* iconExtra = NULL);
 
 class PropertieBase {
     public:

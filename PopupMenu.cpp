@@ -286,11 +286,12 @@ void PopupMenu::Render(){
             w3dEngine::PopMatrix();
         }
         if (items[i]->checkbox){
-            // checkbox a la derecha: tilde si esta encendido (estilo PropBool)
+            // checkbox a la derecha: EL del editor (caja redondeada + tilde), el mismo del panel de propiedades.
+            // Antes era un tilde SUELTO: sin la tilde no se distinguia de un boton comun.
+            int lado = CheckboxLado();
             w3dEngine::PushMatrix();
-            w3dEngine::Translatef((GLfloat)(width - bordersGS - IconSizeGS), 0, 0);
-            RenderBitmapText(*items[i]->checkbox ? "\xE2\x9C\x94" : "",
-                             textAlign::left, IconSizeGS + gapGS);
+            w3dEngine::Translatef((GLfloat)(width - bordersGS - lado), 0, 0);
+            DibujarCheckbox(lado, *items[i]->checkbox);
             w3dEngine::PopMatrix();
         }
         if (items[i]->valorFloat){
@@ -331,7 +332,7 @@ void PopupMenu::Render(){
                       ListaColores[static_cast<int>(ColorID::grisUI)][2], 0.5f);
             int atajoDX = width - bordersGS - gapGS;
             if (items[i]->submenu) atajoDX -= IconSizeGS + gapGS; // dejar la flecha del submenu a la derecha del atajo
-            if (items[i]->checkbox) atajoDX -= IconSizeGS + gapGS; // dejar la tilde a la derecha del atajo (no superponer)
+            if (items[i]->checkbox) atajoDX -= CheckboxLado() + gapGS; // dejar el checkbox a la derecha del atajo (no superponer)
             w3dEngine::PushMatrix();
             w3dEngine::Translatef((GLfloat)atajoDX, 0, 0);
             RenderBitmapText(items[i]->atajo, textAlign::right, width);

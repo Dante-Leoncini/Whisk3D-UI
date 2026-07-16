@@ -1,7 +1,8 @@
 #include "PropBool.h"
 #include "w3dGraphics.h"
 
-std::string unicodeCheck = "✔";
+// el glyph sale de card.h (CheckboxTilde): un solo lugar decide como se ve un checkbox
+std::string unicodeCheck = CheckboxTilde();
 
 PropBool::PropBool(const std::string& Name):
     PropertieBase(Name){
