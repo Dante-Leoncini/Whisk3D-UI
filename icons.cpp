@@ -61,7 +61,9 @@ void CrearIconos(int texW, int texH){
         { 106, 12, 10, 10 }, // notifOk (check, se pinta verde)
         {  95,  1, 10, 10 }, // modificador (pestania Modificadores)
         {  73, 69, 10, 10 }, // armature (esqueleto) - arte que paso Dante
-        {  95, 10, 10, 10 }  // keyframe (rombo) - arte que paso Dante
+        {  94, 10, 10, 10 }, // keyframe (rombo) - arte que paso Dante
+        {  84, 45, 10, 10 }, // monitor (pantalla): el menu "View" - arte que paso Dante
+        {  84, 20, 10, 10 }  // snap (iman) - arte que paso Dante
     };
 
     // limpia por si se llama más de una vez

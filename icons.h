@@ -23,7 +23,7 @@ extern GLshort IconLineMesh[8];
 extern int IconSize;
 extern int IconSizeGS;
 
-const size_t ICON_TOTAL = 42; // (constexpr es C++11)
+const size_t ICON_TOTAL = 44; // (constexpr es C++11)
 
 // dialecto C++03 compartido
 struct IconType {
@@ -69,7 +69,9 @@ struct IconType {
     notifOk,         // notificacion OK/exito (se pinta verde)
     modificador,     // pestania "Modificadores" en Properties
     armature,        // esqueleto (Add > Armature / outliner)
-    keyframe         // rombo: tarjeta "Keyframe" del panel de propiedades - arte que paso Dante
+    keyframe,        // rombo: tarjeta "Keyframe" del panel de propiedades - arte que paso Dante
+    monitor,         // pantalla: el menu "View" (sin texto, para ahorrar ancho de barra) - arte que paso Dante
+    snap             // iman: el boton "Snap" de la barra del viewport3d - arte que paso Dante
     };
     Enum v;
     IconType(Enum e) : v(e) {}

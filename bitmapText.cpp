@@ -50,11 +50,26 @@ void RenderBitmapText(const std::string& text, textAlign align, int maxPixels){
     while (i < text.size() && drawn < drawChars) {
         uint16_t cp = UTF8_Char(text.c_str(), i);
         if (cp != 0x20) {
-            const GLfloat* uv = WhiskFont->getUVTri(cp); // 6 verts * (u,v) = 12 floats
+            // ACENTUADA: se dibuja la LETRA BASE y encima el acento, los dos del mismo atlas (ver font.h). Entra en
+            // el MISMO buffer -> sigue siendo un solo draw-call para el string entero.
+            uint16_t base = cp;
+            Font::Acento ac = Font::Descomponer(cp, base);
+            const GLfloat* uv = WhiskFont->getUVTri(base); // 6 verts * (u,v) = 12 floats
             float dx = x0 + (float)(drawn * cw);
+            const float dy = (float)WhiskFont->BajadaDe(base); // los derivados por rotacion no caen a la misma altura
             for (int v = 0; v < 6; v++) {
-                vbuf.push_back(quad[v*2] + dx); vbuf.push_back(quad[v*2+1]);
+                vbuf.push_back(quad[v*2] + dx); vbuf.push_back(quad[v*2+1] + dy);
                 ubuf.push_back(uv[v*2]);        ubuf.push_back(uv[v*2+1]);
+            }
+            if (ac != Font::AcentoNo) {
+                // la altura del acento depende de la LETRA que lleva abajo, no del acento
+                const bool mayus = (base >= 0x41 && base <= 0x5A);
+                const GLfloat* ma = WhiskFont->getMeshAcentoTri(mayus);
+                const GLfloat* ua = WhiskFont->getUVAcentoTri(ac);
+                for (int v = 0; v < 6; v++) {
+                    vbuf.push_back(ma[v*2] + dx); vbuf.push_back(ma[v*2+1]);
+                    ubuf.push_back(ua[v*2]);      ubuf.push_back(ua[v*2+1]);
+                }
             }
         }
         drawn++;
