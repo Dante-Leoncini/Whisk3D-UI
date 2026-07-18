@@ -13,7 +13,7 @@
     #include <GL/gl.h>
 #endif
 
-#include "WhiskUI/object2D.h"
+#include "WhiskUI/draw/object2D.h"
 
 class Rec2D : public Object2D {
 	public:

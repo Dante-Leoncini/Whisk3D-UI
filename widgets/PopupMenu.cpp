@@ -1,6 +1,6 @@
-#include "WhiskUI/PopupMenu.h"
+#include "WhiskUI/widgets/PopupMenu.h"
 #include "w3dGraphics.h"
-#include "WhiskUI/glesdraw.h"
+#include "WhiskUI/draw/glesdraw.h"
 
 PopupMenu* MenuAbierto = NULL;
 int MenuPantallaW = 100000;
@@ -31,7 +31,10 @@ MenuItem::MenuItem(const std::string& Text, int Id, int Icon, PopupMenu* Submenu
     verde = false;
     valorFloat = NULL;
     vmin = 0.0f; vmax = 1.0f;
+    accion = NULL;
 }
+
+const char* (*W3dMenuTraducir)(const char*) = NULL;
 
 PopupMenu::PopupMenu(){
     titulo = "";
@@ -62,6 +65,31 @@ void PopupMenu::Limpiar(){
     for (size_t i = 0; i < items.size(); i++) delete items[i];
     items.clear();
     selectIndex = -1;
+}
+
+void PopupMenu::Construir(const MenuDef* defs, int n){
+    Limpiar();
+    for (int i = 0; i < n; i++){
+        const MenuDef& d = defs[i];
+        const char* txt = (W3dMenuTraducir && d.text) ? W3dMenuTraducir(d.text) : (d.text ? d.text : "");
+        const int ic = d.icon ? d.icon - 1 : -1;   // 0 = sin icono; los reales venian +1 (ICONO)
+        MenuItem* it;
+        if (d.checkbox)     it = AgregarCheck(txt, i, d.checkbox, ic);
+        else if (d.submenu) it = Agregar(txt, i, ic, *d.submenu);
+        else                it = Agregar(txt, i, ic);
+        it->accion = d.accion;
+        if (d.atajo) it->atajo = d.atajo;
+    }
+}
+
+void PopupMenu::Ejecutar(int id){
+    for (size_t i = 0; i < items.size(); i++){
+        if (items[i]->id == id){
+            if (items[i]->accion){ items[i]->accion(); return; }  // declarativo: la accion vive en el item
+            break;
+        }
+    }
+    if (action) action(id);   // menu del camino viejo (id -> switch): sigue funcionando igual
 }
 
 MenuItem* PopupMenu::Agregar(const std::string& text, int id, int icon,
@@ -198,17 +226,13 @@ void PopupMenu::Render(){
     // fondo: tarjeta con BORDE VERDE (el menu activo es el foco)
     w3dEngine::Color4f(gris[0], gris[1], gris[2], 1.0f);
     card->RenderObject(false);
-    w3dEngine::Color4f(ListaColores[static_cast<int>(ColorID::accent)][0],
-              ListaColores[static_cast<int>(ColorID::accent)][1],
-              ListaColores[static_cast<int>(ColorID::accent)][2], 1.0f);
+    SetColorID(ColorID::accent, 1.0f);
     card->RenderBorder(false);
 
     w3dEngine::Translatef((GLfloat)borderGS, (GLfloat)borderGS, 0);
     if (!titulo.empty()){
         // cabecera
-        w3dEngine::Color4f(ListaColores[static_cast<int>(ColorID::blanco)][0],
-                  ListaColores[static_cast<int>(ColorID::blanco)][1],
-                  ListaColores[static_cast<int>(ColorID::blanco)][2], 1.0f);
+        SetColorID(ColorID::blanco, 1.0f);
         w3dEngine::PushMatrix();
         w3dEngine::Translatef((GLfloat)gapGS, 0, 0);
         RenderBitmapText(titulo, textAlign::left, width - bordersGS);
@@ -237,31 +261,21 @@ void PopupMenu::Render(){
     for (int i = _first; i < _last; i++){
         bool resaltada = (i == selectIndex);
         if (resaltada){
-            w3dEngine::Color4f(ListaColores[static_cast<int>(ColorID::headerColor)][0],
-                      ListaColores[static_cast<int>(ColorID::headerColor)][1],
-                      ListaColores[static_cast<int>(ColorID::headerColor)][2], 1.0f);
+            SetColorID(ColorID::headerColor, 1.0f);
             highlight->RenderObject(false);
         }
         bool deshabilitada = (items[i]->gris && !*items[i]->gris);
         if (deshabilitada){
             // depende de un master apagado (ej: overlays off): NO desaparece,
             // se ve al 50% transparente (mismo color de texto, media opacidad)
-            w3dEngine::Color4f(ListaColores[static_cast<int>(ColorID::grisUI)][0],
-                      ListaColores[static_cast<int>(ColorID::grisUI)][1],
-                      ListaColores[static_cast<int>(ColorID::grisUI)][2], 0.5f);
+            SetColorID(ColorID::grisUI, 0.5f);
         } else if (items[i]->verde){
             // opcion ACTIVA (ej: el modo de pivot actual): icono + texto en VERDE
-            w3dEngine::Color4f(ListaColores[static_cast<int>(ColorID::accent)][0],
-                      ListaColores[static_cast<int>(ColorID::accent)][1],
-                      ListaColores[static_cast<int>(ColorID::accent)][2], 1.0f);
+            SetColorID(ColorID::accent, 1.0f);
         } else if (resaltada){
-            w3dEngine::Color4f(ListaColores[static_cast<int>(ColorID::blanco)][0],
-                      ListaColores[static_cast<int>(ColorID::blanco)][1],
-                      ListaColores[static_cast<int>(ColorID::blanco)][2], 1.0f);
+            SetColorID(ColorID::blanco, 1.0f);
         } else {
-            w3dEngine::Color4f(ListaColores[static_cast<int>(ColorID::grisUI)][0],
-                      ListaColores[static_cast<int>(ColorID::grisUI)][1],
-                      ListaColores[static_cast<int>(ColorID::grisUI)][2], 1.0f);
+            SetColorID(ColorID::grisUI, 1.0f);
         }
         w3dEngine::PushMatrix();
         w3dEngine::Translatef((GLfloat)gapGS, 0, 0);
@@ -304,21 +318,15 @@ void PopupMenu::Render(){
             int barH = RenglonHeightGS - 2 * GlobalScale;
             w3dEngine::PushMatrix();
             w3dEngine::Translatef((GLfloat)barX, (GLfloat)GlobalScale, 0);
-            w3dEngine::Color4f(ListaColores[static_cast<int>(ColorID::headerColor)][0],
-                      ListaColores[static_cast<int>(ColorID::headerColor)][1],
-                      ListaColores[static_cast<int>(ColorID::headerColor)][2], 1.0f);
+            SetColorID(ColorID::headerColor, 1.0f);
             sliderCard->Resize(sliderW, barH); sliderCard->RenderObject(false);
             int fillW = (int)(frac * sliderW);
             if (fillW > 2){
-                w3dEngine::Color4f(ListaColores[static_cast<int>(ColorID::accent)][0],
-                          ListaColores[static_cast<int>(ColorID::accent)][1],
-                          ListaColores[static_cast<int>(ColorID::accent)][2], 1.0f);
+                SetColorID(ColorID::accent, 1.0f);
                 sliderCard->Resize(fillW, barH); sliderCard->RenderObject(false);
             }
             w3dEngine::PopMatrix();
-            w3dEngine::Color4f(ListaColores[static_cast<int>(ColorID::blanco)][0],
-                      ListaColores[static_cast<int>(ColorID::blanco)][1],
-                      ListaColores[static_cast<int>(ColorID::blanco)][2], 1.0f);
+            SetColorID(ColorID::blanco, 1.0f);
             w3dEngine::PushMatrix();
             w3dEngine::Translatef((GLfloat)barX, 0, 0);
             RenderBitmapFloat(*items[i]->valorFloat, textAlign::center, sliderW);
@@ -327,9 +335,7 @@ void PopupMenu::Render(){
         if (!items[i]->atajo.empty()){
             // hint del atajo: gris tenue (un poco mas oscuro que el texto),
             // alineado al borde derecho del menu (igual en todos los menus)
-            w3dEngine::Color4f(ListaColores[static_cast<int>(ColorID::grisUI)][0],
-                      ListaColores[static_cast<int>(ColorID::grisUI)][1],
-                      ListaColores[static_cast<int>(ColorID::grisUI)][2], 0.5f);
+            SetColorID(ColorID::grisUI, 0.5f);
             int atajoDX = width - bordersGS - gapGS;
             if (items[i]->submenu) atajoDX -= IconSizeGS + gapGS; // dejar la flecha del submenu a la derecha del atajo
             if (items[i]->checkbox) atajoDX -= CheckboxLado() + gapGS; // dejar el checkbox a la derecha del atajo (no superponer)

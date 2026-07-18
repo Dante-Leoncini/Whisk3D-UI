@@ -14,12 +14,12 @@
     #include <GL/gl.h>
 #endif
 
-#include "WhiskUI/UI.h"
-#include "WhiskUI/card.h"
-#include "WhiskUI/icons.h"
-#include "WhiskUI/colores.h"
-#include "WhiskUI/bitmapText.h"
-#include "WhiskUI/TextField.h" // editField: el boton se vuelve un input de texto (rename in-place)
+#include "WhiskUI/core/UI.h"
+#include "WhiskUI/widgets/card.h"
+#include "WhiskUI/draw/icons.h"
+#include "WhiskUI/theme/colores.h"
+#include "WhiskUI/text/bitmapText.h"
+#include "WhiskUI/widgets/TextField.h" // editField: el boton se vuelve un input de texto (rename in-place)
 
 // Boton compartido (4 OS): tarjeta del color de las cards con borde
 // oscuro (el borde es lo que lo hace "boton"), texto y un icono opcional

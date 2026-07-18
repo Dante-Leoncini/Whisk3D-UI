@@ -1,4 +1,4 @@
-#include "WhiskUI/icons.h"
+#include "WhiskUI/draw/icons.h"
 
 // Variables globales
 GLshort IconMesh[8] = { 0,0, 10,0, 0,10, 10,10 };

@@ -2,7 +2,7 @@
 #define PROPBUTTONROW_H
 
 #include "PropertieBase.h"
-#include "WhiskUI/Button.h"
+#include "WhiskUI/widgets/Button.h"
 #include "w3dGraphics.h"
 #include <vector>
 

@@ -2,7 +2,7 @@
 #define PROPBUTTON_H
 
 #include "PropertieBase.h"
-#include "WhiskUI/Button.h"
+#include "WhiskUI/widgets/Button.h"
 
 // fila-boton para los grupos de propiedades (ej: "New Material")
 class PropButton : public PropertieBase {

@@ -2,7 +2,7 @@
 #define PROPLIST_H
 
 #include "PropertieBase.h"
-#include "WhiskUI/card.h"
+#include "WhiskUI/widgets/card.h"
 #include "objects/Mesh.h"
 
 class Armature; // objects/Armature.h (lista de clips de animacion, modo 5)

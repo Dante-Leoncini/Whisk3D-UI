@@ -192,40 +192,28 @@ void GroupPropertie::RenderPropertiBox(){
         properties[i]->RenderPropertiBox(cardToUse);
 
         if (cardToUse == checkBox){
-            w3dEngine::Color4f(ListaColores[static_cast<int>(ColorID::background)][0],
-                    ListaColores[static_cast<int>(ColorID::background)][1],
-                    ListaColores[static_cast<int>(ColorID::background)][2], 1.0f);
+            SetColorID(ColorID::background, 1.0f);
         }
 
         // hover: se resalta el BORDE del checkbox (no el relleno)
         if (this == PropHoverGroup && (int)i == PropHoverFila &&
             selectIndex != (int)i &&
             properties[i]->GetType() == PropertyType::Bool){
-            w3dEngine::Color4f(ListaColores[static_cast<int>(ColorID::blanco)][0],
-                        ListaColores[static_cast<int>(ColorID::blanco)][1],
-                        ListaColores[static_cast<int>(ColorID::blanco)][2], 1.0f);
+            SetColorID(ColorID::blanco, 1.0f);
             properties[i]->RenderPropertiBoxBorder(cardToUse);
-            w3dEngine::Color4f(ListaColores[static_cast<int>(ColorID::background)][0],
-                    ListaColores[static_cast<int>(ColorID::background)][1],
-                    ListaColores[static_cast<int>(ColorID::background)][2], 1.0f);
+            SetColorID(ColorID::background, 1.0f);
         }
 
         //dibujado del borde
         if (selectIndex == i){
             if (editando || properties[i]->editando){
-                w3dEngine::Color4f(ListaColores[static_cast<int>(ColorID::accent)][0],
-                            ListaColores[static_cast<int>(ColorID::accent)][1],
-                            ListaColores[static_cast<int>(ColorID::accent)][2], 1.0f);
+                SetColorID(ColorID::accent, 1.0f);
             }
             else {
-                w3dEngine::Color4f(ListaColores[static_cast<int>(ColorID::blanco)][0],
-                            ListaColores[static_cast<int>(ColorID::blanco)][1],
-                            ListaColores[static_cast<int>(ColorID::blanco)][2], 1.0f);
+                SetColorID(ColorID::blanco, 1.0f);
             }
             properties[i]->RenderPropertiBoxBorder(cardToUse);
-            w3dEngine::Color4f(ListaColores[static_cast<int>(ColorID::background)][0],
-                    ListaColores[static_cast<int>(ColorID::background)][1],
-                    ListaColores[static_cast<int>(ColorID::background)][2], 1.0f);
+            SetColorID(ColorID::background, 1.0f);
         }
     }
     w3dEngine::Translatef((GLfloat)-colEtiqueta, GlobalScale, 0);
@@ -237,31 +225,21 @@ void GroupPropertie::RenderPropertiValue(){
     for (size_t i = 0; i < properties.size(); ++i){
         //si es checkbox
         if (properties[i]->GetType() == PropertyType::Bool){
-            w3dEngine::Color4f(ListaColores[static_cast<int>(ColorID::background)][0],
-                        ListaColores[static_cast<int>(ColorID::background)][1],
-                        ListaColores[static_cast<int>(ColorID::background)][2], 1.0f);
+            SetColorID(ColorID::background, 1.0f);
         }
         else if (selectIndex == i){
             if (editando){
-                w3dEngine::Color4f(ListaColores[static_cast<int>(ColorID::accent)][0],
-                            ListaColores[static_cast<int>(ColorID::accent)][1],
-                            ListaColores[static_cast<int>(ColorID::accent)][2], 1.0f);
+                SetColorID(ColorID::accent, 1.0f);
             }
             else {
-                w3dEngine::Color4f(ListaColores[static_cast<int>(ColorID::blanco)][0],
-                            ListaColores[static_cast<int>(ColorID::blanco)][1],
-                            ListaColores[static_cast<int>(ColorID::blanco)][2], 1.0f);
+                SetColorID(ColorID::blanco, 1.0f);
             }
         }
         else if (this == PropHoverGroup && (int)i == PropHoverFila){
-            w3dEngine::Color4f(ListaColores[static_cast<int>(ColorID::blanco)][0],
-                        ListaColores[static_cast<int>(ColorID::blanco)][1],
-                        ListaColores[static_cast<int>(ColorID::blanco)][2], 1.0f);
+            SetColorID(ColorID::blanco, 1.0f);
         }
         else {
-            w3dEngine::Color4f(ListaColores[static_cast<int>(ColorID::grisUI)][0],
-                        ListaColores[static_cast<int>(ColorID::grisUI)][1],
-                        ListaColores[static_cast<int>(ColorID::grisUI)][2], 1.0f);
+            SetColorID(ColorID::grisUI, 1.0f);
         }
         properties[i]->RenderPropertiValue(propertiBox);
     }
@@ -273,20 +251,14 @@ void GroupPropertie::RenderPropertiLabel(){
     w3dEngine::Translatef((GLfloat)(colEtiqueta - gapGS), 0, 0);
     for (size_t i = 0; i < properties.size(); ++i){
         if (selectIndex == i){
-            w3dEngine::Color4f(ListaColores[static_cast<int>(ColorID::accent)][0],
-                        ListaColores[static_cast<int>(ColorID::accent)][1],
-                        ListaColores[static_cast<int>(ColorID::accent)][2], 1.0f);
+            SetColorID(ColorID::accent, 1.0f);
         }
         else if (this == PropHoverGroup && (int)i == PropHoverFila){
             // hover: el texto se resalta en blanco
-            w3dEngine::Color4f(ListaColores[static_cast<int>(ColorID::blanco)][0],
-                        ListaColores[static_cast<int>(ColorID::blanco)][1],
-                        ListaColores[static_cast<int>(ColorID::blanco)][2], 1.0f);
+            SetColorID(ColorID::blanco, 1.0f);
         }
         else {
-            w3dEngine::Color4f(ListaColores[static_cast<int>(ColorID::grisUI)][0],
-                        ListaColores[static_cast<int>(ColorID::grisUI)][1],
-                        ListaColores[static_cast<int>(ColorID::grisUI)][2], 1.0f);
+            SetColorID(ColorID::grisUI, 1.0f);
         }
         properties[i]->RenderPropertiLabel(propertiBox);
     }
@@ -296,23 +268,17 @@ void GroupPropertie::RenderPropertiLabel(){
 void GroupPropertie::Render(){
     if (!visible) return;
 
-    w3dEngine::Color4f(ListaColores[static_cast<int>(ColorID::gris)][0],
-                ListaColores[static_cast<int>(ColorID::gris)][1],
-                ListaColores[static_cast<int>(ColorID::gris)][2], 1.0f);
+    SetColorID(ColorID::gris, 1.0f);
 
     card->RenderObject(false);
 
     w3dEngine::Translatef(borderGS, borderGS, 0);
 
     if (selectIndex == -1){
-        w3dEngine::Color4f(ListaColores[static_cast<int>(ColorID::accent)][0],
-                    ListaColores[static_cast<int>(ColorID::accent)][1],
-                    ListaColores[static_cast<int>(ColorID::accent)][2], 1.0f);
+        SetColorID(ColorID::accent, 1.0f);
     }
     else {
-        w3dEngine::Color4f(ListaColores[static_cast<int>(ColorID::grisUI)][0],
-                    ListaColores[static_cast<int>(ColorID::grisUI)][1],
-                    ListaColores[static_cast<int>(ColorID::grisUI)][2], 1.0f);
+        SetColorID(ColorID::grisUI, 1.0f);
     }
 
     CardTitulo(
@@ -326,9 +292,7 @@ void GroupPropertie::Render(){
     w3dEngine::Translatef(0, RenglonHeightGS + gapGS, 0);
 
     if (open){
-        w3dEngine::Color4f(ListaColores[static_cast<int>(ColorID::background)][0],
-                  ListaColores[static_cast<int>(ColorID::background)][1],
-                  ListaColores[static_cast<int>(ColorID::background)][2], 1.0f);
+        SetColorID(ColorID::background, 1.0f);
 
         w3dEngine::PushMatrix();
         RenderPropertiBox();

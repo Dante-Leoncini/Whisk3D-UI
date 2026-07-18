@@ -2,8 +2,8 @@
 #define PROPFLOAT_H
 
 #include "PropertieBase.h"
-#include "WhiskUI/card.h"
-#include "WhiskUI/TextField.h" // edicion por TEXTO del valor (click / OK -> tipear + enter)
+#include "WhiskUI/widgets/card.h"
+#include "WhiskUI/widgets/TextField.h" // edicion por TEXTO del valor (click / OK -> tipear + enter)
 
 class PropFloat : public PropertieBase {
     public:

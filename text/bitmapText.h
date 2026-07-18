@@ -18,8 +18,8 @@
 #endif
 
 #include "UI.h"
-#include "WhiskUI/UI.h"
-#include "WhiskUI/font.h"
+#include "WhiskUI/core/UI.h"
+#include "WhiskUI/text/font.h"
 
 // dialecto C++03 compartido
 struct textAlign {

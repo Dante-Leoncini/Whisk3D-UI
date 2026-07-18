@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 
-#include "WhiskUI/card.h"
+#include "WhiskUI/widgets/card.h"
 #ifndef W3D_SYMBIAN
 #include "variables.h"
 #endif
@@ -13,7 +13,7 @@
 #include "PropBool.h"
 #include "PropColor.h"
 
-#include "WhiskUI/colores.h"
+#include "WhiskUI/theme/colores.h"
 
 class GroupPropertie {
     public:

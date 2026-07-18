@@ -1,4 +1,4 @@
-#include "WhiskUI/glesdraw.h"
+#include "WhiskUI/draw/glesdraw.h"
 #include "w3dGraphics.h" // la abstraccion del engine (sin OpenGL directo)
 
 // El dibujo 2D de la UI ya NO llama OpenGL directo: va por w3dEngine (gfx::), asi la UI

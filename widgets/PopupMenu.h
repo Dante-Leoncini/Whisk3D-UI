@@ -15,16 +15,36 @@
     #include <GL/gl.h>
 #endif
 
-#include "WhiskUI/UI.h"
-#include "WhiskUI/card.h"
-#include "WhiskUI/icons.h"
-#include "WhiskUI/colores.h"
-#include "WhiskUI/bitmapText.h"
+#include "WhiskUI/core/UI.h"
+#include "WhiskUI/widgets/card.h"
+#include "WhiskUI/draw/icons.h"
+#include "WhiskUI/theme/colores.h"
+#include "WhiskUI/text/bitmapText.h"
 
 class PopupMenu;
 
 // una opcion del menu: icono opcional + gap + texto; puede abrir otro
 // menu desplegable (submenu)
+// ---------------------------------------------------------------------------------------------------------------
+//  MENU DECLARATIVO. Un menu se describe como una TABLA de estos: el texto y la accion del item JUNTOS, en una sola
+//  linea. Se acabo el id magico apuntando a un switch lejano (y el bug de "me olvide de conectarlo": aca no se puede
+//  agregar un item sin su accion). PopupMenu::Construir(tabla) arma el menu; el id de cada item es su fila.
+// ---------------------------------------------------------------------------------------------------------------
+class PopupMenu;
+struct MenuDef {
+    const char* text;       // la CLAVE es el texto. Se traduce con el hook de abajo al construir.
+    void      (*accion)();  // que hace el item. NULL = es submenu (ver 'submenu') o item padre sin accion.
+    const char* atajo;      // hint del atajo ("Shift D"); NULL = sin atajo
+    int         icon;       // 0 = SIN icono. Los reales via ICONO(x) (= IconType+1: deja el 0 libre como "ninguno").
+    PopupMenu** submenu;    // NULL = item comun; si no, apunta al PUNTERO del submenu (que ya tiene que existir)
+    bool*       checkbox;   // NULL = comun; si no, es un checkbox sobre *checkbox
+};
+#define ICONO(x) ((int)(x) + 1)   // para MenuDef.icon; sin ICONO(...) el campo queda 0 = sin icono
+
+// Traduccion opcional de los textos de menu. El toolkit NO conoce el sistema de idiomas del editor: si la app
+// instala este hook (con su T()), las tablas salen traducidas; si queda NULL, el texto va tal cual.
+extern const char* (*W3dMenuTraducir)(const char*);
+
 class MenuItem {
     public:
         std::string text;
@@ -35,6 +55,8 @@ class MenuItem {
                             // bool (un check a la derecha) y NO cierra el menu
         bool* gris;         // NULL = nunca; si no, se ve GRIS (deshabilitada)
                             // cuando *gris es false (ej: depende de "overlays")
+        void (*accion)();   // accion PROPIA del item (estilo declarativo, ver MenuDef). NULL = usa el id + el
+                            // action(id) del menu (camino viejo). El que dispara PREFIERE esta si esta.
         std::string atajo;  // hint del atajo a la derecha, gris tenue ("Shift D",
                             // "Ctrl I", "X"...); "" = sin atajo. Solo visual.
         bool verde;         // true = opcion ACTIVA: icono + texto en VERDE accent
@@ -80,6 +102,11 @@ class PopupMenu {
         // opcion SLIDER: barra a la derecha; click en ella setea *valor (no cierra)
         MenuItem* AgregarFloat(const std::string& text, int id, float* valor,
                                float vmin, float vmax, int icon = -1);
+        // arma el menu desde una TABLA declarativa (id de cada item = su fila). n = cantidad de filas.
+        // Reemplaza a la retahila de ->Agregar(...) + el switch de acciones: la accion vive en la propia fila.
+        void Construir(const MenuDef* defs, int n);
+        // dispara el item 'id': su accion PROPIA si tiene (declarativo), si no el action(id) del menu (viejo).
+        void Ejecutar(int id);
         void Limpiar(); // borra todas las opciones (menus dinamicos)
         void Resize();      // ancho/alto segun el contenido
         void Abrir(int sx, int sy, int pantallaW, int pantallaH);

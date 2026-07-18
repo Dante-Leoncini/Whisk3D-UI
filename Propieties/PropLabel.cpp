@@ -57,9 +57,7 @@ void PropLabel::RenderPropertiLabel(Card* propertiBox) {
     if (oculto) return;
     // texto a lo ancho de toda la fila (el pase de labels esta parado en el borde derecho de la caja:
     // volver al margen izquierdo). Gris tenue, alineado a la izquierda.
-    w3dEngine::Color4f(ListaColores[static_cast<int>(ColorID::grisUI)][0],
-              ListaColores[static_cast<int>(ColorID::grisUI)][1],
-              ListaColores[static_cast<int>(ColorID::grisUI)][2], 1.0f);
+    SetColorID(ColorID::grisUI, 1.0f);
     if (wrap && !lineas.empty()) {
         for (size_t k = 0; k < lineas.size(); k++) {
             w3dEngine::PushMatrix();

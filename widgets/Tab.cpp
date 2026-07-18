@@ -1,6 +1,6 @@
-#include "WhiskUI/Tab.h"
+#include "WhiskUI/widgets/Tab.h"
 #include "w3dGraphics.h"
-#include "WhiskUI/glesdraw.h"
+#include "WhiskUI/draw/glesdraw.h"
 
 Tab::Tab(const std::string& Text, int Icon) {
     // (eran inicializadores de clase: C++03)

@@ -1,8 +1,8 @@
 #include "card.h"
 #include "w3dGraphics.h"
-#include "WhiskUI/glesdraw.h"
-#include "WhiskUI/colores.h"    // ListaColores (colores del checkbox)
-#include "WhiskUI/bitmapText.h" // RenderBitmapText (el tilde)
+#include "WhiskUI/draw/glesdraw.h"
+#include "WhiskUI/theme/colores.h"    // ListaColores (colores del checkbox)
+#include "WhiskUI/text/bitmapText.h" // RenderBitmapText (el tilde)
 
 // UVs e indices
 GLubyte CardIndices[] = {

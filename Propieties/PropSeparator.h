@@ -2,7 +2,7 @@
 #define PROPSEPARATOR_H
 
 #include "PropertieBase.h"
-#include "WhiskUI/card.h"
+#include "WhiskUI/widgets/card.h"
 #include "w3dGraphics.h" // w3dEngine + ListaColores/ColorID
 
 // fila SEPARADORA: una linea horizontal fina (gris) a lo ancho de la tarjeta. No seleccionable.

@@ -1,6 +1,6 @@
 #include "PropertieBase.h"
 #include "w3dGraphics.h"
-#include "WhiskUI/glesdraw.h"
+#include "WhiskUI/draw/glesdraw.h"
 
 void CardTitulo(GLfloat* icon, const std::string& texto, int maxPixels, GLfloat* iconExtra){
     //icono de la coleccion

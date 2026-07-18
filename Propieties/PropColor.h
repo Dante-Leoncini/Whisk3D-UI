@@ -2,7 +2,7 @@
 #define PROPCOLOR_H
 
 #include "PropertieBase.h"
-#include "WhiskUI/card.h"
+#include "WhiskUI/widgets/card.h"
 
 class PropColor : public PropertieBase {
     public:

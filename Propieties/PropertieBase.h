@@ -14,11 +14,11 @@
     #include <GL/gl.h>
 #endif
 
-#include "WhiskUI/UI.h"
-#include "WhiskUI/icons.h"
-#include "WhiskUI/colores.h"
-#include "WhiskUI/card.h"
-#include "WhiskUI/bitmapText.h"
+#include "WhiskUI/core/UI.h"
+#include "WhiskUI/draw/icons.h"
+#include "WhiskUI/theme/colores.h"
+#include "WhiskUI/widgets/card.h"
+#include "WhiskUI/text/bitmapText.h"
 #include "objects/Objects.h"
 
 // dialecto C++03 compartido

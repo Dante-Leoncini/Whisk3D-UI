@@ -111,30 +111,22 @@ void PropListMeshParts::RenderPropertiLabel(Card* propertiBox){
             w3dEngine::PushMatrix();
             w3dEngine::Translatef((GLfloat)(width - gapGS * 3), (GLfloat)ty, 0);
             thumb->Resize(GlobalScale * 3, th);
-            w3dEngine::Color4f(ListaColores[static_cast<int>(ColorID::grisUI)][0],
-                    ListaColores[static_cast<int>(ColorID::grisUI)][1],
-                    ListaColores[static_cast<int>(ColorID::grisUI)][2], 0.6f);
+            SetColorID(ColorID::grisUI, 0.6f);
             thumb->RenderObject(false);
             w3dEngine::PopMatrix();
         }
 
-        w3dEngine::Color4f(ListaColores[static_cast<int>(ColorID::grisUI)][0],
-                ListaColores[static_cast<int>(ColorID::grisUI)][1],
-                ListaColores[static_cast<int>(ColorID::grisUI)][2], 1.0f);
+        SetColorID(ColorID::grisUI, 1.0f);
 
         // solo la VENTANA visible (culling de filas enteras)
         for (int i = scrollFila; i < scrollFila + visibles && i < n; ++i){
             if (selectIndex == i){
-                w3dEngine::Color4f(ListaColores[static_cast<int>(ColorID::accent)][0],
-                        ListaColores[static_cast<int>(ColorID::accent)][1],
-                        ListaColores[static_cast<int>(ColorID::accent)][2], 1.0f);
+                SetColorID(ColorID::accent, 1.0f);
             }
             RenderBitmapText(ListaNombre(i), textAlign::left, width -bordersGS);
 
             if (selectIndex == i){
-                w3dEngine::Color4f(ListaColores[static_cast<int>(ColorID::grisUI)][0],
-                        ListaColores[static_cast<int>(ColorID::grisUI)][1],
-                        ListaColores[static_cast<int>(ColorID::grisUI)][2], 1.0f);
+                SetColorID(ColorID::grisUI, 1.0f);
             }
             w3dEngine::Translatef(0, RenglonHeightGS + gapGS, 0);
         }

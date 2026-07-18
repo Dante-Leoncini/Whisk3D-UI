@@ -2,7 +2,7 @@
 #define PROPBOOL_H
 
 #include "PropertieBase.h"
-#include "WhiskUI/card.h"
+#include "WhiskUI/widgets/card.h"
 
 extern std::string unicodeCheck;
 

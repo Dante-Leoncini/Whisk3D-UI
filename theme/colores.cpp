@@ -1,4 +1,5 @@
 #include "colores.h"
+#include "w3dGraphics.h" // w3dEngine::Color4f (SetColorID)
 
 #include <fstream>
 #include <sstream>
@@ -69,4 +70,9 @@ bool loadColorsW3d(const char* aPath) {
         ListaColoresUbyte[id][3] = (GLubyte)(a * 255.0f);
     }
     return true;
+}
+
+void SetColorID(ColorID id, float a){
+    const float* c = ListaColores[static_cast<int>(id)];
+    w3dEngine::Color4f(c[0], c[1], c[2], a);
 }

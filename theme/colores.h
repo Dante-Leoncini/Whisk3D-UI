@@ -37,6 +37,10 @@ struct ColorID {
 extern GLubyte ListaColoresUbyte[ColorID::Count][4];
 extern float ListaColores[ColorID::Count][4];
 
+// Setea el color de dibujo a un ColorID de la paleta (alpha opcional). Colapsa el patron repetido
+// w3dEngine::Color4f(ListaColores[ColorID::X][0..2], a) que estaba copiado en decenas de lugares.
+void SetColorID(ColorID id, float a = 1.0f);
+
 // Carga la paleta de la UI desde un skin.ini ("nombre r g b a" por linea; ignora
 // los nombres que no reconoce). Devuelve false si no pudo abrir el archivo.
 bool loadColorsW3d(const char* aPath);

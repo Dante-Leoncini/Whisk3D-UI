@@ -2,7 +2,7 @@
 #define PROPSELECTTEXT_H
 
 #include "PropertieBase.h"
-#include "WhiskUI/card.h"
+#include "WhiskUI/widgets/card.h"
 
 class PropSelectText : public PropertieBase {
     public:

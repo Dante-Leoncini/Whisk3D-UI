@@ -1,6 +1,6 @@
-#include "WhiskUI/Button.h"
+#include "WhiskUI/widgets/Button.h"
 #include "w3dGraphics.h"
-#include "WhiskUI/glesdraw.h"
+#include "WhiskUI/draw/glesdraw.h"
 
 Button::Button(const std::string& Text, int Icon, bool Adaptar){
     // (eran inicializadores de clase: C++03)

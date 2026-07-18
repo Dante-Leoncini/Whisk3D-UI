@@ -17,8 +17,8 @@
 #endif
 #endif
 
-#include "WhiskUI/object2D.h"
-#include "WhiskUI/UI.h"
+#include "WhiskUI/draw/object2D.h"
+#include "WhiskUI/core/UI.h"
 #include "font.h"
 
 // Variables UV/indices

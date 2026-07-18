@@ -2,8 +2,8 @@
 #define PROPTEXT_H
 
 #include "PropertieBase.h"
-#include "WhiskUI/TextField.h"   // TextField + g_textFieldActivo (caja editable compartida)
-#include "WhiskUI/bitmapText.h"
+#include "WhiskUI/widgets/TextField.h"   // TextField + g_textFieldActivo (caja editable compartida)
+#include "WhiskUI/text/bitmapText.h"
 #include "w3dGraphics.h"         // w3dEngine (Color4fv) + ListaColores/ColorID (resaltado select-all)
 
 // fila de TEXTO EDITABLE (nombre del export, output del render, paths...). Al hacer

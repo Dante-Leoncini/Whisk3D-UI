@@ -14,12 +14,12 @@
     #include <GL/gl.h>
 #endif
 
-#include "WhiskUI/UI.h"
-#include "WhiskUI/card.h"
-#include "WhiskUI/rectangle.h"
-#include "WhiskUI/icons.h"
-#include "WhiskUI/colores.h"
-#include "WhiskUI/bitmapText.h"
+#include "WhiskUI/core/UI.h"
+#include "WhiskUI/widgets/card.h"
+#include "WhiskUI/draw/rectangle.h"
+#include "WhiskUI/draw/icons.h"
+#include "WhiskUI/theme/colores.h"
+#include "WhiskUI/text/bitmapText.h"
 
 // Pestania compartida (4 OS): como un boton pero SIN el borde inferior,
 // asi se funde con el contenido de abajo. Puede tener texto o icono.
