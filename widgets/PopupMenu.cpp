@@ -449,11 +449,15 @@ int PopupMenu::Click(int mx, int my){
         // solo dejarlo abierto. El proximo toque ya si elige un item (tactil = 2 toques para submenus).
         if (g_submenuAcabaDeAbrir){ g_submenuAcabaDeAbrir = false; return -1; }
         int id = submenuAbierto->Click(mx, my);
-        // si el submenu selecciono algo terminal (se cerro solo), cerramos
-        // tambien ESTE menu para que no quede el primero abierto
+        // si el submenu selecciono algo terminal (se cerro solo), lo ejecuto EN el submenu (dueno del id) y
+        // cierro tambien ESTE menu. NO subo el id: colisiona por posicion con un item del padre (era el bug
+        // de "importar GLB -> Circle"). Ver la nota en Enter().
         if (id >= 0 && !submenuAbierto->abierto){
+            PopupMenu* sub = submenuAbierto;
             submenuAbierto = NULL;
             Cerrar();
+            sub->Ejecutar(id);
+            return -1; // ya ejecutado
         }
         return id;
     }
@@ -482,8 +486,15 @@ int PopupMenu::Enter(){
     if (submenuAbierto && submenuAbierto->abierto){
         int id = submenuAbierto->Enter();
         if (id >= 0 && !submenuAbierto->abierto){
+            // el id pertenece al SUBMENU (es el dueno del item elegido). Hay que ejecutarlo EN el submenu,
+            // NO devolverlo al padre: los ids son por-posicion y colisionan (GLB=3 del submenu Imports caia
+            // en Circle=3 del menu Add -> "importar GLB" creaba un circulo). Cierro primero (como el camino
+            // de un item de nivel tope) y despues ejecuto, por si la accion abre otro popup (file browser).
+            PopupMenu* sub = submenuAbierto;
             submenuAbierto = NULL;
             Cerrar();
+            sub->Ejecutar(id);
+            return -1; // ya ejecutado: el llamador (if id>=0 Ejecutar) no re-despacha
         }
         return id;
     }
