@@ -5,9 +5,6 @@
 #include <string>
 
 #include "WhiskUI/widgets/card.h"
-#ifndef W3D_SYMBIAN
-#include "variables.h"
-#endif
 #include "PropertieBase.h"
 #include "PropList.h"
 #include "PropBool.h"
