@@ -17,6 +17,7 @@
 // ============================================================================
 
 #include "w3dGraphics.h"
+#include "w3dTexture.h"   // UploadRGBA (antes dependia del orden de includes del caller)
 #include "stb/stb_image.h"
 #include <map>
 #include <string.h>
