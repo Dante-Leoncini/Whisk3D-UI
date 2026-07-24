@@ -31,4 +31,12 @@ struct W3dGlyphUV {
 // Si no existe, devuelve el fallback '?' (y false).
 bool W3dFontGetGlyph(unsigned short aCode, W3dGlyphUV& aOut);
 
+// tamano REAL de la textura donde vive la fuente (el atlas dinamico es mas grande
+// que los 128 clasicos; font.png queda en su (0,0) asi que las coords no cambian)
+void W3dFontSetTexSize(int w, int h);
+
+// posicion EN PIXELES del glifo dentro de font.png (para el que arma su propio
+// atlas desde el archivo y no depende del tamano de la textura del editor)
+bool W3dFontGetGlyphPx(unsigned short aCode, int* aX, int* aY);
+
 #endif // W3D_FONT_H

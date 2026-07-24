@@ -14,6 +14,9 @@ class PropColor : public PropertieBase {
         void SetGlColor();
 
         PropertyType GetType() override;
+        // fila de PALETA del editor 2D: el indice de la entrada (-1 = fila normal).
+        // El click handler lo usa para la crucecita de borrar.
+        virtual int PaletaIdx() const { return -1; }
 
         void button_up() override;
         void button_down() override;

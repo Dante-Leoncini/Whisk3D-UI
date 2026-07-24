@@ -103,6 +103,13 @@ void GroupPropertie::Resize(int Width, int Height){
     height = RenglonHeightGS + gapGS + borderGS;
     int widthProperties = width - bordersGS;
 
+    // la columna de valores mide anchoValores; el resto es etiqueta. Se calcula ANTES de
+    // resizear las hijas (y se publica en PropColEtiqueta) para que las filas que ocupan
+    // solo la columna de valores (los desplegables) le acierten al MISMO ancho que el box.
+    int anchoBox = (int)(widthProperties * anchoValores);
+    colEtiqueta = widthProperties - anchoBox;
+    PropColEtiqueta = colEtiqueta;
+
     if (open){
         for (size_t i = 0; i < properties.size(); ++i){
             height += properties[i]->Resize(width);
@@ -112,9 +119,6 @@ void GroupPropertie::Resize(int Width, int Height){
     int heightProperties = height - bordersGS;
     maxPixelsTitle = widthProperties - IconSizeGS - gapGS;
 
-    // la columna de valores mide anchoValores; el resto es etiqueta
-    int anchoBox = (int)(widthProperties * anchoValores);
-    colEtiqueta = widthProperties - anchoBox;
     propertiBox->Resize(anchoBox, RenglonHeightGS+GlobalScale*2);
     checkBox->Resize(RenglonHeightGS+GlobalScale*2, RenglonHeightGS+GlobalScale*2);
 }

@@ -35,8 +35,10 @@ struct W3dAtlasGlyph {
 struct W3dTextAtlas {
     unsigned tex; int atlasW, atlasH, fontPx, lineH, ascent;
     int mezcla;   // modo de mezcla (default: premultiplicado -> texto de cualquier color + sombras)
+    bool pixelPerfect; // fuente PIXEL (NEAREST): dibujar SOLO a multiplos enteros y pen entero
     std::map<unsigned, W3dAtlasGlyph> glyphs;
-    W3dTextAtlas() : tex(0), atlasW(0), atlasH(0), fontPx(1), lineH(0), ascent(0), mezcla(gfx::MezclaPremult) {}
+    W3dTextAtlas() : tex(0), atlasW(0), atlasH(0), fontPx(1), lineH(0), ascent(0),
+                     mezcla(gfx::MezclaPremult), pixelPerfect(false) {}
 
     // lectura little-endian de un buffer
     static unsigned rdU16(const unsigned char* p){ return (unsigned)p[0] | ((unsigned)p[1]<<8); }

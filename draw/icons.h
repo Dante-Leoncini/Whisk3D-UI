@@ -95,6 +95,12 @@ class IconUV {
 // ===================================================
 extern std::vector<IconUV*> IconsUV;
 
+// nombre estable de cada icono (el archivo atlas/iconos/<nombre>.png del skin)
+const char* IconoNombre(int i);
+// arma IconsUV desde una lista de rects EXTERNA (el atlas dinamico); un rect con
+// x = -1 usa el arte legacy de font.png (que vive en el (0,0) del atlas nuevo)
+void CrearIconosDesde(const IconRect* lista, int texW, int texH);
+
 // ===================================================
 // Funciones
 // ===================================================

@@ -18,8 +18,24 @@ void SetIconScale(int scale){
     IconLineMesh[2] = IconLineMesh[5] = IconLineMesh[6] = IconLineMesh[7] = (GLshort)(RenglonHeight * scale);
 }
 
-void CrearIconos(int texW, int texH){
-    IconRect lista[ICON_TOTAL] = {
+// el nombre de cada icono, EN EL ORDEN del enum (para los pngs individuales del skin)
+static const char* KNombres[ICON_TOTAL] = {
+    "camera", "light", "mesh", "visible", "hidden", "archive", "line", "arrow",
+    "arrowRight", "mirror", "array", "gamepad", "instance", "constraint", "curve",
+    "textura", "empty", "lista", "cuadricula", "carpeta", "foto", "object",
+    "material", "plane", "circle", "cono", "normalVertex", "normalCustom",
+    "normalFace", "cilindro", "selVertex", "selEdge", "selFace", "pivotMedian",
+    "pivotIndividual", "pivotActive", "pivotCursor", "notifError", "notifOk",
+    "modificador", "armature", "keyframe", "monitor", "snap"
+};
+const char* IconoNombre(int i) {
+    return (i >= 0 && i < (int)ICON_TOTAL) ? KNombres[i] : "";
+}
+
+// la tabla LEGACY: donde vive cada icono ADENTRO de font.png (sigue siendo el
+// fallback de los iconos sin png individual, y el camino entero sin atlas/)
+static const IconRect* TablaLegacy() {
+    static IconRect lista[ICON_TOTAL] = {
         {  1, 117, 10, 10 }, // camera
         { 13, 117, 10, 10 }, // light
         { 24, 117, 10, 10 }, // mesh
@@ -65,17 +81,25 @@ void CrearIconos(int texW, int texH){
         {  84, 45, 10, 10 }, // monitor (pantalla): el menu "View" - arte que paso Dante
         {  84, 20, 10, 10 }  // snap (iman) - arte que paso Dante
     };
+    return lista;
+}
+
+void CrearIconosDesde(const IconRect* lista, int texW, int texH){
+    const IconRect* legacy = TablaLegacy();
 
     // limpia por si se llama más de una vez
     IconsUV.clear();
 
     for (size_t i = 0; i < ICON_TOTAL; ++i) {
         IconUV* NewIcon = new IconUV();
+        // x = -1: el icono no tiene png individual -> su arte de siempre en font.png
+        // (que el atlas dinamico deja ENTERO en el (0,0), asi el rect legacy vale igual)
+        const IconRect& r = (lista[i].x >= 0) ? lista[i] : legacy[i];
 
-        GLfloat u1 = (GLfloat)lista[i].x / texW;
-        GLfloat u2 = (GLfloat)(lista[i].x + lista[i].w) / texW;
-        GLfloat v1 = (GLfloat)lista[i].y / texH;
-        GLfloat v2 = (GLfloat)(lista[i].y + lista[i].h) / texH;
+        GLfloat u1 = (GLfloat)r.x / texW;
+        GLfloat u2 = (GLfloat)(r.x + r.w) / texW;
+        GLfloat v1 = (GLfloat)r.y / texH;
+        GLfloat v2 = (GLfloat)(r.y + r.h) / texH;
 
         NewIcon->uvs[0] = u1; NewIcon->uvs[1] = v1; // top-left
         NewIcon->uvs[2] = u2; NewIcon->uvs[3] = v1; // top-right
@@ -92,4 +116,8 @@ void CrearIconos(int texW, int texH){
 
         IconsUV.push_back(NewIcon);
     }
+}
+
+void CrearIconos(int texW, int texH){
+    CrearIconosDesde(TablaLegacy(), texW, texH);
 }

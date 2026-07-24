@@ -9,6 +9,7 @@ Button::Button(const std::string& Text, int Icon, bool Adaptar){
     adaptar = Adaptar;
     desplegable = false;
     caretMenu = false;
+    altoRenglon = false;
     centrado = false;
     cuadrado = false;
     visible = true;
@@ -44,7 +45,9 @@ void Button::Resize(int maxW){
     if (width < RenglonHeightGS) width = RenglonHeightGS;
     // mas alto que un renglon: el icono queda centrado con aire arriba y
     // abajo. La altura depende del modo (tactil: mas alto; compacto: 2px menos)
-    height = UIBotonAltura();
+    // altoRenglon: EXACTAMENTE el alto del box de los inputs de propiedades
+    // (RenglonHeightGS + GlobalScale*2, ver GroupPropertie::Resize) -> todo parejo
+    height = altoRenglon ? RenglonHeightGS + GlobalScale * 2 : UIBotonAltura();
     if (cuadrado) width = height; // botones de icono cuadrados (transporte del timeline)
     card->Resize(width, height);
 }
@@ -89,7 +92,7 @@ void Button::Render(){
     }
     w3dEngine::Translatef((GLfloat)x0, 0, 0);
     int disponible = width - x0 - gapGS;
-    // caret opcional: reservar lugar a la derecha para la flecha abajo (afordancia de menu)
+    // caret opcional: reservar el lugar de la flechita de la derecha
     if (caretMenu && !editField) disponible -= IconSizeGS + gapGS;
     const float* tc = colorTexto ? colorTexto
         : (focoMenu ? ListaColores[static_cast<int>(ColorID::accent)]

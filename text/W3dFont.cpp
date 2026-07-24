@@ -49,12 +49,24 @@ static const TGlyphEntry KGlyphs[] = {
 
 static const int KGlyphCount = (int)(sizeof(KGlyphs) / sizeof(KGlyphs[0]));
 
+// el atlas dinamico puede ser mas grande que los 128 clasicos (font.png en el 0,0)
+static int gTexW = W3dFont_TexSize;
+static int gTexH = W3dFont_TexSize;
+void W3dFontSetTexSize(int w, int h) { gTexW = w; gTexH = h; }
+
 static void MakeUV(int aX, int aY, W3dGlyphUV& aOut) {
-    const float kTex = (float)W3dFont_TexSize;
-    aOut.u0 = (float)aX / kTex;
-    aOut.v0 = (float)aY / kTex;
-    aOut.u1 = (float)(aX + W3dFont_GlyphW) / kTex;
-    aOut.v1 = (float)(aY + W3dFont_GlyphH) / kTex;
+    aOut.u0 = (float)aX / gTexW;
+    aOut.v0 = (float)aY / gTexH;
+    aOut.u1 = (float)(aX + W3dFont_GlyphW) / gTexW;
+    aOut.v1 = (float)(aY + W3dFont_GlyphH) / gTexH;
+}
+
+bool W3dFontGetGlyphPx(unsigned short aCode, int* aX, int* aY) {
+    for (int i = 0; i < KGlyphCount; i++) {
+        if (KGlyphs[i].code == aCode) { *aX = KGlyphs[i].x; *aY = KGlyphs[i].y; return true; }
+    }
+    *aX = 7; *aY = 63;   // fallback: '?'
+    return false;
 }
 
 bool W3dFontGetGlyph(unsigned short aCode, W3dGlyphUV& aOut) {

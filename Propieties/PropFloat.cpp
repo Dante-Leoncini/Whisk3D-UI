@@ -117,7 +117,7 @@ void PropFloat::RenderPropertiValue(Card* propertiBox){
         }
         if (entero){
             int r = (int)(*value + 0.5f); // vertices: siempre >= 3 (positivo)
-            std::ostringstream ss; ss << r;
+            std::ostringstream ss; ss << r << unit;   // la unidad tambien en enteros ("px")
             RenderBitmapText(ss.str(), al, boxW);
         } else {
             RenderBitmapFloat(*value, al, boxW, unit);

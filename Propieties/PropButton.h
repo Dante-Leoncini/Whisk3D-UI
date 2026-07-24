@@ -8,6 +8,8 @@
 class PropButton : public PropertieBase {
     public:
         Button* button;
+        bool conLabel; // true: el NOMBRE a la izquierda (columna de etiquetas) y el boton SOLO
+                       // en la columna de valores (para los desplegables). false: boton a lo ancho.
         bool oculto; // true: no ocupa fila (material por defecto)
         bool gris;   // true: se dibuja atenuado y NO ejecuta su accion (ej: Render Animation sin animaciones)
         void (*action)(); // que hace el boton al activarse (o NULL)
@@ -17,6 +19,7 @@ class PropButton : public PropertieBase {
 
         PropertyType GetType();
         int Resize(int w);
+        int Avance() const; // paso de fila (con label: la grilla de renglones, como los inputs)
         bool EditPropertie(); // la accion del boton (por ahora: nada)
         bool Seleccionable() { return !oculto; }
 
