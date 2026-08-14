@@ -1,5 +1,6 @@
 #ifndef PROPFLOAT_H
 #define PROPFLOAT_H
+#include "crossplatform.h" // W3D_OVERRIDE (C++03/RVCT)
 
 #include "PropertieBase.h"
 #include "WhiskUI/widgets/card.h"
@@ -41,27 +42,27 @@ class PropFloat : public PropertieBase {
         // a la izquierda del label. Valores = AnimPosition/Rotation/Scale/Visible/Render
         // (Core), animComp = AnimX/Y/Z. -1 = no animable (sin rombo).
         int animProp, animComp;
-        int AnimProp() override { return animProp; }
-        int AnimComp() override { return animComp; }
+        int AnimProp() W3D_OVERRIDE { return animProp; }
+        int AnimComp() W3D_OVERRIDE { return animComp; }
         void Set(float v);          // asigna *value (con clamp), dispara onChange
         void SetRango(float mn, float mx);
         float baseStep();           // valor base para las flechas (redondea si entero)
 
-        PropertyType GetType() override;
+        PropertyType GetType() W3D_OVERRIDE;
 
-        void button_up() override;
-        void button_down() override;
-        void button_left() override;
-        void button_right() override;
-        bool Cancel() override;
+        void button_up() W3D_OVERRIDE;
+        void button_down() W3D_OVERRIDE;
+        void button_left() W3D_OVERRIDE;
+        void button_right() W3D_OVERRIDE;
+        bool Cancel() W3D_OVERRIDE;
 
-        bool EditPropertie() override;
+        bool EditPropertie() W3D_OVERRIDE;
 
-        void RenderPropertiBox(Card* propertiBox) override;
-        void RenderPropertiBoxBorder(Card* propertiBox) override;
-        void RenderPropertiValue(Card* propertiBox) override;
-        void RenderPropertiLabel(Card* propertiBox) override;
-        int Resize(int w) override;
+        void RenderPropertiBox(Card* propertiBox) W3D_OVERRIDE;
+        void RenderPropertiBoxBorder(Card* propertiBox) W3D_OVERRIDE;
+        void RenderPropertiValue(Card* propertiBox) W3D_OVERRIDE;
+        void RenderPropertiLabel(Card* propertiBox) W3D_OVERRIDE;
+        int Resize(int w) W3D_OVERRIDE;
 };
 
 // edicion numerica por TEXTO (analogo al rename): mientras esta activa el input llega por g_textFieldActivo

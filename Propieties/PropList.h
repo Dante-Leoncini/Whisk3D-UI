@@ -1,5 +1,6 @@
 #ifndef PROPLIST_H
 #define PROPLIST_H
+#include "crossplatform.h" // W3D_OVERRIDE (C++03/RVCT)
 
 #include "PropertieBase.h"
 #include "WhiskUI/widgets/card.h"
@@ -15,10 +16,10 @@ class PropList : public PropertieBase {
 
         PropList(const std::string& Name);
 
-        bool EditPropertie() override;
-        bool Cancel() override;
+        bool EditPropertie() W3D_OVERRIDE;
+        bool Cancel() W3D_OVERRIDE;
 
-        PropertyType GetType() override;
+        PropertyType GetType() W3D_OVERRIDE;
 };
 
 class PropListMeshParts : public PropList {
@@ -41,16 +42,16 @@ class PropListMeshParts : public PropList {
         std::string ListaNombre(int i) const; // nombre del item i
         void        ListaSeleccionar(int i);  // setea el ACTIVO (selectIndex + activo de la malla) + re-bake
 
-        void button_up() override;
-        void button_down() override;
-        void button_left() override;
-        void button_right() override;
+        void button_up() W3D_OVERRIDE;
+        void button_down() W3D_OVERRIDE;
+        void button_left() W3D_OVERRIDE;
+        void button_right() W3D_OVERRIDE;
 
-        void RenderPropertiBox(Card* propertiBox) override;
-        void RenderPropertiBoxBorder(Card* propertiBox) override;
-        void RenderPropertiValue(Card* propertiBox) override;
-        void RenderPropertiLabel(Card* propertiBox) override;
-        int Resize(int width) override;
+        void RenderPropertiBox(Card* propertiBox) W3D_OVERRIDE;
+        void RenderPropertiBoxBorder(Card* propertiBox) W3D_OVERRIDE;
+        void RenderPropertiValue(Card* propertiBox) W3D_OVERRIDE;
+        void RenderPropertiLabel(Card* propertiBox) W3D_OVERRIDE;
+        int Resize(int width) W3D_OVERRIDE;
 };
 
 #endif

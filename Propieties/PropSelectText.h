@@ -1,5 +1,6 @@
 #ifndef PROPSELECTTEXT_H
 #define PROPSELECTTEXT_H
+#include "crossplatform.h" // W3D_OVERRIDE (C++03/RVCT)
 
 #include "PropertieBase.h"
 #include "WhiskUI/widgets/card.h"
@@ -8,21 +9,21 @@ class PropSelectText : public PropertieBase {
     public:
         PropSelectText(const std::string& Name);
 
-        PropertyType GetType() override;
+        PropertyType GetType() W3D_OVERRIDE;
 
-        void button_up() override;
-        void button_down() override;
-        void button_left() override;
-        void button_right() override;
-        bool Cancel() override;
+        void button_up() W3D_OVERRIDE;
+        void button_down() W3D_OVERRIDE;
+        void button_left() W3D_OVERRIDE;
+        void button_right() W3D_OVERRIDE;
+        bool Cancel() W3D_OVERRIDE;
 
-        bool EditPropertie() override;
+        bool EditPropertie() W3D_OVERRIDE;
 
-        void RenderPropertiBox(Card* propertiBox) override;
-        void RenderPropertiBoxBorder(Card* propertiBox) override;
-        void RenderPropertiValue(Card* propertiBox) override;
-        void RenderPropertiLabel(Card* propertiBox) override;
-        int Resize(int w) override;
+        void RenderPropertiBox(Card* propertiBox) W3D_OVERRIDE;
+        void RenderPropertiBoxBorder(Card* propertiBox) W3D_OVERRIDE;
+        void RenderPropertiValue(Card* propertiBox) W3D_OVERRIDE;
+        void RenderPropertiLabel(Card* propertiBox) W3D_OVERRIDE;
+        int Resize(int w) W3D_OVERRIDE;
 };
 
 #endif

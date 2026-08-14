@@ -1,5 +1,6 @@
 #ifndef CARD_H
 #define CARD_H
+#include "crossplatform.h" // W3D_OVERRIDE (C++03/RVCT)
 
 #ifdef _WIN32
 #ifndef W3D_SYMBIAN
@@ -57,7 +58,7 @@ class Card : public Object2D {
 		// Métodos
 		void Resize(int w, int h);
 		void SetColor(GLubyte red, GLubyte green, GLubyte blue);
-		void RenderObject(bool usarColorPropio = true) override;
+		void RenderObject(bool usarColorPropio = true) W3D_OVERRIDE;
         void RenderBorder(bool usarColorPropio);
         // como los de arriba pero con el BORDE INFERIOR recto/cuadrado (pestanias)
         void RenderObjectTab();

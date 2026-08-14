@@ -1,5 +1,6 @@
 #ifndef REC2D_H
 #define REC2D_H
+#include "crossplatform.h" // W3D_OVERRIDE (C++03/RVCT)
 
 #ifdef _WIN32
 #ifndef W3D_SYMBIAN
@@ -28,7 +29,7 @@ class Rec2D : public Object2D {
 		// Métodos
 		void SetSize(GLshort x, GLshort y, GLshort w, GLshort h);
 		void SetColor(GLubyte red, GLubyte green, GLubyte blue);
-		void RenderObject(bool usarColorPropio = true) override;
+		void RenderObject(bool usarColorPropio = true) W3D_OVERRIDE;
 };
 
 #endif
