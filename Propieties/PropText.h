@@ -13,10 +13,11 @@ class PropText : public PropertieBase {
     public:
         TextField field;
         bool oculto;        // true = no ocupa fila (lo usa el campo de rename: visible solo al renombrar)
+        bool error;         // validacion: true = marcar el campo en ROJO (falta completarlo). Se autolimpia al escribir.
         void (*onClick)();  // NULL = campo editable normal; si no, al clickear se llama esto (ej: Path -> Browse) y NO se edita
 
         PropText(const std::string& Name, const std::string& valor = "")
-            : PropertieBase(Name) { field.SetText(valor); oculto = false; onClick = 0; }
+            : PropertieBase(Name) { field.SetText(valor); oculto = false; error = false; onClick = 0; }
 
         PropertyType GetType() { return PropertyType::Text; }
         int Resize(int w) { if (oculto) return 0; width = w; return RenglonHeightGS + gapGS; }
@@ -31,8 +32,18 @@ class PropText : public PropertieBase {
         }
         void RenderPropertiBoxBorder(Card* propertiBox) {
             if (oculto) return;
+            if (error && field.text.find_first_not_of(" \t") != std::string::npos) error = false; // se completo -> limpiar el rojo
             w3dEngine::Translatef(0, -RenglonHeightGS - gapGS, 0);
-            propertiBox->RenderBorder(false);
+            if (error) {
+                // VALIDACION: campo por completar -> BORDE en ROJO. Se pinta con el color PROPIO de la
+                // card (RenderBorder(true)), seteado a rojo temporalmente y restaurado (sin tocar el relleno).
+                GLubyte r = propertiBox->color[0], g = propertiBox->color[1], b = propertiBox->color[2];
+                propertiBox->color[0] = 240; propertiBox->color[1] = 90; propertiBox->color[2] = 90;
+                propertiBox->RenderBorder(true);
+                propertiBox->color[0] = r; propertiBox->color[1] = g; propertiBox->color[2] = b;
+            } else {
+                propertiBox->RenderBorder(false);
+            }
             w3dEngine::Translatef(0, RenglonHeightGS + gapGS, 0);
         }
         void RenderPropertiValue(Card* propertiBox) {
