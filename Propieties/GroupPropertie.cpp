@@ -232,8 +232,8 @@ void GroupPropertie::RenderPropertiBox(){
             SetColorID(ColorID::background, 1.0f);
         }
 
-        //dibujado del borde
-        if (selectIndex == i){
+        //dibujado del borde (NO en el valor si el foco esta en el KEYFRAME de esta fila: estamos en el rombo)
+        if (selectIndex == i && g_kfFocoProp != (void*)properties[i]){
             if (editando || properties[i]->editando){
                 SetColorID(ColorID::accent, 1.0f);
             }
@@ -255,7 +255,8 @@ void GroupPropertie::RenderPropertiValue(){
         if (properties[i]->GetType() == PropertyType::Bool){
             SetColorID(ColorID::background, 1.0f);
         }
-        else if (selectIndex == i){
+        else if (selectIndex == i && g_kfFocoProp != (void*)properties[i]){
+            // con el foco en el KEYFRAME de esta fila NO se blanquea el numero (estamos en el rombo, no editando)
             if (editando){
                 SetColorID(ColorID::accent, 1.0f);
             }

@@ -78,7 +78,7 @@ static const IconRect* TablaLegacy() {
         { 106, 12, 10, 10 }, // notifOk (check, se pinta verde)
         {  95,  1, 10, 10 }, // modificador (pestania Modificadores)
         {  73, 69, 10, 10 }, // armature (esqueleto)
-        {  94, 10, 10, 10 }, // keyframe (rombo)
+        {  95, 12, 10, 10 }, // keyframe (rombo): pos real del diamante en font.png (antes {94,10} lo recortaba)
         {  84, 45, 10, 10 }, // monitor (pantalla): el menu "View"
         {  84, 20, 10, 10 }, // snap (iman)
         {  60, 117, 10, 10 }, // guardar (fallback: el archivador legacy si falta el png)
