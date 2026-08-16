@@ -22,8 +22,10 @@ class PropText : public PropertieBase {
         PropertyType GetType() { return PropertyType::Text; }
         int Resize(int w) { if (oculto) return 0; width = w; return RenglonHeightGS + gapGS; }
 
-        // click: enfoca el campo (lo des-enfoca quien corresponda)
-        bool EditPropertie() { g_textFieldActivo = &field; editando = false; return false; }
+        // OK/click sobre la fila: si tiene onClick (ej: campo Carpeta -> Browse) lo dispara y NO edita; sino
+        // enfoca el campo para tipear (lo des-enfoca quien corresponda). Asi en Symbian OK abre el explorador de
+        // archivos en vez de forzarte a escribir el path a mano.
+        bool EditPropertie() { if (onClick) { onClick(); return false; } g_textFieldActivo = &field; editando = false; return false; }
 
         void RenderPropertiBox(Card* propertiBox) {
             if (oculto) return;
