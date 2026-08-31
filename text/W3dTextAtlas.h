@@ -119,7 +119,10 @@ struct W3dTextAtlas {
             float V[18]  = { x0,y0,0, x1,y0,0, x1,y1,0,  x0,y0,0, x1,y1,0, x0,y1,0 };
             float UV[12] = { gl->u0,gl->v0, gl->u1,gl->v0, gl->u1,gl->v1,  gl->u0,gl->v0, gl->u1,gl->v1, gl->u0,gl->v1 };
             gfx::VertexPointer3f(0, V); gfx::TexCoordPointer2f(0, UV);
-            gfx::Color4f(r*a, g*a, b*a, a);   // PREMULTIPLICADO (blend ONE, ONE_MINUS_SRC_ALPHA)
+            // con mezcla PREMULT el color va premultiplicado (blend ONE, 1-A);
+            // con el ATLAS UNICO compartido (RGBA recto, MezclaAlpha) va tal cual
+            if (mezcla == gfx::MezclaPremult) gfx::Color4f(r*a, g*a, b*a, a);
+            else                              gfx::Color4f(r, g, b, a);
             gfx::DrawTrianglesArray(6);
         }
         return gl->advance * sc;
