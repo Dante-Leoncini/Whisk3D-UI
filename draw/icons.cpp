@@ -27,10 +27,22 @@ static const char* KNombres[ICON_TOTAL] = {
     "normalFace", "cilindro", "selVertex", "selEdge", "selFace", "pivotMedian",
     "pivotIndividual", "pivotActive", "pivotCursor", "notifError", "notifOk",
     "modificador", "armature", "keyframe", "monitor", "snap", "guardar", "camera_off",
-    "borrar", "mas", "seleccion"
+    "borrar", "mas", "seleccion",
+    "falloff_custom", "falloff_smoother", "falloff_sphere", "falloff_root",
+    "falloff_sharp", "falloff_linear", "falloff_constant"
 };
 const char* IconoNombre(int i) {
     return (i >= 0 && i < (int)ICON_TOTAL) ? KNombres[i] : "";
+}
+
+int IconoIndice(const char* nombre) {
+    if (!nombre || !*nombre) return -1;
+    for (int i = 0; i < (int)ICON_TOTAL; i++) {
+        const char* a = KNombres[i]; const char* b = nombre;
+        while (*a && *a == *b) { a++; b++; }
+        if (!*a && !*b) return i;
+    }
+    return -1;
 }
 
 // la tabla LEGACY: donde vive cada icono ADENTRO de font.png (sigue siendo el
@@ -85,7 +97,16 @@ static const IconRect* TablaLegacy() {
         {   1, 117, 10, 10 }, // camera_off (fallback: la camara legacy si falta el png)
         { 106, 23, 10, 10 }, // borrar (fallback: la cruz de notifError si falta el png)
         {  49, 81, 10, 10 }, // mas (fallback: el cubo/object si falta el png)
-        { 109, 57, 10, 10 }  // seleccion (fallback: selVertex si falta el png)
+        { 109, 57, 10, 10 }, // seleccion (fallback: selVertex si falta el png)
+        // los falloff son arte NUEVO (no existen en font.png): sin su png caen todos a la
+        // rayita legacy, que al menos se lee como "una curva" y no como un icono equivocado.
+        {  72, 117, 10, 10 }, // falloff_custom
+        {  72, 117, 10, 10 }, // falloff_smoother
+        {  72, 117, 10, 10 }, // falloff_sphere
+        {  72, 117, 10, 10 }, // falloff_root
+        {  72, 117, 10, 10 }, // falloff_sharp
+        {  72, 117, 10, 10 }, // falloff_linear
+        {  72, 117, 10, 10 }  // falloff_constant
     };
     return lista;
 }

@@ -23,7 +23,7 @@ extern GLshort IconLineMesh[8];
 extern int IconSize;
 extern int IconSizeGS;
 
-const size_t ICON_TOTAL = 49; // (constexpr es C++11)
+const size_t ICON_TOTAL = 56; // (constexpr es C++11)
 
 // dialecto C++03 compartido
 struct IconType {
@@ -76,7 +76,18 @@ struct IconType {
     camera_off,      // camara TACHADA: el objeto no se renderiza (outliner)
     borrar,          // tacho: item "Borrar" del menu Animacion (Delete Keyframe)
     mas,             // signo +: menu "Add"/Anadir de la barra del viewport
-    seleccion        // cursor/marco: boton "Seleccionar" de la barra (reemplaza el texto largo)
+    seleccion,       // cursor/marco: boton "Seleccionar" de la barra (reemplaza el texto largo)
+    // FALLOFF: la curva de caida de una herramienta con radio (menu Falloff del pincel). Cada
+    // uno DIBUJA su curva, asi se eligen de un vistazo sin leer. Van en el orden del enum
+    // W3dFalloffTipo salvo los que todavia no tienen arte (smooth, sharper, inverse square),
+    // que caen a texto hasta que llegue el png.
+    falloff_custom,
+    falloff_smoother,
+    falloff_sphere,
+    falloff_root,
+    falloff_sharp,
+    falloff_linear,
+    falloff_constant
     };
     Enum v;
     IconType(Enum e) : v(e) {}
@@ -102,6 +113,9 @@ extern std::vector<IconUV*> IconsUV;
 
 // nombre estable de cada icono (el archivo atlas/iconos/<nombre>.png del skin)
 const char* IconoNombre(int i);
+// el INVERSO: indice del icono que se llama asi, -1 si no existe. Lo usa el codigo que elige
+// el icono por NOMBRE en vez de por enum (ej: el falloff, que ya nombra su arte en su tabla).
+int IconoIndice(const char* nombre);
 // arma IconsUV desde una lista de rects EXTERNA (el atlas dinamico); un rect con
 // x = -1 usa el arte legacy de font.png (que vive en el (0,0) del atlas nuevo)
 void CrearIconosDesde(const IconRect* lista, int texW, int texH);
