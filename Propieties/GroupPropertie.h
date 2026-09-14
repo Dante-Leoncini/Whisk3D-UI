@@ -26,6 +26,7 @@ class GroupPropertie {
         Card* propertiBox;
         Card* checkBox;
         bool open;
+        bool flecha;     // false = sin la flecha de plegar en el titulo (una ventana flotante, no una tarjeta del panel)
         bool visible;
         bool editando;
 

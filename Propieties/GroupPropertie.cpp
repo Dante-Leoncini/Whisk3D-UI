@@ -72,6 +72,7 @@ void GroupPropertie::selectLastIndexProperty(){
 }
 
 GroupPropertie::GroupPropertie(const std::string& Name): name(Name), icono(-1) {
+    flecha = true;
     // C++03: defaults (name viene del init-list)
     open = true;
     visible = true;
@@ -311,6 +312,7 @@ void GroupPropertie::Render(){
     }
 
     CardTitulo(
+        !flecha ? NULL :
         open
             ? IconsUV[static_cast<size_t>(IconType::arrow)]->uvs
             : IconsUV[static_cast<size_t>(IconType::arrowRight)]->uvs,

@@ -4,6 +4,13 @@
 #include "WhiskUI/draw/icons.h"   // IconType::keyframe (rombo)
 
 void CardTitulo(GLfloat* icon, const std::string& texto, int maxPixels, GLfloat* iconExtra){
+    if (!icon){   // sin flecha (ventana flotante, no una tarjeta desplegable): el titulo arranca en el borde
+        w3dEngine::PushMatrix();
+        if (iconExtra){ W3dDrawStrip4(IconMesh, iconExtra); w3dEngine::Translatef(IconSizeGS + gapGS, 0, 0); maxPixels -= IconSizeGS + gapGS; }
+        RenderBitmapText(texto, textAlign::left, maxPixels);
+        w3dEngine::PopMatrix();
+        return;
+    }
     //icono de la coleccion
     W3dDrawStrip4(IconMesh, icon); // (shim: strip+short no dibujan en N95)
 
