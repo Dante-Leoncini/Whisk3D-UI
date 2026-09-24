@@ -8,6 +8,17 @@
 
 class Armature; // objects/Armature.h (lista de clips de animacion, modo 5)
 
+// modo 13: el ARBOL del MIX de animaciones (objetos -> capas). La lista no conoce el modelo: lo pregunta a
+// estos ganchos, que instala el panel de propiedades (Properties.cpp). NULL = lista vacia.
+extern int  (*MixFilasCount)();
+extern std::string (*MixFilaTexto)(int fila);
+extern int  (*MixFilaNivel)(int fila);        // sangria (0 = objeto/escenas, 1 = capa)
+extern int  (*MixFilaOjo)(int fila);          // -1 sin ojo, 0 oculta, 1 visible
+extern void (*MixFilaSeleccionar)(int fila);
+extern int  (*MixFilaActiva)();
+extern int  (*MixFilaPlegada)(int fila);      // -1 no se pliega (capa), 0 desplegada, 1 plegada
+extern int  (*MixFilaIcono)(int fila);        // IconType de la fila
+
 class PropList : public PropertieBase {
     public:
         Card* listBox;
@@ -35,7 +46,7 @@ class PropListMeshParts : public PropList {
         Object* obj;
         int filasMax;   // alto de la VENTANA (ajustable arrastrando)
         int scrollFila; // primera fila visible
-        int modo;       // 0 = mesh parts; 1 = UV maps; 2 = colores; 3 = modificadores; 4 = vertex groups; 5 = animaciones (armature); 6 = huesos (armature); 7 = animaciones del OBJETO (vertex anims del mesh); 8 = huesos 2D del armature 2D ACTIVO; 10 = armatures 2D del mesh (Mesh::armatures2d); 11 = stack de constraints (Object::constraints, va por 'obj'); 12 = scripts lua del objeto (Object::scriptDatos, va por 'obj'; el ORDEN es el de ejecucion)
+        int modo;       // 0 = mesh parts; 1 = UV maps; 2 = colores; 3 = modificadores; 4 = vertex groups; 5 = animaciones (armature); 6 = huesos (armature); 7 = animaciones del OBJETO (vertex anims del mesh); 8 = huesos 2D del armature 2D ACTIVO; 10 = armatures 2D del mesh (Mesh::armatures2d); 11 = stack de constraints (Object::constraints, va por 'obj'); 12 = scripts lua del objeto (Object::scriptDatos, va por 'obj'; el ORDEN es el de ejecucion); 13 = el arbol del MIX de animaciones (ganchos Mix*)
         void AjustarVentana(); // mantiene la seleccion a la vista
         // segun 'modo' lee la lista correcta (la MISMA lista para parts/uvmaps/colors):
         int         ListaCount() const;       // cantidad de items

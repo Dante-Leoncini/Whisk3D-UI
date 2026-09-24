@@ -5,6 +5,18 @@
 #include "animation/VertexAnimation.h"        // modo 7: animaciones del objeto + hooks
 #include "animation/Armature2DAnimation.h"    // modo 10: Arm2DSetActivo (cambiar de rig 2D recarga el rango)
 #include "script/W3dScript.h"                 // modo 12: W3dScriptDatos (los scripts lua del objeto)
+#include "WhiskUI/draw/icons.h"               // modo 13: el ojo de cada capa del mix
+#include "WhiskUI/draw/glesdraw.h"            // W3dDrawStrip4 (el icono)
+
+// modo 13 (arbol del MIX): los instala Properties.cpp
+int  (*MixFilasCount)() = 0;
+std::string (*MixFilaTexto)(int) = 0;
+int  (*MixFilaNivel)(int) = 0;
+int  (*MixFilaOjo)(int) = 0;
+void (*MixFilaSeleccionar)(int) = 0;
+int  (*MixFilaActiva)() = 0;
+int  (*MixFilaPlegada)(int) = 0;
+int  (*MixFilaIcono)(int) = 0;
 
 PropList::PropList(const std::string& Name):
     PropertieBase(Name){
@@ -35,6 +47,7 @@ PropListMeshParts::PropListMeshParts(const std::string& Name):
 // UV groups (segun 'modo'). Los dos grupos de pesos son entidades DISTINTAS (ver Mesh.h):
 // modo 4 = vertexGroups (por control-point, rig 3D); modo 9 = uvGroups (por corner, rig 2D).
 int PropListMeshParts::ListaCount() const {
+    if (modo == 13) return MixFilasCount ? MixFilasCount() : 0;   // arbol del MIX
     if (modo == 5) return arm ? (int)arm->animations.size() : 0; // clips de animacion (armature)
     if (modo == 7) return mesh ? (int)mesh->animations.size() : 0; // animaciones del objeto (vertex anims)
     if (modo == 6) return arm ? (int)arm->bones.size() : 0;      // huesos (Pose Mode)
@@ -51,6 +64,7 @@ int PropListMeshParts::ListaCount() const {
     return (int)mesh->materialsGroup.size();
 }
 std::string PropListMeshParts::ListaNombre(int i) const {
+    if (modo == 13) return MixFilaTexto ? MixFilaTexto(i) : std::string();
     if (modo == 5) return (arm && i >= 0 && i < (int)arm->animations.size()) ? arm->animations[i]->name : std::string();
     if (modo == 7) return (mesh && i >= 0 && i < (int)mesh->animations.size() && mesh->animations[i]) ? mesh->animations[i]->name : std::string();
     if (modo == 6) return (arm && i >= 0 && i < (int)arm->bones.size()) ? arm->bones[i].name : std::string();
@@ -74,6 +88,7 @@ std::string PropListMeshParts::ListaNombre(int i) const {
 }
 void PropListMeshParts::ListaSeleccionar(int i) {
     selectIndex = i;
+    if (modo == 13) { if (MixFilaSeleccionar) MixFilaSeleccionar(i); return; }
     if (modo == 5) { if (arm){ arm->animActiva = i;                              // clip: activo + sincroniza la seleccion
                                if (OnSeleccionarAnimClip) OnSeleccionarAnimClip(arm, i); } return; } // app-wide (timeline + Start/End)
     if (modo == 7) { if (mesh && OnSeleccionarAnimVertex) OnSeleccionarAnimVertex(mesh, i); return; } // anim del objeto -> timeline
@@ -164,6 +179,43 @@ void PropListMeshParts::RenderPropertiLabel(Card* propertiBox){
             if (selectIndex == i){
                 SetColorID(ColorID::accent, 1.0f);
             }
+            if (modo == 13) {
+                // ARBOL (como el outliner): flecha de plegar + icono en los objetos; en las capas, la LINEA
+                // del costado (baja desde la flecha del padre) + icono; el OJO de la capa a la derecha
+                int nivel = MixFilaNivel ? MixFilaNivel(i) : 0;
+                int pleg  = MixFilaPlegada ? MixFilaPlegada(i) : -1;
+                int ico   = MixFilaIcono ? MixFilaIcono(i) : (int)IconType::armature;
+                w3dEngine::PushMatrix();
+                if (nivel > 0) {
+                    // la linea: tapa tambien el hueco entre filas (gapGS) para que se vea continua
+                    SetColorID(ColorID::grisUI, 1.0f);
+                    w3dEngine::PushMatrix();
+                    w3dEngine::Translatef(0, (GLfloat)-gapGS, 0);
+                    W3dDrawStrip4(IconLineMesh, IconsUV[static_cast<size_t>(IconType::line)]->uvs);
+                    w3dEngine::PopMatrix();
+                    W3dDrawStrip4(IconLineMesh, IconsUV[static_cast<size_t>(IconType::line)]->uvs);
+                    w3dEngine::Translatef((GLfloat)(IconSizeGS + gapGS), 0, 0);
+                } else if (pleg >= 0) {
+                    SetColorID(selectIndex == i ? ColorID::accent : ColorID::grisUI, 1.0f);
+                    W3dDrawStrip4(IconMesh, IconsUV[static_cast<size_t>(pleg ? IconType::arrowRight : IconType::arrow)]->uvs);
+                    w3dEngine::Translatef((GLfloat)(IconSizeGS + gapGS), 0, 0);
+                }
+                SetColorID(selectIndex == i ? ColorID::accent : ColorID::grisUI, 1.0f);
+                W3dDrawStrip4(IconMesh, IconsUV[static_cast<size_t>(ico)]->uvs);
+                w3dEngine::Translatef((GLfloat)(IconSizeGS + gapGS), 0, 0);
+                int usado = (int)(IconSizeGS + gapGS) * 2;
+                RenderBitmapText(ListaNombre(i), textAlign::left, width - bordersGS - usado - (int)IconSizeGS - gapGS * 4);
+                w3dEngine::PopMatrix();
+                int ojo = MixFilaOjo ? MixFilaOjo(i) : -1;
+                if (ojo >= 0) {
+                    w3dEngine::PushMatrix();
+                    w3dEngine::Translatef((GLfloat)(width - (int)IconSizeGS - gapGS * 4), 0, 0);
+                    SetColorID(ColorID::grisUI, ojo ? 1.0f : 0.45f);
+                    W3dDrawStrip4(IconMesh, IconsUV[static_cast<size_t>(ojo ? IconType::visible : IconType::hidden)]->uvs);
+                    w3dEngine::PopMatrix();
+                    SetColorID(selectIndex == i ? ColorID::accent : ColorID::grisUI, 1.0f);
+                }
+            } else
             RenderBitmapText(ListaNombre(i), textAlign::left, width -bordersGS);
 
             if (selectIndex == i){
@@ -224,6 +276,7 @@ int PropListMeshParts::Resize(int w){
     // panel, como los modificadores) porque el stack es POR OBJETO: cambiar de objeto
     // seleccionado tiene que mover el resaltado sin que haga falta tocar ningun boton.
     else if (obj && modo == 11) selectIndex = obj->constraintActivo;
+    else if (modo == 13) selectIndex = MixFilaActiva ? MixFilaActiva() : -1;
     if (ListaCount() > 0){
         // VENTANA de filasMax filas como maximo (el resto scrollea)
         int n = ListaCount();
