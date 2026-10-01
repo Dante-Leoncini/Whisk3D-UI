@@ -114,6 +114,7 @@ void GroupPropertie::Resize(int Width, int Height){
     anchoBox -= keyBtnCol;
     colEtiqueta = widthProperties - anchoBox - keyBtnCol;
     PropColEtiqueta = colEtiqueta;
+    g_propKeyBtnCol = keyBtnCol;   // las filas con rombo (ej: un desplegable animable) se achican para dejarle lugar
 
     if (open){
         for (size_t i = 0; i < properties.size(); ++i){

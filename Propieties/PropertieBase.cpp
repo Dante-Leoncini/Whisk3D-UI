@@ -39,6 +39,8 @@ void W3dRenderRomboKey(int estado){
     static float tenue[4];
     if (estado == 1){ const float* a = ListaColores[static_cast<int>(ColorID::accent)];
                       tenue[0]=a[0]*0.5f; tenue[1]=a[1]*0.5f; tenue[2]=a[2]*0.5f; tenue[3]=1.0f; c = tenue; }
+    static const float verde[4] = { 0.35f, 0.85f, 0.35f, 1.0f };   // 3: cambio sin guardar
+    if (estado == 3) c = verde;
     w3dEngine::Color4fv(c);
     W3dDrawStrip4(IconMesh, IconsUV[static_cast<size_t>(IconType::keyframe)]->uvs);
     w3dEngine::Color4fv(ListaColores[static_cast<int>(ColorID::blanco)]);

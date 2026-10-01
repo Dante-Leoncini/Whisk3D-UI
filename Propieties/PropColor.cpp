@@ -9,10 +9,12 @@ PropColor::PropColor(const std::string& Name):
 };
 
 // el swatch de color = un CUADRADO pegado a la DERECHA (mismo tamaño/posicion que el checkbox);
-// la etiqueta ocupa todo el ancho a su izquierda. (Espeja a PropBool.)
+// la etiqueta ocupa todo el ancho a su izquierda. (Espeja a PropBool.) Con la columna del rombo de KEYFRAME
+// reservada (g_propKeyBtnCol, ej. los colores animables de la lampara) el swatch queda a SU izquierda: antes
+// se dibujaba encima del rombo y no se podia ni poner un keyframe ni abrir el color.
 void PropColor::RenderPropertiBox(Card* propertiBox){
     if (value){
-        float dx = (float)(width - PropColEtiqueta - propertiBox->width - bordersGS);
+        float dx = (float)(width - PropColEtiqueta - propertiBox->width - bordersGS - g_propKeyBtnCol); // deja la columna del rombo
         w3dEngine::Translatef(dx, 0, 0);
         propertiBox->Render(false);
         w3dEngine::Translatef(-dx, RenglonHeightGS + gapGS, 0);
@@ -21,7 +23,7 @@ void PropColor::RenderPropertiBox(Card* propertiBox){
 
 void PropColor::RenderPropertiBoxBorder(Card* propertiBox){
     if (value){
-        float dx = (float)(width - PropColEtiqueta - propertiBox->width - bordersGS);
+        float dx = (float)(width - PropColEtiqueta - propertiBox->width - bordersGS - g_propKeyBtnCol); // deja la columna del rombo
         w3dEngine::Translatef(dx, -RenglonHeightGS - gapGS, 0);
         propertiBox->RenderBorder(false);
         w3dEngine::Translatef(-dx, RenglonHeightGS + gapGS, 0);
@@ -38,8 +40,8 @@ void PropColor::RenderPropertiValue(Card* propertiBox){
 void PropColor::RenderPropertiLabel(Card* propertiBox){
     if (value){
         int cb = RenglonHeightGS + GlobalScale * 2; // mismo ancho que el checkbox/swatch
-        float dx = (float)(width - PropColEtiqueta - cb - bordersGS - gapGS);
-        int wLabel = width - cb - bordersGS - gapGS * 2;
+        float dx = (float)(width - PropColEtiqueta - cb - bordersGS - gapGS - g_propKeyBtnCol);
+        int wLabel = width - cb - bordersGS - gapGS * 2 - g_propKeyBtnCol;
         w3dEngine::Translatef(dx, 0, 0);
         RenderBitmapText(name, textAlign::right, wLabel);
         w3dEngine::Translatef(-dx, RenglonHeightGS + gapGS, 0);

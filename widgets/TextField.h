@@ -41,4 +41,21 @@ struct TextField {
 extern TextField* g_textFieldActivo;  // el campo enfocado (NULL = ninguno)
 bool TextFieldInputChar(int c);       // alimenta el campo activo: 8=backspace, 127=supr, imprimibles
 
+// ---- CANCELAR (Esc en PC, C/Cancel en el keypad) ----
+// Los duenos de un campo CONFIRMAN al perder el foco comparando el texto con su valor (el Name de
+// Properties, el rename en linea del outliner...). Para que Esc DESCARTE sin que cada dueno lo sepa,
+// el campo vuelve al texto que tenia AL ENFOCARSE y recien ahi pierde el foco: el dueno no ve cambios.
+// El texto "de antes" se anota al enfocar (TextFieldEnfocar) y, para los que asignan g_textFieldActivo
+// a mano, antes de la primera tecla y en el seguimiento por cuadro (TextFieldSeguirFoco).
+void TextFieldEnfocar(TextField* f);  // g_textFieldActivo = f + anota su texto actual
+void TextFieldSeguirFoco();           // si el foco cambio por afuera, anota el texto del nuevo campo
+bool TextFieldCancelar();             // restaura el texto de antes y suelta el foco (false = no habia campo)
+void TextFieldFinDeCuadro();          // (el ultimo paso de cada cuadro de la UI) seguimiento + fin del restaurado
+// Los duenos que escriben EN VIVO (cada tecla ya cambio su dato: el texto de un boton 2D, el nombre de
+// una paleta, las distancias de un LOD...) no confirman al perder el foco: para ellos, el campo que un
+// Esc acaba de DESCARTAR sigue "enfocado" hasta el fin de ese cuadro, asi escriben el texto restaurado.
+// Usan TextFieldEnVivo en lugar de comparar g_textFieldActivo.
+extern TextField* g_textFieldRestaurado;
+inline bool TextFieldEnVivo(const TextField* f) { return f && (g_textFieldActivo == f || g_textFieldRestaurado == f); }
+
 #endif // TEXTFIELD_H

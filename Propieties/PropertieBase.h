@@ -50,6 +50,8 @@ extern void* g_kfFocoProp;    // la PropertieBase cuyo keyframe esta enfocado po
 // HOOKS del boton-rombo de keyframe (canal de animacion de una propiedad). El editor
 // los cablea (usan ObjActivo + CurrentFrame + las curvas). NULL sin editor.
 //   estado(prop,comp) -> 0 sin animacion / 1 animado sin key aqui / 2 hay key aqui
+//                        3 CAMBIO SIN GUARDAR (verde): el valor de ahora no es el que dice la curva en este frame;
+//                          un click lo guarda como key en el frame actual
 //   toggle(prop,comp) -> pone/quita el key del canal en el frame actual
 extern int  (*W3dKeyframeEstado)(int prop, int comp);
 extern void (*W3dKeyframeToggle)(int prop, int comp);

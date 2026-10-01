@@ -10,6 +10,7 @@ PropButton::PropButton(const std::string& Name, int Icon):
     oculto = false;
     gris = false;
     action = NULL;
+    animProp = -1; animComp = 0;
 }
 
 PropButton::~PropButton(){
@@ -27,7 +28,9 @@ int PropButton::Resize(int w){
         button->altoRenglon = true;
     }
     // con label: el boton ocupa SOLO la columna de valores (el nombre va a la izquierda)
-    button->Resize(conLabel ? (w - PropColEtiqueta - bordersGS) : (w - bordersGS));
+    // animable: deja la columna del rombo de keyframe a la derecha (g_propKeyBtnCol, la publica el grupo)
+    const int key = (animProp >= 0) ? g_propKeyBtnCol : 0;
+    button->Resize(conLabel ? (w - PropColEtiqueta - bordersGS - key) : (w - bordersGS - key));
     return Avance();
 }
 

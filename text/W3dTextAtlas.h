@@ -45,14 +45,27 @@ struct W3dTextAtlas {
     static int      rdI16(const unsigned char* p){ int v=(int)p[0]|((int)p[1]<<8); return v>=32768? v-65536 : v; }
     static unsigned rdU32(const unsigned char* p){ return (unsigned)p[0]|((unsigned)p[1]<<8)|((unsigned)p[2]<<16)|((unsigned)p[3]<<24); }
 
-    // proximo codepoint UTF-8 (1-2 bytes = latin1; 3-4 bytes se saltean). Avanza s.
+    // proximo codepoint UTF-8 (1 a 4 bytes). Avanza s. Una secuencia mal formada devuelve su primer byte (y se
+    // saltean sus bytes de continuacion). Antes los de 3-4 bytes (comillas tipograficas, puntos suspensivos, guiones
+    // largos, flechas...) devolvian el byte inicial 0xE2 y se dibujaban como otra letra.
     static unsigned NextCp(const char*& s) {
         unsigned char c = (unsigned char)*s++;
         if (c < 0x80) return c;
-        if ((c & 0xE0) == 0xC0 && ((unsigned char)*s & 0xC0) == 0x80)
-            return ((unsigned)(c & 0x1F) << 6) | ((unsigned char)*s++ & 0x3F);
-        while (((unsigned char)*s & 0xC0) == 0x80) s++;
-        return c;
+        int extra = ((c & 0xE0) == 0xC0) ? 1 : ((c & 0xF0) == 0xE0) ? 2 : ((c & 0xF8) == 0xF0) ? 3 : 0;
+        unsigned cp = (extra == 1) ? (c & 0x1F) : (extra == 2) ? (c & 0x0F) : (c & 0x07);
+        const char* p = s;
+        for (int k = 0; k < extra; k++) {
+            unsigned char d = (unsigned char)*p;
+            if ((d & 0xC0) != 0x80) { extra = 0; break; }
+            cp = (cp << 6) | (d & 0x3F);
+            p++;
+        }
+        if (extra == 0) {
+            while (((unsigned char)*s & 0xC0) == 0x80) s++;
+            return c;
+        }
+        s = p;
+        return cp;
     }
 
     // carga: bytes del .w3dfnt (metricas) + bytes del .png (atlas RGB gris). true si ok.

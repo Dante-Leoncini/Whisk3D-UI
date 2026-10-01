@@ -29,7 +29,11 @@ static const char* KNombres[ICON_TOTAL] = {
     "modificador", "armature", "keyframe", "monitor", "snap", "guardar", "camera_off",
     "borrar", "mas", "seleccion",
     "falloff_custom", "falloff_smoother", "falloff_sphere", "falloff_root",
-    "falloff_sharp", "falloff_linear", "falloff_constant"
+    "falloff_sharp", "falloff_linear", "falloff_constant",
+    "menos", "igual", "niebla", "limpiarz", "recorte", "hitbox",
+    "animacion", "prefab", "libreria",
+    "sonido", "script", "video", "filtro",
+    "candado"
 };
 const char* IconoNombre(int i) {
     return (i >= 0 && i < (int)ICON_TOTAL) ? KNombres[i] : "";
@@ -106,7 +110,25 @@ static const IconRect* TablaLegacy() {
         {  72, 117, 10, 10 }, // falloff_root
         {  72, 117, 10, 10 }, // falloff_sharp
         {  72, 117, 10, 10 }, // falloff_linear
-        {  72, 117, 10, 10 }  // falloff_constant
+        {  72, 117, 10, 10 }, // falloff_constant
+        // menos / igual: arte NUEVO (sin su png caen al "mas")
+        {  49, 81, 10, 10 }, // menos
+        {  49, 81, 10, 10 }, // igual
+        { 109, 57, 10, 10 }, // niebla (arte NUEVO: sin su png cae a un icono cualquiera)
+        { 109, 57, 10, 10 }, // limpiarz (idem)
+        { 109, 57, 10, 10 }, // recorte (idem)
+        { 109, 57, 10, 10 }, // hitbox (idem)
+        // los del outliner por recursos: arte NUEVO. Sin su png caen al icono legacy mas parecido
+        {  73, 93, 10, 10 }, // animacion (la curva)
+        {  49, 81, 10, 10 }, // prefab (el cubo)
+        {  85, 81, 10, 10 }, // libreria (la carpeta)
+        // los de la BIBLIOTECA: arte NUEVO. Sin su png caen al icono legacy mas parecido
+        { 109, 57, 10, 10 }, // sonido
+        {  73, 93, 10, 10 }, // script
+        {  73, 93, 10, 10 }, // video
+        { 109, 57, 10, 10 }, // filtro
+        // el de las librerias: arte NUEVO. Sin su png cae a la carpeta (el de la libreria)
+        {  85, 81, 10, 10 }  // candado
     };
     return lista;
 }

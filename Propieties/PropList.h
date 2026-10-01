@@ -26,6 +26,7 @@ class PropList : public PropertieBase {
         int originalIndex;
 
         PropList(const std::string& Name);
+        ~PropList(); // libera listBox (la lista es duena de su caja)
 
         bool EditPropertie() W3D_OVERRIDE;
         bool Cancel() W3D_OVERRIDE;

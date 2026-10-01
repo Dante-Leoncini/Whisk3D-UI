@@ -13,6 +13,11 @@ class PropButton : public PropertieBase {
         bool oculto; // true: no ocupa fila (material por defecto)
         bool gris;   // true: se dibuja atenuado y NO ejecuta su accion (ej: Render Animation sin animaciones)
         void (*action)(); // que hace el boton al activarse (o NULL)
+        // canal ANIMABLE (rombo de keyframe a la derecha, como PropFloat/PropBool). -1 = no animable. Ej: el
+        // selector de la "Camara activa" (AnimCamActiva): el rombo guarda el corte en el frame actual.
+        int animProp, animComp;
+        int AnimProp() { return oculto ? -1 : animProp; }
+        int AnimComp() { return animComp; }
 
         PropButton(const std::string& Name, int Icon = -1);
         ~PropButton();

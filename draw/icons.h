@@ -23,7 +23,7 @@ extern GLshort IconLineMesh[8];
 extern int IconSize;
 extern int IconSizeGS;
 
-const size_t ICON_TOTAL = 56; // (constexpr es C++11)
+const size_t ICON_TOTAL = 70; // (constexpr es C++11)
 
 // dialecto C++03 compartido
 struct IconType {
@@ -88,6 +88,24 @@ struct IconType {
     falloff_sharp,
     falloff_linear,
     falloff_constant
+        , menos,  // signo -: modo "Restar" de una capa del Mix de animaciones
+        igual,    // signo =: el modo Mix (capas mezcladas) y el modo "Mezclar" de una capa
+        niebla,   // tres lineas onduladas: el objeto Niebla (glFog en el arbol)
+        limpiarz, // capas con una goma: el objeto Limpiar Z
+        recorte,  // rectangulo punteado dentro de la pantalla: el objeto Recorte
+        hitbox,   // caja de alambre con una marca: el objeto Hitbox (caja de deteccion)
+        // el OUTLINER POR RECURSOS (selector de vista): los tipos de recurso que no tenian icono
+        animacion, // tira de pelicula con un "play": los animsets (clips de esqueleto)
+        prefab,    // caja en perspectiva: un prefab (una "clase" instanciable)
+        libreria,  // libros en un estante: una libreria externa (otro .w3d de solo lectura)
+        // (las raices ESCENA y JUEGO usan los iconos que ya habia: camera y gamepad)
+        // la BIBLIOTECA (el outliner como explorador del .w3d): los tipos de archivo y el filtro
+        sonido,    // parlante con ondas: un sonido (.wav / .ogg)
+        script,    // hoja con llaves: un script .lua
+        video,     // pantalla con un "play": un video
+        filtro,    // embudo: el filtro por tipo de la biblioteca
+        // las LIBRERIAS externas: lo que genera un proxy W3D es de SOLO LECTURA (outliner)
+        candado    // candado cerrado: de solo lectura (lo generado por un proxy de una libreria)
     };
     Enum v;
     IconType(Enum e) : v(e) {}

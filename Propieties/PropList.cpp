@@ -27,6 +27,13 @@ PropList::PropList(const std::string& Name):
     listBox = new Card(NULL, 300, 300);
 };
 
+// las listas viven lo que su tarjeta: el panel de propiedades se libera con el layout
+// (abrir un proyecto) y cada lista dejaba su caja viva
+PropList::~PropList(){
+    delete listBox;
+    listBox = NULL;
+}
+
 PropertyType PropList::GetType(){
     return PropertyType::List;
 }

@@ -25,7 +25,7 @@ class PropText : public PropertieBase {
         // OK/click sobre la fila: si tiene onClick (ej: campo Carpeta -> Browse) lo dispara y NO edita; sino
         // enfoca el campo para tipear (lo des-enfoca quien corresponda). Asi en Symbian OK abre el explorador de
         // archivos en vez de forzarte a escribir el path a mano.
-        bool EditPropertie() { if (onClick) { onClick(); return false; } g_textFieldActivo = &field; editando = false; return false; }
+        bool EditPropertie() { if (onClick) { onClick(); return false; } TextFieldEnfocar(&field); editando = false; return false; }
 
         void RenderPropertiBox(Card* propertiBox) {
             if (oculto) return;
