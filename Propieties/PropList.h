@@ -15,6 +15,15 @@ extern std::string (*MixFilaTexto)(int fila);
 extern int  (*MixFilaNivel)(int fila);        // sangria (0 = objeto/escenas, 1 = capa)
 extern int  (*MixFilaOjo)(int fila);          // -1 sin ojo, 0 oculta, 1 visible
 extern void (*MixFilaSeleccionar)(int fila);
+// modo 14: los PASOS de una rutina ('obj'). La lista no conoce la Rutina (es del editor): los llena PropsRutina.cpp
+extern int (*RutinaFilasCount)(Object* o);
+extern std::string (*RutinaFilaTexto)(Object* o, int fila);
+extern void (*RutinaFilaSeleccionar)(Object* o, int fila);
+extern int (*RutinaFilaIcono)(Object* o, int fila);   // el icono del grupo del paso (-1 = sin icono)
+// lo que se ve a la DERECHA de la fila: 0 nada, 1 checkbox apagado, 2 prendido, 3 un cuadro del color 'rgba'
+extern int (*RutinaFilaValor)(Object* o, int fila, float* rgba);
+// arrastrando un paso: la fila donde caeria (se dibuja una linea arriba de ella; -1 = no se arrastra)
+extern int g_rutinaFilaDestino;
 extern int  (*MixFilaActiva)();
 extern int  (*MixFilaPlegada)(int fila);      // -1 no se pliega (capa), 0 desplegada, 1 plegada
 extern int  (*MixFilaIcono)(int fila);        // IconType de la fila

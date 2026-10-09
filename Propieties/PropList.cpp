@@ -7,6 +7,7 @@
 #include "script/W3dScript.h"                 // modo 12: W3dScriptDatos (los scripts lua del objeto)
 #include "WhiskUI/draw/icons.h"               // modo 13: el ojo de cada capa del mix
 #include "WhiskUI/draw/glesdraw.h"            // W3dDrawStrip4 (el icono)
+#include "WhiskUI/theme/colores.h"            // modo 14: el gris del checkbox apagado
 
 // modo 13 (arbol del MIX): los instala Properties.cpp
 int  (*MixFilasCount)() = 0;
@@ -14,6 +15,12 @@ std::string (*MixFilaTexto)(int) = 0;
 int  (*MixFilaNivel)(int) = 0;
 int  (*MixFilaOjo)(int) = 0;
 void (*MixFilaSeleccionar)(int) = 0;
+int (*RutinaFilasCount)(Object*) = 0;
+std::string (*RutinaFilaTexto)(Object*, int) = 0;
+void (*RutinaFilaSeleccionar)(Object*, int) = 0;
+int (*RutinaFilaIcono)(Object*, int) = 0;
+int (*RutinaFilaValor)(Object*, int, float*) = 0;
+int g_rutinaFilaDestino = -1;
 int  (*MixFilaActiva)() = 0;
 int  (*MixFilaPlegada)(int) = 0;
 int  (*MixFilaIcono)(int) = 0;
@@ -55,6 +62,7 @@ PropListMeshParts::PropListMeshParts(const std::string& Name):
 // modo 4 = vertexGroups (por control-point, rig 3D); modo 9 = uvGroups (por corner, rig 2D).
 int PropListMeshParts::ListaCount() const {
     if (modo == 13) return MixFilasCount ? MixFilasCount() : 0;   // arbol del MIX
+    if (modo == 14) return RutinaFilasCount ? RutinaFilasCount(obj) : 0;   // pasos de una rutina
     if (modo == 5) return arm ? (int)arm->animations.size() : 0; // clips de animacion (armature)
     if (modo == 7) return mesh ? (int)mesh->animations.size() : 0; // animaciones del objeto (vertex anims)
     if (modo == 6) return arm ? (int)arm->bones.size() : 0;      // huesos (Pose Mode)
@@ -72,6 +80,7 @@ int PropListMeshParts::ListaCount() const {
 }
 std::string PropListMeshParts::ListaNombre(int i) const {
     if (modo == 13) return MixFilaTexto ? MixFilaTexto(i) : std::string();
+    if (modo == 14) return RutinaFilaTexto ? RutinaFilaTexto(obj, i) : std::string();
     if (modo == 5) return (arm && i >= 0 && i < (int)arm->animations.size()) ? arm->animations[i]->name : std::string();
     if (modo == 7) return (mesh && i >= 0 && i < (int)mesh->animations.size() && mesh->animations[i]) ? mesh->animations[i]->name : std::string();
     if (modo == 6) return (arm && i >= 0 && i < (int)arm->bones.size()) ? arm->bones[i].name : std::string();
@@ -96,6 +105,7 @@ std::string PropListMeshParts::ListaNombre(int i) const {
 void PropListMeshParts::ListaSeleccionar(int i) {
     selectIndex = i;
     if (modo == 13) { if (MixFilaSeleccionar) MixFilaSeleccionar(i); return; }
+    if (modo == 14) { if (RutinaFilaSeleccionar) RutinaFilaSeleccionar(obj, i); return; }
     if (modo == 5) { if (arm){ arm->animActiva = i;                              // clip: activo + sincroniza la seleccion
                                if (OnSeleccionarAnimClip) OnSeleccionarAnimClip(arm, i); } return; } // app-wide (timeline + Start/End)
     if (modo == 7) { if (mesh && OnSeleccionarAnimVertex) OnSeleccionarAnimVertex(mesh, i); return; } // anim del objeto -> timeline
@@ -219,6 +229,44 @@ void PropListMeshParts::RenderPropertiLabel(Card* propertiBox){
                     w3dEngine::Translatef((GLfloat)(width - (int)IconSizeGS - gapGS * 4), 0, 0);
                     SetColorID(ColorID::grisUI, ojo ? 1.0f : 0.45f);
                     W3dDrawStrip4(IconMesh, IconsUV[static_cast<size_t>(ojo ? IconType::visible : IconType::hidden)]->uvs);
+                    w3dEngine::PopMatrix();
+                    SetColorID(selectIndex == i ? ColorID::accent : ColorID::grisUI, 1.0f);
+                }
+            } else if (modo == 14 && RutinaFilaIcono && RutinaFilaIcono(obj, i) >= 0) {
+                // los PASOS de una rutina: el icono de su grupo (Transform = camara, Fog = niebla...), el texto y A LA
+                // DERECHA lo que hace de un vistazo: el checkbox de un on/off o un cuadro con su color
+                const int lado = CheckboxLado();
+                float rgba[4] = { 1, 1, 1, 1 };
+                const int valor = RutinaFilaValor ? RutinaFilaValor(obj, i, rgba) : 0;
+                w3dEngine::PushMatrix();
+                W3dDrawStrip4(IconMesh, IconsUV[static_cast<size_t>(RutinaFilaIcono(obj, i))]->uvs);
+                w3dEngine::Translatef((GLfloat)(IconSizeGS + gapGS), 0, 0);
+                RenderBitmapText(ListaNombre(i), textAlign::left,
+                                 width - bordersGS - (int)IconSizeGS - gapGS - (valor ? lado + gapGS * 5 : 0));
+                w3dEngine::PopMatrix();
+                if (valor) {
+                    w3dEngine::PushMatrix();
+                    w3dEngine::Translatef((GLfloat)(width - lado - gapGS * 4), 0, 0);
+                    if (valor == 3) DibujarMuestraColor(lado, rgba);
+                    else if (valor == 2) DibujarCheckbox(lado, true);
+                    else {   // apagado: la caja en un gris tenue (la del panel es del color del fondo: aca no se veia)
+                        const float* g = ListaColores[static_cast<int>(ColorID::grisUI)];
+                        const float* f = ListaColores[static_cast<int>(ColorID::background)];
+                        float c[4] = { f[0] + (g[0] - f[0]) * 0.3f, f[1] + (g[1] - f[1]) * 0.3f, f[2] + (g[2] - f[2]) * 0.3f, 1.0f };
+                        DibujarMuestraColor(lado, c);
+                    }
+                    w3dEngine::PopMatrix();
+                    SetColorID(selectIndex == i ? ColorID::accent : ColorID::grisUI, 1.0f);
+                }
+                // arrastrando un paso: la linea donde cae (arriba de esta fila)
+                if (g_rutinaFilaDestino == i || (g_rutinaFilaDestino == n && i == n - 1)) {
+                    static Card* linea = NULL;
+                    if (!linea) linea = new Card(NULL, width, GlobalScale * 2);
+                    linea->Resize(width - bordersGS, GlobalScale * 2);
+                    w3dEngine::PushMatrix();
+                    w3dEngine::Translatef(0, (GLfloat)(g_rutinaFilaDestino == i ? -gapGS : RenglonHeightGS), 0);
+                    SetColorID(ColorID::accent, 1.0f);
+                    linea->RenderObject(false);
                     w3dEngine::PopMatrix();
                     SetColorID(selectIndex == i ? ColorID::accent : ColorID::grisUI, 1.0f);
                 }

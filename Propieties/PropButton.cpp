@@ -7,6 +7,7 @@ PropButton::PropButton(const std::string& Name, int Icon):
     // ancho maximo de la columna (no se adapta al texto)
     button = new Button(Name, Icon, false);
     conLabel = false;
+    colBoton = 0;
     oculto = false;
     gris = false;
     action = NULL;
@@ -27,10 +28,20 @@ int PropButton::Resize(int w){
         button->caretMenu = true;
         button->altoRenglon = true;
     }
-    // con label: el boton ocupa SOLO la columna de valores (el nombre va a la izquierda)
+    // con label: el nombre mide su TEXTO (hasta el 55 % del renglon) y el boton ocupa TODO el resto. Antes el boton
+    // iba solo en la columna de valores: con una tarjeta de valores angosta el desplegable quedaba chiquito a la
+    // derecha y lo elegido no se leia ni con el panel a pantalla completa
     // animable: deja la columna del rombo de keyframe a la derecha (g_propKeyBtnCol, la publica el grupo)
     const int key = (animProp >= 0) ? g_propKeyBtnCol : 0;
-    button->Resize(conLabel ? (w - PropColEtiqueta - bordersGS - key) : (w - bordersGS - key));
+    if (conLabel) {
+        int chars = 0;
+        for (size_t i = 0; i < name.size(); i++) if (((unsigned char)name[i] & 0xC0) != 0x80) chars++;   // (UTF-8)
+        colBoton = chars * CharacterWidthGS + gapGS * 2 + bordersGS;
+        if (colBoton > w * 55 / 100) colBoton = w * 55 / 100;
+        button->Resize(w - colBoton - bordersGS - key);
+    } else {
+        button->Resize(w - bordersGS - key);
+    }
     return Avance();
 }
 
@@ -49,24 +60,25 @@ bool PropButton::EditPropertie(){
 
 void PropButton::RenderPropertiBox(Card* propertiBox){
     if (oculto) return;
-    // sin label el boton arranca en el borde izquierdo del cuerpo del grupo;
-    // con label queda en la columna de valores (el origen de este pase)
-    if (!conLabel) w3dEngine::Translatef((GLfloat)-PropColEtiqueta, 0, 0);
+    // el origen de este pase es la columna de valores: sin label el boton arranca en el borde izquierdo del cuerpo
+    // del grupo; con label, despues de su nombre (ColBoton)
+    const GLfloat dx = (GLfloat)(ColBoton() - PropColEtiqueta);
+    w3dEngine::Translatef(dx, 0, 0);
     static const float grisAtenuado[4] = {0.35f, 0.35f, 0.35f, 1.0f};
     const float* txtPrev = button->colorTexto;
     if (gris) button->colorTexto = grisAtenuado; // texto+icono atenuados
     button->Render();
     if (gris) button->colorTexto = txtPrev;
-    w3dEngine::Translatef((GLfloat)(conLabel ? 0 : PropColEtiqueta), (GLfloat)Avance(), 0);
+    w3dEngine::Translatef(-dx, (GLfloat)Avance(), 0);
 }
 
 void PropButton::RenderPropertiBoxBorder(Card* propertiBox){
     if (oculto) return;
     // fila seleccionada con el teclado: borde resaltado sobre el boton
-    GLfloat off = (GLfloat)(conLabel ? 0 : PropColEtiqueta);
-    w3dEngine::Translatef(-off, (GLfloat)-Avance(), 0);
+    const GLfloat dx = (GLfloat)(ColBoton() - PropColEtiqueta);
+    w3dEngine::Translatef(dx, (GLfloat)-Avance(), 0);
     button->card->RenderBorder(false);
-    w3dEngine::Translatef(off, (GLfloat)Avance(), 0);
+    w3dEngine::Translatef(-dx, (GLfloat)Avance(), 0);
 }
 
 void PropButton::RenderPropertiValue(Card* propertiBox){
@@ -76,6 +88,12 @@ void PropButton::RenderPropertiValue(Card* propertiBox){
 
 void PropButton::RenderPropertiLabel(Card* propertiBox){
     if (oculto) return;
-    if (conLabel) RenderBitmapText(name, textAlign::right, PropColEtiqueta - bordersGS);
+    if (conLabel) {   // (el origen del pase es el final de la columna de etiquetas) al borde izquierdo del renglon; si no
+                      // entra (panel angosto) se corta por el FINAL: "Modo de re", no "do de render"
+        const GLfloat dx = (GLfloat)(bordersGS + gapGS * 2 - PropColEtiqueta);
+        w3dEngine::Translatef(dx, 0, 0);
+        RenderBitmapText(name, textAlign::left, colBoton - bordersGS - gapGS * 2);
+        w3dEngine::Translatef(-dx, 0, 0);
+    }
     w3dEngine::Translatef(0, (GLfloat)Avance(), 0);
 }

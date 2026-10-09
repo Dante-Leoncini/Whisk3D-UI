@@ -228,6 +228,40 @@ void PopupMenu::Abrir(int sx, int sy, int pantallaW, int pantallaH){
     abierto = true;
 }
 
+void PopupMenu::AnchoMax(int w){
+    if (w < IconSizeGS) w = IconSizeGS;
+    if (w >= width) return;
+    width = w;
+    card->Resize(width, height);
+    highlight->Resize(width - bordersGS, RenglonHeightGS + GlobalScale);
+}
+
+// donde va un SUBMENU: a la DERECHA de este menu si entra; si no, a la IZQUIERDA; si no entra de ningun lado, del lado
+// con mas lugar, angostado (el texto se recorta) para que quede SIEMPRE a la vista una COLUMNA de este menu: por ahi se
+// pasa el mouse a las otras opciones. Antes se clampeaba contra el borde y quedaba ENCIMA del padre entero (y del
+// abuelo): con menus largos (las mallas por carpeta, sus partes) no se podia ir a otra opcion
+void PopupMenu::AbrirSubmenuAlLado(PopupMenu* sub, int fila){
+    if (!sub) return;
+    const int oy = titulo.empty() ? 0 : (RenglonHeightGS + gapGS);
+    const int sy = y + borderGS + oy + (fila - scroll) * (RenglonHeightGS + gapGS);   // la fila VISIBLE
+    sub->Abrir(x + width - gapGS, sy, MenuPantallaW, MenuPantallaH);   // (mide su ancho y acomoda la altura)
+    const int W = MenuPantallaW;
+    const int der = x + width - gapGS, izq = x + gapGS - sub->width;
+    if (der + sub->width <= W) { sub->x = der; return; }
+    if (izq >= 0) { sub->x = izq; return; }
+    int col = width / 3;                       // la columna de este menu que queda a la vista
+    if (col < IconSizeGS * 3) col = IconSizeGS * 3;
+    if (col > width) col = width;
+    if (W - (x + width) >= x) {                // mas lugar a la derecha: se ve la columna IZQUIERDA de este menu
+        sub->x = x + col;
+        if (sub->x + sub->width > W) sub->AnchoMax(W - sub->x);
+    } else {                                   // a la izquierda: se ve la columna DERECHA
+        const int fin = x + width - col;
+        sub->x = fin - sub->width;
+        if (sub->x < 0) { sub->x = 0; sub->AnchoMax(fin); }
+    }
+}
+
 void PopupMenu::Cerrar(){
     if (g_sliderDragMenu == this) MenuSliderDragSoltar(); // menu cerrado (ESC, etc): corta el drag
     abierto = false;
@@ -241,6 +275,10 @@ void PopupMenu::Cerrar(){
 
 bool PopupMenu::Contains(int mx, int my) const {
     return mx >= x && mx < x + width && my >= y && my < y + height;
+}
+bool PopupMenu::ContieneConSubmenus(int mx, int my) const {
+    if (Contains(mx, my)) return true;
+    return submenuAbierto && submenuAbierto->abierto && submenuAbierto->ContieneConSubmenus(mx, my);
 }
 
 void PopupMenu::Render(){
@@ -434,10 +472,7 @@ void PopupMenu::SincronizarSubmenu(){
     if (submenuAbierto == sub) return; // ya esta como corresponde
     if (submenuAbierto){ submenuAbierto->Cerrar(); submenuAbierto = NULL; }
     if (sub){
-        int oy = titulo.empty() ? 0 : (RenglonHeightGS + gapGS);
-        sub->Abrir(x + width - gapGS,
-                   y + borderGS + oy + (selectIndex - scroll) * (RenglonHeightGS + gapGS), // fila VISIBLE
-                   MenuPantallaW, MenuPantallaH);
+        AbrirSubmenuAlLado(sub, selectIndex);
         submenuAbierto = sub;
         g_submenuAcabaDeAbrir = true; // el proximo click sobre este submenu solo lo deja abierto (no selecciona)
     }
@@ -479,20 +514,24 @@ bool PopupMenu::MouseMove(int mx, int my){
 }
 
 int PopupMenu::Click(int mx, int my){
+    // el click en el submenu abierto O EN UNO DE SUS SUBMENUS (a cualquier profundidad). Antes solo se miraba el
+    // submenu DIRECTO: un click en el nieto (Add > Core > Draw > Draw mesh) le parecia a este menu un click
+    // AFUERA, lo cerraba todo y no se creaba nada
     if (submenuAbierto && submenuAbierto->abierto &&
-        submenuAbierto->Contains(mx, my)){
+        submenuAbierto->ContieneConSubmenus(mx, my)){
         // el submenu se ACABA de abrir por este mismo toque (y quedo solapado bajo el dedo): NO seleccionar,
         // solo dejarlo abierto. El proximo toque ya si elige un item (tactil = 2 toques para submenus).
         if (g_submenuAcabaDeAbrir){ g_submenuAcabaDeAbrir = false; return -1; }
         int id = submenuAbierto->Click(mx, my);
         // si el submenu selecciono algo terminal (se cerro solo), lo ejecuto EN el submenu (dueno del id) y
         // cierro tambien ESTE menu. NO subo el id: colisiona por posicion con un item del padre (era el bug
-        // de "importar GLB -> Circle"). Ver la nota en Enter().
-        if (id >= 0 && !submenuAbierto->abierto){
+        // de "importar GLB -> Circle"). Ver la nota en Enter(). Si lo eligio un submenu MAS profundo, ese ya
+        // lo ejecuto (devuelve -1) y cerro su cadena: aca solo queda cerrar este.
+        if (!submenuAbierto->abierto){
             PopupMenu* sub = submenuAbierto;
             submenuAbierto = NULL;
             Cerrar();
-            sub->Ejecutar(id);
+            if (id >= 0) sub->Ejecutar(id);
             return -1; // ya ejecutado
         }
         return id;
@@ -596,10 +635,7 @@ bool PopupMenu::AbrirSubmenuActual(){
     MenuItem* it = ItemActual();
     if (!it || !it->submenu) return false;
     if (it->gris && !*it->gris) return false; // deshabilitado
-    int oy = titulo.empty() ? 0 : (RenglonHeightGS + gapGS);
-    it->submenu->Abrir(x + width - gapGS,
-                       y + borderGS + oy + (selectIndex - scroll) * (RenglonHeightGS + gapGS), // fila VISIBLE
-                       MenuPantallaW, MenuPantallaH);
+    AbrirSubmenuAlLado(it->submenu, selectIndex);
     it->submenu->selectIndex = 0; // pre-seleccion (Abrir lo deja en -1)
     submenuAbierto = it->submenu;
     return true;

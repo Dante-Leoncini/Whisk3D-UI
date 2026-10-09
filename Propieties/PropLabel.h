@@ -12,6 +12,7 @@ class PropLabel : public PropertieBase {
     public:
         bool oculto;
         bool wrap;                       // word-wrap multilinea (por espacios)
+        bool rojo;                       // un ERROR (el rojo de los errores del editor), no un aviso gris
         std::vector<std::string> lineas; // lineas ya cortadas (las recalcula Resize en modo wrap)
 
         PropLabel(const std::string& Name, bool Wrap = false);

@@ -4,6 +4,7 @@
 PropLabel::PropLabel(const std::string& Name, bool Wrap) : PropertieBase(Name) {
     oculto = false;
     wrap = Wrap;
+    rojo = false;
 }
 
 // parte 'txt' en lineas que entran en 'maxPix' pixeles, cortando SOLO en ESPACIOS (word-wrap). Si una palabra
@@ -57,7 +58,8 @@ void PropLabel::RenderPropertiLabel(Card* propertiBox) {
     if (oculto) return;
     // texto a lo ancho de toda la fila (el pase de labels esta parado en el borde derecho de la caja:
     // volver al margen izquierdo). Gris tenue, alineado a la izquierda.
-    SetColorID(ColorID::grisUI, 1.0f);
+    if (rojo) w3dEngine::Color4f(0.92f, 0.28f, 0.24f, 1.0f);
+    else SetColorID(ColorID::grisUI, 1.0f);
     if (wrap && !lineas.empty()) {
         for (size_t k = 0; k < lineas.size(); k++) {
             w3dEngine::PushMatrix();

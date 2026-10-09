@@ -47,6 +47,7 @@ const char*  CheckboxTilde();           // el glyph del tilde
 // (la Card es un 9-patch del atlas y el tilde es texto). Lo usan los menus; el panel de propiedades dibuja la
 // caja y el tilde en pasadas separadas (su render es por fases) pero saca de aca tamaño y colores.
 void DibujarCheckbox(int lado, bool on);
+void DibujarMuestraColor(int lado, const float* rgba);   // un cuadrado de ese color (la caja del checkbox)
 
 class Card : public Object2D {
 	public:

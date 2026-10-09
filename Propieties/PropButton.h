@@ -8,8 +8,10 @@
 class PropButton : public PropertieBase {
     public:
         Button* button;
-        bool conLabel; // true: el NOMBRE a la izquierda (columna de etiquetas) y el boton SOLO
-                       // en la columna de valores (para los desplegables). false: boton a lo ancho.
+        bool conLabel; // true (los desplegables): el NOMBRE a la izquierda, del ancho de su texto, y el boton en TODO
+                       // el resto del renglon. false: boton a lo ancho.
+        int colBoton;  // (conLabel) donde empieza el boton, desde el borde izquierdo del renglon (lo calcula Resize)
+        int ColBoton() const { return conLabel ? colBoton : 0; }
         bool oculto; // true: no ocupa fila (material por defecto)
         bool gris;   // true: se dibuja atenuado y NO ejecuta su accion (ej: Render Animation sin animaciones)
         void (*action)(); // que hace el boton al activarse (o NULL)

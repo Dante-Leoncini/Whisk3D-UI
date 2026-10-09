@@ -20,6 +20,7 @@
 #include "w3dTexture.h"   // UploadRGBA (antes dependia del orden de includes del caller)
 #include "stb/stb_image.h"
 #include <map>
+#include <vector>
 #include <string.h>
 
 namespace w3dui {
@@ -120,7 +121,6 @@ struct W3dTextAtlas {
         gfx::EnableArray(gfx::VertexArray); gfx::EnableArray(gfx::TexCoordArray);
         gfx::DisableArray(gfx::ColorArray); gfx::DisableArray(gfx::NormalArray); // usar Color4f constante
     }
-    void End() const { gfx::DisableArray(gfx::TexCoordArray); gfx::Disable(gfx::Blend); }
 
     // dibuja UN glifo (pen en x,y = cima del ascender, ortho Y-DOWN). Devuelve el avance a tamanio px.
     // Para letras de tamanio VARIABLE: llamalo por glifo con distinto px / color y posiciona a mano.
@@ -142,9 +142,30 @@ struct W3dTextAtlas {
     }
 
     // texto uniforme. x,y = pen (y = cima del ascender). Devuelve el ancho dibujado. Llama Begin() antes.
+    // UN draw por cadena: los glifos se juntan en un buffer (antes era un draw -y dos punteros- por LETRA: un
+    // "Score: 12345" eran 33 llamadas al driver, ahora 4)
     float DrawText(const char* s, float x, float y, float px, float r, float g, float b, float a) const {
-        if (!s) return 0; float x0 = x;
-        while (*s) x += DrawGlyph(NextCp(s), x, y, px, r, g, b, a);
+        if (!s) return 0;
+        const float x0 = x, sc = px / (float)fontPx;
+        static std::vector<float> V, UV;   // (reusados: sin allocs despues del primer texto largo)
+        V.clear(); UV.clear();
+        while (*s) {
+            const W3dAtlasGlyph* gl = Glyph(NextCp(s));
+            if (!gl) continue;
+            if (gl->w > 0 && gl->h > 0) {
+                const float gx0 = x + gl->xoff * sc, gy0 = y + gl->yoff * sc, gx1 = gx0 + gl->w * sc, gy1 = gy0 + gl->h * sc;
+                const float v[18]  = { gx0,gy0,0, gx1,gy0,0, gx1,gy1,0,  gx0,gy0,0, gx1,gy1,0, gx0,gy1,0 };
+                const float uv[12] = { gl->u0,gl->v0, gl->u1,gl->v0, gl->u1,gl->v1,  gl->u0,gl->v0, gl->u1,gl->v1, gl->u0,gl->v1 };
+                V.insert(V.end(), v, v + 18); UV.insert(UV.end(), uv, uv + 12);
+            }
+            x += gl->advance * sc;
+        }
+        if (!V.empty()) {
+            gfx::VertexPointer3f(0, &V[0]); gfx::TexCoordPointer2f(0, &UV[0]);
+            if (mezcla == gfx::MezclaPremult) gfx::Color4f(r*a, g*a, b*a, a);
+            else                              gfx::Color4f(r, g, b, a);
+            gfx::DrawTrianglesArray((int)(V.size() / 3));
+        }
         return x - x0;
     }
 };

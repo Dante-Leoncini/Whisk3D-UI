@@ -174,6 +174,13 @@ const float* CheckboxColorCaja(bool on){
 const float* CheckboxColorTilde(){ return ListaColores[static_cast<int>(ColorID::background)]; }
 const char*  CheckboxTilde(){ return "\xE2\x9C\x94"; }
 
+void DibujarMuestraColor(int lado, const float* rgba){
+    static Card* caja = NULL;
+    if (!caja) caja = new Card(NULL, lado, lado);
+    caja->Resize(lado, lado);
+    w3dEngine::Color4f(rgba[0], rgba[1], rgba[2], 1.0f);
+    caja->RenderObject(false);
+}
 void DibujarCheckbox(int lado, bool on){
     static Card* caja = NULL;
     if (!caja) caja = new Card(NULL, lado, lado);

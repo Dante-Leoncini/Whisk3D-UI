@@ -112,11 +112,18 @@ class PopupMenu {
         void Abrir(int sx, int sy, int pantallaW, int pantallaH);
         void Cerrar();
         bool Contains(int mx, int my) const;
+        // el punto cae en ESTE menu o en alguno de sus submenus ABIERTOS, a cualquier profundidad (un
+        // sub-submenu se extiende mas alla del submenu directo: Add > Core > Draw > Draw mesh)
+        bool ContieneConSubmenus(int mx, int my) const;
 
         void Render();      // en ortho 2D de PANTALLA completa
         // abre/cierra el submenu segun la fila resaltada (selectIndex): SOLO por
         // hover de mouse (las flechas ya NO lo auto-abren; se abre con der/enter/ok)
         void SincronizarSubmenu();
+        // abre 'sub' al lado de la fila 'fila': a la derecha si entra, si no a la izquierda; si no entra de ningun lado,
+        // angostado y dejando SIEMPRE a la vista una columna de este menu (para pasar el mouse a las otras opciones)
+        void AbrirSubmenuAlLado(PopupMenu* sub, int fila);
+        void AnchoMax(int w);   // lo angosta (el texto de cada fila se recorta)
         bool MouseMove(int mx, int my); // hover + auto-cierre por lejania
         int Click(int mx, int my);  // id elegido, -1 nada, -2 abrio submenu
         int Enter();                // idem Click sobre la opcion resaltada
