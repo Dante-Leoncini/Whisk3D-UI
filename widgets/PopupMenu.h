@@ -31,6 +31,7 @@ class PopupMenu;
 //  agregar un item sin su accion). PopupMenu::Construir(tabla) arma el menu; el id de cada item es su fila.
 // ---------------------------------------------------------------------------------------------------------------
 class PopupMenu;
+class MenuItem;
 struct MenuDef {
     const char* text;       // la CLAVE es el texto. Se traduce con el hook de abajo al construir.
     void      (*accion)();  // que hace el item. NULL = es submenu (ver 'submenu') o item padre sin accion.
@@ -44,6 +45,10 @@ struct MenuDef {
 // Traduccion opcional de los textos de menu. El toolkit NO conoce el sistema de idiomas del editor: si la app
 // instala este hook (con su T()), las tablas salen traducidas; si queda NULL, el texto va tal cual.
 extern const char* (*W3dMenuTraducir)(const char*);
+// El hint de atajo que se MUESTRA. Los items guardan "@<funcion>" (no la tecla): la app instala este hook y devuelve lo
+// que corresponde (la combinacion configurada, la tecla del telefono...). Sin hook, un "@..." no se muestra.
+extern std::string (*W3dMenuAtajoTexto)(const std::string&);
+std::string MenuAtajoVisible(const MenuItem* it);
 
 class MenuItem {
     public:

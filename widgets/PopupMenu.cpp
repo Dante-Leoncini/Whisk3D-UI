@@ -10,10 +10,16 @@ int MenuPantallaH = 100000;
 // El atajo se dibuja a la IZQUIERDA de la flecha o la tilde (ver Render), por eso se suman.
 // Se usa item-por-item: el ancho del menu es el MINIMO que hace entrar cada fila (no una
 // columna unica compartida) y el label se recorta justo antes de ESTA columna.
+std::string (*W3dMenuAtajoTexto)(const std::string&) = NULL;
+std::string MenuAtajoVisible(const MenuItem* it){
+    if (!it || it->atajo.empty()) return std::string();
+    if (W3dMenuAtajoTexto) return W3dMenuAtajoTexto(it->atajo);
+    return (it->atajo[0] == '@') ? std::string() : it->atajo;
+}
 static int MenuItemDerecha(const MenuItem* it){
     if (it->valorFloat) return 80 * GlobalScale + gapGS; // slider (no convive con atajo)
     int icono = (it->submenu || it->checkbox) ? IconSizeGS : 0;
-    int atajo = (int)it->atajo.size() * CharacterWidthGS;
+    int atajo = (int)MenuAtajoVisible(it).size() * CharacterWidthGS;
     if (atajo > 0) return (icono > 0) ? icono + gapGS + atajo : atajo;
     return icono;
 }
@@ -406,7 +412,8 @@ void PopupMenu::Render(){
             RenderBitmapFloat(*items[i]->valorFloat, textAlign::center, sliderW);
             w3dEngine::PopMatrix();
         }
-        if (!items[i]->atajo.empty()){
+        const std::string atajoTxt = MenuAtajoVisible(items[i]);
+        if (!atajoTxt.empty()){
             // hint del atajo: gris tenue (un poco mas oscuro que el texto),
             // alineado al borde derecho del menu (igual en todos los menus)
             SetColorID(ColorID::grisUI, 0.5f);
@@ -415,7 +422,7 @@ void PopupMenu::Render(){
             if (items[i]->checkbox) atajoDX -= CheckboxLado() + gapGS; // dejar el checkbox a la derecha del atajo (no superponer)
             w3dEngine::PushMatrix();
             w3dEngine::Translatef((GLfloat)atajoDX, 0, 0);
-            RenderBitmapText(items[i]->atajo, textAlign::right, width);
+            RenderBitmapText(atajoTxt, textAlign::right, width);
             w3dEngine::PopMatrix();
         }
         w3dEngine::Translatef(0, (GLfloat)(RenglonHeightGS + gapGS), 0);
