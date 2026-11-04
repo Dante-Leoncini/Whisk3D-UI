@@ -33,7 +33,10 @@ static const char* KNombres[ICON_TOTAL] = {
     "menos", "igual", "niebla", "limpiarz", "recorte", "hitbox",
     "animacion", "prefab", "libreria",
     "sonido", "script", "video", "filtro",
-    "candado"
+    "candado",
+    "interp_constant", "interp_linear", "interp_bezier",
+    "numero", "reloj", "columnas", "filas", "maximizar", "minimizar", "expandir",
+    "candado_abierto", "consola"
 };
 const char* IconoNombre(int i) {
     return (i >= 0 && i < (int)ICON_TOTAL) ? KNombres[i] : "";
@@ -128,7 +131,20 @@ static const IconRect* TablaLegacy() {
         {  73, 93, 10, 10 }, // video
         { 109, 57, 10, 10 }, // filtro
         // el de las librerias: arte NUEVO. Sin su png cae a la carpeta (el de la libreria)
-        {  85, 81, 10, 10 }  // candado
+        {  85, 81, 10, 10 }, // candado
+        // los de la interpolacion: arte NUEVO. Sin su png caen a la rayita (se lee como "una curva")
+        {  72, 117, 10, 10 }, // interp_constant
+        {  72, 117, 10, 10 }, // interp_linear
+        {  72, 117, 10, 10 }, // interp_bezier
+        {  72, 117, 10, 10 }, // numero (arte NUEVO: sin su png, la rayita)
+        {  72, 117, 10, 10 }, // reloj (arte NUEVO: sin su png, la rayita)
+        {  72, 117, 10, 10 }, // columnas (idem)
+        {  72, 117, 10, 10 }, // filas (idem)
+        {  72, 117, 10, 10 }, // maximizar (idem)
+        {  72, 117, 10, 10 }, // minimizar (idem)
+        {  72, 117, 10, 10 }, // expandir (idem)
+        {  85, 81, 10, 10 },  // candado_abierto (arte NUEVO: sin su png, la carpeta como el candado)
+        {  73, 93, 10, 10 }   // consola (arte NUEVO: sin su png, el del script)
     };
     return lista;
 }

@@ -30,6 +30,10 @@ class PropFloat : public PropertieBase {
         bool entero;                // muestra/escalona como entero (redondeado)
         bool centrado;              // centra el valor en su columna
         bool flechas;               // dibuja < > clickeables a los lados
+        // una LISTA DE OPCIONES (con 'entero'): el valor es el indice y se muestra su nombre (en ingles: se traduce con
+        // W3dMenuTraducir). Asi un "elegir uno" (Width Type: Offset / Width / Depth...) usa las mismas flechas < >
+        const char* const* opciones;
+        int nOpciones;
         // ACELERACION del izq/der: arranca en 1 y acelera de a poco.
         // OFF por defecto -> los contadores click-a-click (cortes, segmentos de cilindro/esfera) siguen igual.
         bool acelera;

@@ -54,7 +54,7 @@ void PropBool::RenderPropertiLabel(Card* propertiBox){
         float dx = (float)(width - PropColEtiqueta - cb - bordersGS - gapGS - g_propKeyBtnCol);
         int wLabel = width - cb - bordersGS - gapGS * 2 - g_propKeyBtnCol;
         w3dEngine::Translatef(dx, 0, 0);
-        RenderBitmapText(name, textAlign::right, wLabel);
+        RenderBitmapEtiqueta(name, wLabel);
         w3dEngine::Translatef(-dx, RenglonHeightGS + gapGS, 0);
     }
 };

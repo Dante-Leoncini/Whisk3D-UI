@@ -51,18 +51,8 @@ class PropText : public PropertieBase {
         void RenderPropertiValue(Card* propertiBox) {
             if (oculto) return;
             int boxW = propertiBox->width - bordersGS;
-            bool foco = (g_textFieldActivo == &field);
-            if (foco && field.selectAll) {
-                // TODO seleccionado (al renombrar): texto en color accent, SIN caret. Tipear lo reemplaza.
-                w3dEngine::Color4fv(ListaColores[static_cast<int>(ColorID::accent)]);
-                RenderBitmapText(field.text, textAlign::left, boxW);
-                w3dEngine::Color4fv(ListaColores[static_cast<int>(ColorID::blanco)]); // restaurar
-            } else {
-                std::string shown = field.text;
-                if (foco) // cursor "|" en la posicion del caret
-                    shown = field.text.substr(0, field.caret) + "|" + field.text.substr(field.caret);
-                RenderBitmapText(shown, textAlign::left, boxW);
-            }
+            // (todo seleccionado: fondo atras del texto, tipear lo reemplaza; si no, el cursor que parpadea)
+            RenderTextField(field, g_textFieldActivo == &field, textAlign::left, boxW);
             w3dEngine::Translatef(0, RenglonHeightGS + gapGS, 0);
         }
         void RenderPropertiLabel(Card* propertiBox) {

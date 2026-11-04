@@ -60,7 +60,11 @@ PropListMeshParts::PropListMeshParts(const std::string& Name):
 // la MISMA lista sirve para parts / uv maps / color layers / anim clips / vertex groups /
 // UV groups (segun 'modo'). Los dos grupos de pesos son entidades DISTINTAS (ver Mesh.h):
 // modo 4 = vertexGroups (por control-point, rig 3D); modo 9 = uvGroups (por corner, rig 2D).
+int (*PostFilasCount)() = NULL;
+std::string (*PostFilaTexto)(int) = NULL;
+void (*PostFilaSeleccionar)(int) = NULL;
 int PropListMeshParts::ListaCount() const {
+    if (modo == 15) return PostFilasCount ? PostFilasCount() : 0;   // la pila de postprocesado
     if (modo == 13) return MixFilasCount ? MixFilasCount() : 0;   // arbol del MIX
     if (modo == 14) return RutinaFilasCount ? RutinaFilasCount(obj) : 0;   // pasos de una rutina
     if (modo == 5) return arm ? (int)arm->animations.size() : 0; // clips de animacion (armature)
@@ -79,6 +83,7 @@ int PropListMeshParts::ListaCount() const {
     return (int)mesh->materialsGroup.size();
 }
 std::string PropListMeshParts::ListaNombre(int i) const {
+    if (modo == 15) return PostFilaTexto ? PostFilaTexto(i) : std::string();
     if (modo == 13) return MixFilaTexto ? MixFilaTexto(i) : std::string();
     if (modo == 14) return RutinaFilaTexto ? RutinaFilaTexto(obj, i) : std::string();
     if (modo == 5) return (arm && i >= 0 && i < (int)arm->animations.size()) ? arm->animations[i]->name : std::string();
@@ -104,6 +109,7 @@ std::string PropListMeshParts::ListaNombre(int i) const {
 }
 void PropListMeshParts::ListaSeleccionar(int i) {
     selectIndex = i;
+    if (modo == 15) { if (PostFilaSeleccionar) PostFilaSeleccionar(i); return; }
     if (modo == 13) { if (MixFilaSeleccionar) MixFilaSeleccionar(i); return; }
     if (modo == 14) { if (RutinaFilaSeleccionar) RutinaFilaSeleccionar(obj, i); return; }
     if (modo == 5) { if (arm){ arm->animActiva = i;                              // clip: activo + sincroniza la seleccion

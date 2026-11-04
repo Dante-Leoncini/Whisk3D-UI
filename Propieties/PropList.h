@@ -25,6 +25,10 @@ extern int (*RutinaFilaValor)(Object* o, int fila, float* rgba);
 // arrastrando un paso: la fila donde caeria (se dibuja una linea arriba de ella; -1 = no se arrastra)
 extern int g_rutinaFilaDestino;
 extern int  (*MixFilaActiva)();
+// modo 15: la pila de POSTPROCESADO (render/Postproceso.h, del editor): la llenan estos ganchos (Properties.cpp)
+extern int (*PostFilasCount)();
+extern std::string (*PostFilaTexto)(int fila);
+extern void (*PostFilaSeleccionar)(int fila);
 extern int  (*MixFilaPlegada)(int fila);      // -1 no se pliega (capa), 0 desplegada, 1 plegada
 extern int  (*MixFilaIcono)(int fila);        // IconType de la fila
 

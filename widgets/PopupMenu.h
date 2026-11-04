@@ -68,6 +68,7 @@ class MenuItem {
                             // (ej: el modo de pivot actual en el menu de pivot)
         float* valorFloat;  // NULL = opcion comun; si no, es un SLIDER (ej: size)
         float vmin, vmax;   // rango del slider (click en la barra setea el valor)
+        bool lineaArriba;   // una LINEA separadora arriba de esta fila (separa dos grupos de opciones)
 
         MenuItem(const std::string& Text, int Id, int Icon = -1,
                  PopupMenu* Submenu = NULL, bool* Checkbox = NULL);
@@ -87,6 +88,9 @@ class PopupMenu {
         int selectIndex;    // opcion resaltada (-1 = ninguna)
         int scroll;         // primera fila VISIBLE (>0 cuando el menu es mas alto que la pantalla -> scrollbar)
         bool abierto;
+        // se cierra solo si el mouse se aleja (default). false = uno que no se abrio en el mouse (centrado en la pantalla,
+        // como el de "pantalla externa"): el mouse tiene que poder ir hasta el
+        bool cerrarLejos;
         PopupMenu* submenuAbierto;
         Card* card;
         Card* highlight;

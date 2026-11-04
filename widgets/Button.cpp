@@ -20,6 +20,8 @@ Button::Button(const std::string& Text, int Icon, bool Adaptar){
     colorBorde = NULL;
     alpha = 1.0f;
     iconFlip = 0;
+    relleno = NULL;
+    barra = -1.0f;
     editField = NULL;
     rol = -1;
     width = 10;
@@ -83,13 +85,39 @@ void Button::Render(){
     else if (hover)      w3dEngine::Color4f(blanco[0], blanco[1], blanco[2], a);
     else                 w3dEngine::Color4f(fondo[0], fondo[1], fondo[2], a);
     card->RenderBorder(false);
+    // la BARRA de un numero de 0 a 1 (el relleno de su largo, en accent oscuro)
+    if (barra >= 0.0f && !editField) {
+        const float f = barra > 1.0f ? 1.0f : barra;
+        const int wb = (int)((float)(width - 2 * GlobalScale) * f);
+        if (wb > 0) {
+            const float* ad = ListaColores[static_cast<int>(ColorID::accentDark)];
+            w3dEngine::Color4f(ad[0], ad[1], ad[2], a);
+            w3dEngine::PushMatrix();
+            w3dEngine::Translatef((GLfloat)GlobalScale, (GLfloat)GlobalScale, 0);
+            card->Resize(wb, height - 2 * GlobalScale); card->RenderObject(false);
+            card->Resize(width, height);
+            w3dEngine::PopMatrix();
+        }
+    }
+    // el CUADRADO de color (el color base, la emision): ocupa el boton con un margen
+    if (relleno) {
+        const int m = 3 * GlobalScale;
+        w3dEngine::Color4f(relleno[0], relleno[1], relleno[2], 1.0f);
+        w3dEngine::PushMatrix();
+        w3dEngine::Translatef((GLfloat)m, (GLfloat)m, 0);
+        card->Resize(width - 2 * m, height - 2 * m); card->RenderObject(false);
+        card->Resize(width, height);
+        w3dEngine::PopMatrix();
+    }
     w3dEngine::PopMatrix();
 
     // contenido: icono opcional a la izquierda + texto (se recorta si
     // el texto es mas grande que el boton)
     w3dEngine::PushMatrix();
     int x0 = gapGS;
-    if (centrado && !editField) { // como INPUT (editField) se alinea a la IZQUIERDA, no centrado
+    // solo ICONO (sin texto): centrado en el boton (los cuadrados de solo icono quedaban corridos a la derecha)
+    if (text.empty() && icon >= 0 && !editField) { x0 = (width - IconSizeGS) / 2; if (x0 < 0) x0 = 0; }
+    else if ((centrado || barra >= 0.0f) && !editField) {   // (el numero de una barra va en el medio) // como INPUT (editField) se alinea a la IZQUIERDA, no centrado
         // icono+texto centrados en el boton (OK / Cancel / switch)
         int contenido = (int)text.size() * CharacterWidthGS;
         if (icon >= 0) contenido += IconSizeGS + (text.empty() ? 0 : gapGS);
@@ -103,7 +131,6 @@ void Button::Render(){
     const float* tc = colorTexto ? colorTexto
         : (focoMenu ? ListaColores[static_cast<int>(ColorID::accent)]
         : (hover ? blanco : ListaColores[static_cast<int>(ColorID::grisUI)]));
-    if (editField && editField->selectAll) tc = ListaColores[static_cast<int>(ColorID::accent)]; // todo sel
     w3dEngine::Color4f(tc[0], tc[1], tc[2], 1.0f);
     if (icon >= 0) {
         w3dEngine::PushMatrix();
@@ -122,15 +149,13 @@ void Button::Render(){
         w3dEngine::Translatef((GLfloat)(IconSizeGS + gapGS), 0, 0);
         disponible -= IconSizeGS + gapGS;
     }
-    // texto: si es un INPUT (editField), su texto + caret "|" (sin caret si esta TODO seleccionado)
-    std::string shown = text;
-    if (editField) {
-        if (editField->selectAll) shown = editField->text;
-        else shown = editField->text.substr(0, editField->caret) + "|" + editField->text.substr(editField->caret);
-    }
-    if (!shown.empty() && disponible > 0) {
+    // texto: si es un INPUT (editField), el campo (todo seleccionado = fondo atras; si no, el cursor que parpadea)
+    if (editField && disponible > 0) {
         w3dEngine::Translatef(0, (GLfloat)((height - LetterHeightGS) / 2), 0);
-        RenderBitmapText(shown, textAlign::left, disponible);
+        RenderTextField(*editField, g_textFieldActivo == editField, textAlign::left, disponible);
+    } else if (!text.empty() && disponible > 0) {
+        w3dEngine::Translatef(0, (GLfloat)((height - LetterHeightGS) / 2), 0);
+        RenderBitmapText(text, textAlign::left, disponible);
     }
     w3dEngine::PopMatrix();
 

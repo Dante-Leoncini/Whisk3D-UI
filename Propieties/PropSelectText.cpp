@@ -22,7 +22,7 @@ void PropSelectText::RenderPropertiValue(Card* propertiBox){
 }
 
 void PropSelectText::RenderPropertiLabel(Card* propertiBox){
-    RenderBitmapText(name, textAlign::right, PropColEtiqueta - bordersGS);
+    RenderBitmapEtiqueta(name, PropColEtiqueta - bordersGS);
     w3dEngine::Translatef(0, RenglonHeightGS + gapGS, 0);
 };
 

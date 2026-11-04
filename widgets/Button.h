@@ -51,10 +51,16 @@ class Button {
                             // barAlpha de la barra para que los botones dejen ver la escena
                             // igual que el fondo sobre el que estan.
         int iconFlip;       // 0 nada, 1 flip horizontal, 2 flip vertical
+        const float* relleno; // != NULL: un CUADRADO de ese color adentro del boton (el color base / la emision de un
+                              // material: se abre su selector de color)
+        float barra;        // >= 0: el boton es un NUMERO de 0 a 1: una barra de ese largo (accent) y el valor en el medio
+                            // (se arrastra de izquierda a derecha; un click lo deja escribir). < 0 = boton comun
         TextField* editField; // != NULL: el boton se dibuja como INPUT de texto (rename in-place). El
                               // texto/caret salen de aca; al confirmar/cancelar se vuelve a poner NULL.
         int rol;            // ROL estable del boton en la barra (se busca por rol, NO por indice:
                             // reordenar la barra no rompe el dispatch). -1 = sin rol.
+        std::string ayuda;  // el CARTELITO de ayuda (en INGLES, la UI lo pasa por T()): lo que es un boton de solo icono.
+                            // Aparece al dejar el mouse encima un momento y se va solo (W3dAyudaRender). "" = sin cartel
         Card* card;
 
         Button(const std::string& Text, int Icon = -1, bool Adaptar = true);

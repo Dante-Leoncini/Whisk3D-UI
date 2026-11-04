@@ -23,7 +23,7 @@ extern GLshort IconLineMesh[8];
 extern int IconSize;
 extern int IconSizeGS;
 
-const size_t ICON_TOTAL = 70; // (constexpr es C++11)
+const size_t ICON_TOTAL = 82; // (constexpr es C++11)
 
 // dialecto C++03 compartido
 struct IconType {
@@ -105,7 +105,26 @@ struct IconType {
         video,     // pantalla con un "play": un video
         filtro,    // embudo: el filtro por tipo de la biblioteca
         // las LIBRERIAS externas: lo que genera un proxy W3D es de SOLO LECTURA (outliner)
-        candado    // candado cerrado: de solo lectura (lo generado por un proxy de una libreria)
+        candado,   // candado cerrado: de solo lectura (lo generado por un proxy de una libreria)
+        // la INTERPOLACION de una key (timeline: Key > Interpolation Mode; Properties > Keyframe)
+        interp_constant,   // escalon: el valor se queda y salta en la key siguiente
+        interp_linear,     // recta
+        interp_bezier,     // curva suave
+        // un MAPA del material como NUMERO (para toda la superficie) en vez de una textura
+        numero,
+        // un RELOJ: el tipo de viewport Linea de tiempo (el boton de tipo de su barra)
+        reloj,
+        // dividir un viewport (el menu de tipo): dos cuadrados lado a lado (en columnas) o uno arriba del otro (en filas)
+        columnas,
+        filas,
+        // el menu de tipo: MAXIMIZAR (un rectangulo), MINIMIZAR (dos rectangulos superpuestos), EXPANDIR (flechas en las esquinas)
+        maximizar,
+        minimizar,
+        expandir,
+        // el candado ABIERTO (el de la vista de camara: abierto = navegar te saca de la camara)
+        candadoAbierto,
+        // una TERMINAL (">_" en una ventana): el viewport Consola
+        consola
     };
     Enum v;
     IconType(Enum e) : v(e) {}

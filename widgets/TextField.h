@@ -39,6 +39,11 @@ struct TextField {
 };
 
 extern TextField* g_textFieldActivo;  // el campo enfocado (NULL = ninguno)
+// EL DIBUJO de un campo (bitmapText.cpp), en el origen actual y con el color actual. Sin foco: el texto. Con foco y
+// TODO seleccionado: un fondo atras del texto (tipear reemplaza). Si no: el CURSOR, un palito que parpadea.
+// align = textAlign (0 izquierda, 1 derecha, 2 centro). Igual en las 5 plataformas (PC, Symbian, Android, web, Mac).
+void RenderTextField(const TextField& f, bool foco, int align, int maxPixels);
+bool TextFieldParpadeoTick();         // true = el palito cambio (prendido/apagado): redibujar
 bool TextFieldInputChar(int c);       // alimenta el campo activo: 8=backspace, 127=supr, imprimibles
 
 // ---- CANCELAR (Esc en PC, C/Cancel en el keypad) ----

@@ -47,7 +47,7 @@ PropFloat::PropFloat(const std::string& Name, const std::string& Unit):
     dragStep = 0.1f;   // por pixel arrastrado
     minVal = 0.0f; maxVal = 1.0f; tieneRango = false;
     onChange = NULL;
-    entero = false; centrado = false; flechas = false;
+    entero = false; centrado = false; flechas = false; opciones = NULL; nOpciones = 0;
     acelera = false; holdDir = 0; holdCount = 0;
     animProp = -1; animComp = 0;
     // (unit viene del init-list: el ° de rotacion vive)
@@ -95,14 +95,7 @@ void PropFloat::RenderPropertiValue(Card* propertiBox){
         textAlign al = centrado ? textAlign::center : textAlign::left;
         // EDITANDO POR TEXTO: mostrar el campo (con TODO seleccionado en accent, o con caret) en vez del valor.
         if (g_propFloatEditando == this && g_textFieldActivo == &field){
-            if (field.selectAll){
-                w3dEngine::Color4fv(ListaColores[static_cast<int>(ColorID::accent)]); // todo sel: tipear reemplaza
-                RenderBitmapText(field.text, al, boxW);
-                w3dEngine::Color4fv(ListaColores[static_cast<int>(ColorID::blanco)]);
-            } else {
-                std::string shown = field.text.substr(0, field.caret) + "|" + field.text.substr(field.caret);
-                RenderBitmapText(shown, al, boxW);
-            }
+            RenderTextField(field, true, al, boxW);
             w3dEngine::Translatef(0, RenglonHeightGS + gapGS, 0);
             return;
         }
@@ -116,7 +109,11 @@ void PropFloat::RenderPropertiValue(Card* propertiBox){
             RenderBitmapText(">", textAlign::center, aw);
             w3dEngine::PopMatrix();
         }
-        if (entero){
+        if (entero && opciones && nOpciones > 0){
+            int r = (int)(*value + 0.5f); if (r < 0) r = 0; if (r >= nOpciones) r = nOpciones - 1;
+            extern const char* (*W3dMenuTraducir)(const char*);
+            RenderBitmapText(W3dMenuTraducir ? W3dMenuTraducir(opciones[r]) : opciones[r], al, boxW);
+        } else if (entero){
             int r = (int)(*value + 0.5f); // vertices: siempre >= 3 (positivo)
             std::ostringstream ss; ss << r << unit;   // la unidad tambien en enteros ("px")
             RenderBitmapText(ss.str(), al, boxW);
@@ -129,7 +126,7 @@ void PropFloat::RenderPropertiValue(Card* propertiBox){
 
 void PropFloat::RenderPropertiLabel(Card* propertiBox){
     if (value){
-        RenderBitmapText(name, textAlign::right, PropColEtiqueta - bordersGS);
+        RenderBitmapEtiqueta(name, PropColEtiqueta - bordersGS);
         w3dEngine::Translatef(0, RenglonHeightGS + gapGS, 0);
     }
 };

@@ -60,6 +60,7 @@ void MenuSliderDragSoltar(){
 MenuItem::MenuItem(const std::string& Text, int Id, int Icon, PopupMenu* Submenu,
                    bool* Checkbox){
     // (eran inicializadores de clase: C++03)
+    lineaArriba = false;
     text = Text;
     id = Id;
     icon = Icon;
@@ -77,6 +78,7 @@ const char* (*W3dMenuTraducir)(const char*) = NULL;
 
 PopupMenu::PopupMenu(){
     titulo = "";
+    cerrarLejos = true;
     x = 0;
     y = 0;
     width = 10;
@@ -339,6 +341,21 @@ void PopupMenu::Render(){
     int _first = scroll, _last = scroll + FilasVisibles();
     if (_first < 0) _first = 0; if (_last > (int)items.size()) _last = (int)items.size();
     for (int i = _first; i < _last; i++){
+        // la LINEA separadora de un grupo (en el gap de arriba de la fila; el mismo gris que la del titulo)
+        if (items[i]->lineaArriba && i > _first) {
+            const float* ac = ListaColores[static_cast<int>(ColorID::grisLinea)];
+            const float y1 = (float)(-gapGS / 2 + 1), y0 = y1 - 1.0f;   // 1 px de alto (exacto, no escalado)
+            const float x0 = (float)gapGS, x1 = (float)(width - bordersGS);
+            GLfloat sep[18] = { x0,y0,0,  x1,y0,0,  x1,y1,0,
+                                x0,y0,0,  x1,y1,0,  x0,y1,0 };
+            w3dEngine::Color4f(ac[0], ac[1], ac[2], 1.0f);
+            w3dEngine::Disable(w3dEngine::Texture2D);
+            w3dEngine::DisableArray(w3dEngine::TexCoordArray);
+            w3dEngine::VertexPointer3f(0, sep);
+            w3dEngine::DrawTrianglesArray(6);
+            w3dEngine::EnableArray(w3dEngine::TexCoordArray);
+            w3dEngine::Enable(w3dEngine::Texture2D);
+        }
         bool resaltada = (i == selectIndex);
         if (resaltada){
             SetColorID(ColorID::headerColor, 1.0f);
@@ -360,7 +377,11 @@ void PopupMenu::Render(){
         w3dEngine::PushMatrix();
         w3dEngine::Translatef((GLfloat)gapGS, 0, 0);
         if (items[i]->icon >= 0){
+            // 1 px MAS ABAJO (exacto, no escalado): asi queda centrado en vertical con el texto de la fila
+            w3dEngine::PushMatrix();
+            w3dEngine::Translatef(0, 1.0f, 0);
             W3dDrawStrip4(IconMesh, IconsUV[items[i]->icon]->uvs);
+            w3dEngine::PopMatrix();
         }
         int textStartX = gapGS + (hayIconos ? IconSizeGS + gapGS : 0);
         if (hayIconos) w3dEngine::Translatef((GLfloat)(IconSizeGS + gapGS), 0, 0);
@@ -511,10 +532,10 @@ bool PopupMenu::MouseMove(int mx, int my){
     if (submenuAbierto && submenuAbierto->abierto){
         if (submenuAbierto->MouseMove(mx, my)) return true;
     }
-    // lejos de todo: el menu se cierra solo
+    // lejos de todo: el menu se cierra solo (salvo el que no se abrio en el mouse, ver cerrarLejos)
     int margen = 60 * GlobalScale;
-    if (mx < x - margen || mx > x + width + margen ||
-        my < y - margen || my > y + height + margen){
+    if (cerrarLejos && (mx < x - margen || mx > x + width + margen ||
+        my < y - margen || my > y + height + margen)){
         Cerrar();
     }
     return abierto;
