@@ -23,7 +23,7 @@ extern GLshort IconLineMesh[8];
 extern int IconSize;
 extern int IconSizeGS;
 
-const size_t ICON_TOTAL = 82; // (constexpr es C++11)
+const size_t ICON_TOTAL = 103; // (constexpr es C++11)
 
 // dialecto C++03 compartido
 struct IconType {
@@ -124,7 +124,16 @@ struct IconType {
         // el candado ABIERTO (el de la vista de camara: abierto = navegar te saca de la camara)
         candadoAbierto,
         // una TERMINAL (">_" en una ventana): el viewport Consola
-        consola
+        consola,
+        // las curvas de EASING (timeline: Set Keyframe Interpolation): por fuerza y con efecto
+        interp_sine, interp_quad, interp_cubic, interp_quart, interp_quint, interp_expo, interp_circ,
+        interp_back, interp_bounce, interp_elastic,
+        // el EASING de esas curvas (Ctrl+E): automatico, al arrancar, al llegar, en las dos puntas
+        ease_auto, ease_in, ease_out, ease_inout,
+        // un PUNTO relleno: el Auto Keyframe del timeline (rojo = grabando)
+        grabar,
+        // los TIPOS DE HANDLE de un keyframe (timeline: Handle Type): un rombo y como salen sus brazos
+        handle_free, handle_aligned, handle_vector, handle_auto, handle_autoclamped, handle_flat
     };
     Enum v;
     IconType(Enum e) : v(e) {}

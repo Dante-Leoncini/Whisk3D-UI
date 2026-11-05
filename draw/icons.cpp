@@ -36,7 +36,9 @@ static const char* KNombres[ICON_TOTAL] = {
     "candado",
     "interp_constant", "interp_linear", "interp_bezier",
     "numero", "reloj", "columnas", "filas", "maximizar", "minimizar", "expandir",
-    "candado_abierto", "consola"
+    "candado_abierto", "consola",
+    "interp_sine", "interp_quad", "interp_cubic", "interp_quart", "interp_quint", "interp_expo", "interp_circ", "interp_back", "interp_bounce", "interp_elastic", "ease_auto", "ease_in", "ease_out", "ease_inout", "grabar",
+    "handle_free", "handle_aligned", "handle_vector", "handle_auto", "handle_autoclamped", "handle_flat"
 };
 const char* IconoNombre(int i) {
     return (i >= 0 && i < (int)ICON_TOTAL) ? KNombres[i] : "";
@@ -144,7 +146,29 @@ static const IconRect* TablaLegacy() {
         {  72, 117, 10, 10 }, // minimizar (idem)
         {  72, 117, 10, 10 }, // expandir (idem)
         {  85, 81, 10, 10 },  // candado_abierto (arte NUEVO: sin su png, la carpeta como el candado)
-        {  73, 93, 10, 10 }   // consola (arte NUEVO: sin su png, el del script)
+        {  73, 93, 10, 10 },  // consola (arte NUEVO: sin su png, el del script)
+        // las curvas de easing + su easing + el punto del auto key: arte NUEVO. Sin su png, la rayita
+        {  72, 117, 10, 10 }, // interp_sine
+        {  72, 117, 10, 10 }, // interp_quad
+        {  72, 117, 10, 10 }, // interp_cubic
+        {  72, 117, 10, 10 }, // interp_quart
+        {  72, 117, 10, 10 }, // interp_quint
+        {  72, 117, 10, 10 }, // interp_expo
+        {  72, 117, 10, 10 }, // interp_circ
+        {  72, 117, 10, 10 }, // interp_back
+        {  72, 117, 10, 10 }, // interp_bounce
+        {  72, 117, 10, 10 }, // interp_elastic
+        {  72, 117, 10, 10 }, // ease_auto
+        {  72, 117, 10, 10 }, // ease_in
+        {  72, 117, 10, 10 }, // ease_out
+        {  72, 117, 10, 10 }, // ease_inout
+        {  72, 117, 10, 10 }, // grabar
+        {  72, 117, 10, 10 }, // handle_free
+        {  72, 117, 10, 10 }, // handle_aligned
+        {  72, 117, 10, 10 }, // handle_vector
+        {  72, 117, 10, 10 }, // handle_auto
+        {  72, 117, 10, 10 }, // handle_autoclamped
+        {  72, 117, 10, 10 }  // handle_flat
     };
     return lista;
 }

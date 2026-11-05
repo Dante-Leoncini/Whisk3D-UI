@@ -38,6 +38,7 @@ class Button {
         bool visible;     // false: no se dibuja ni ocupa lugar en la barra
                           // (ej: el menu "Object" sin nada seleccionado)
         bool hover;
+        bool separador;  // toolbar: una LINEA VERTICAL antes del boton (arranca otro grupo, estilo Inkscape)
         bool focoMenu;   // menu enfocado con el teclado: borde+texto VERDE
         int width, height;
         int sx, sy;      // rect ABSOLUTO del ultimo render (hover/click)

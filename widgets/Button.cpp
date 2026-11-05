@@ -14,6 +14,7 @@ Button::Button(const std::string& Text, int Icon, bool Adaptar){
     cuadrado = false;
     visible = true;
     hover = false;
+    separador = false;
     focoMenu = false;
     tinte = NULL;
     colorTexto = NULL;
