@@ -52,46 +52,63 @@ void RenderBitmapText(const std::string& text, textAlign align, int maxPixels){
     if (align == textAlign::right)       x0 = (float)(-drawChars * cw);
     else if (align == textAlign::center) x0 = (float)((maxPixels - drawChars * cw) / 2);
 
-    // 4) armar UN buffer de posiciones + UVs para todos los glifos (offset x = drawn*cw horneado)
-    static std::vector<GLfloat> vbuf, ubuf; // reusados (sin alloc por frame tras el warmup)
-    vbuf.clear(); ubuf.clear();
+    // 4) armar los buffers de posiciones + UVs (offset x = drawn*cw horneado). DOS tandas: lo de font.png (casi todo)
+    //    y lo del atlas EXTENDIDO (marcas de acentos que no estan en font.png, el cirilico...: ver font.h). Si el
+    //    string no tiene nada del extendido, es un solo draw-call, como siempre.
+    static std::vector<GLfloat> vbuf, ubuf, vext, uext; // reusados (sin alloc por frame tras el warmup)
+    vbuf.clear(); ubuf.clear(); vext.clear(); uext.clear();
     const GLfloat* quad = WhiskFont->getMeshTri(); // 6 verts * (x,y) = 12 floats, glifo base en el origen
     i = start;
     int drawn = 0;
     while (i < text.size() && drawn < drawChars) {
         uint16_t cp = UTF8_Char(text.c_str(), i);
         if (cp != 0x20) {
-            // ACENTUADA: se dibuja la LETRA BASE y encima el acento, los dos del mismo atlas (ver font.h). Entra en
-            // el MISMO buffer -> sigue siendo un solo draw-call para el string entero.
+            // COMPUESTA (letra con acento, cedilla, dieresis...): se dibuja la LETRA BASE y la marca encima (o abajo)
             uint16_t base = cp;
-            Font::Acento ac = Font::Descomponer(cp, base);
-            const GLfloat* uv = WhiskFont->getUVTri(base); // 6 verts * (u,v) = 12 floats
+            const GLfloat* um = 0; const GLfloat* mm = 0; bool extMarca = false;
+            const bool compuesta = WhiskFont->Compuesta(cp, base, um, mm, extMarca);
+            // (si la marca no se pudo cargar, Compuesta deja la letra base: mejor sin acento que un '?')
+            const GLfloat* uv = 0; bool ext = false;
+            WhiskFont->Glifo(base, uv, ext);               // 6 verts * (u,v) = 12 floats (el '?' si no lo tiene)
             float dx = x0 + (float)(drawn * cw);
             const float dy = (float)WhiskFont->BajadaDe(base); // los derivados por rotacion no caen a la misma altura
+            std::vector<GLfloat>& vb = ext ? vext : vbuf;
+            std::vector<GLfloat>& ub = ext ? uext : ubuf;
             for (int v = 0; v < 6; v++) {
-                vbuf.push_back(quad[v*2] + dx); vbuf.push_back(quad[v*2+1] + dy);
-                ubuf.push_back(uv[v*2]);        ubuf.push_back(uv[v*2+1]);
+                vb.push_back(quad[v*2] + dx); vb.push_back(quad[v*2+1] + dy);
+                ub.push_back(uv[v*2]);        ub.push_back(uv[v*2+1]);
             }
-            if (ac != Font::AcentoNo) {
-                // la altura del acento depende de la LETRA que lleva abajo, no del acento
-                const bool mayus = (base >= 0x41 && base <= 0x5A);
-                const GLfloat* ma = WhiskFont->getMeshAcentoTri(mayus);
-                const GLfloat* ua = WhiskFont->getUVAcentoTri(ac);
+            if (compuesta && um) {
+                // agudo / tilde: su franja de 2px (la altura depende de la letra de abajo, ya elegida);
+                // las del extendido: la celda entera, con la malla del glifo (la marca ya esta en su fila)
+                const GLfloat* ma = mm ? mm : quad;
+                std::vector<GLfloat>& vm = extMarca ? vext : vbuf;
+                std::vector<GLfloat>& uvm = extMarca ? uext : ubuf;
                 for (int v = 0; v < 6; v++) {
-                    vbuf.push_back(ma[v*2] + dx); vbuf.push_back(ma[v*2+1]);
-                    ubuf.push_back(ua[v*2]);      ubuf.push_back(ua[v*2+1]);
+                    vm.push_back(ma[v*2] + dx); vm.push_back(ma[v*2+1]);
+                    uvm.push_back(um[v*2]);     uvm.push_back(um[v*2+1]);
                 }
             }
         }
         drawn++;
     }
-    if (vbuf.empty()) return; // string todo espacios
+    if (vbuf.empty() && vext.empty()) return; // string todo espacios
 
-    // 5) UN draw-call para el string entero
+    // 5) UN draw-call por atlas. Despues del extendido se vuelve a dejar font.png: el que dibuja a continuacion
+    //    (iconos del mismo atlas) puede contar con que sigue puesto.
+    if (!vbuf.empty()) {
+        w3dEngine::BindTexture(WhiskFont->getTexture());
+        w3dEngine::VertexPointer2f(0, &vbuf[0]);
+        w3dEngine::TexCoordPointer2f(0, &ubuf[0]);
+        w3dEngine::DrawTrianglesArray((int)(vbuf.size() / 2));
+    }
+    if (!vext.empty() && WhiskFont->getTextureExt()) {
+        w3dEngine::BindTexture(WhiskFont->getTextureExt());
+        w3dEngine::VertexPointer2f(0, &vext[0]);
+        w3dEngine::TexCoordPointer2f(0, &uext[0]);
+        w3dEngine::DrawTrianglesArray((int)(vext.size() / 2));
+    }
     w3dEngine::BindTexture(WhiskFont->getTexture());
-    w3dEngine::VertexPointer2f(0, &vbuf[0]);
-    w3dEngine::TexCoordPointer2f(0, &ubuf[0]);
-    w3dEngine::DrawTrianglesArray((int)(vbuf.size() / 2));
 }
 
 void RenderBitmapFloat(float value, textAlign align, int maxPixels, const std::string& unit){

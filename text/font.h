@@ -8,6 +8,7 @@
 #endif
 
 #include <map>
+#include <string>
 #ifdef W3D_SYMBIAN
     #include <GLES/gl.h>
     // stlport v4 no tiene <cstdint>
@@ -52,6 +53,25 @@ class Font {
         // mismo quad. 'mayus' lo elige.
         const GLfloat* getMeshAcentoTri(bool mayus) const { return mayus ? meshAcentoMay : meshAcento; }
 
+        // ---- EL ATLAS EXTENDIDO (font-ext.png, generado por tools/fuente_ext.py) ----
+        // Lo que no entra en font.png: las marcas de los acentos que no se recortan de ahi (grave, circunflejo,
+        // dieresis, punto, breve, cedilla, ogonek), ss / i sin punto / l con barra / oe / ae, unos signos y el
+        // CIRILICO. Se carga RECIEN la primera vez que un texto lo necesita (en el N95 la RAM vale): en ingles o
+        // en espaniol puede no cargarse nunca.
+        void SetAtlasExtendido(const std::string& ruta);
+        GLuint getTextureExt() const { return extTex; }
+        // Un caracter listo para dibujar: su UV (6 verts = 12 floats) y de que atlas sale ('ext' = el extendido).
+        // Resuelve las derivadas de font.png ('\\', el '?' invertido), las cirilicas iguales a una latina (que
+        // usan la de font.png) y lo que esta en el extendido. false = no lo tiene: devuelve el '?' de font.png.
+        bool Glifo(uint16_t cp, const GLfloat*& uv, bool& ext);
+        // Letra COMPUESTA (letra base + marca: a con acento, c cedilla, i con dieresis, la breve de la i corta
+        // rusa...): false si 'cp' no lo es. 'base' = la letra sin la marca. La marca: si es el agudo o la tilde
+        // sale de font.png, con su propia malla (una franja de 2px arriba); si no, es la celda entera del
+        // extendido y se dibuja con la malla del glifo ('malla' = NULL).
+        bool Compuesta(uint16_t cp, uint16_t& base, const GLfloat*& uvMarca, const GLfloat*& malla, bool& extMarca);
+        // Si se puede dibujar (no sale el '?'). Para las pruebas de las traducciones.
+        bool Soporta(uint16_t cp);
+
         // Obtener UV por codepoint
         const GLfloat* getUV(uint16_t codepoint) const;
 
@@ -82,6 +102,13 @@ class Font {
         GLfloat uvTilde[12];    // la '~' de la 'n~', recortada
 
         Glyph fallback; // '?' o vacio
+        // el atlas extendido: la ruta, la textura (0 = todavia no), y los UV de cada celda (12 floats por celda)
+        std::string extRuta;
+        GLuint extTex;
+        bool extIntentado;
+        GLfloat* extUV;
+        bool CargarExt();
+        const GLfloat* UVCeldaExt(int celda);
 };
 
 

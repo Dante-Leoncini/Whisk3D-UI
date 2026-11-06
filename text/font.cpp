@@ -1,4 +1,7 @@
 #include "font.h"
+#include "FuenteExt.h"     // el atlas extendido: tablas generadas por tools/fuente_ext.py
+#include "w3dTexture.h"    // w3dEngine::LoadTexture (cargarlo recien cuando haga falta)
+#include <stdlib.h>
 
 // ================= UTF-8 helpers =================
 
@@ -126,7 +129,10 @@ void Font::SetScale(GLshort scale){
 Font::Font(int texW, int texH, GLuint textureID)
     : FontTexture(textureID),
       texWidth(texW),
-      texHeight(texH)
+      texHeight(texH),
+      extTex(0),
+      extIntentado(false),
+      extUV(0)
 {
     SetScale(1); // arma el mesh default (era inicializador de clase)
 
@@ -342,3 +348,85 @@ void Font::addGlyph(uint16_t codepoint, int x, int y, int w, int h) {
 // ================= GLOBAL =================
 
 Font* WhiskFont = NULL;
+// =================================================================================================================
+//  EL ATLAS EXTENDIDO (ver font.h y tools/fuente_ext.py). Las tablas de FuenteExt.h estan ordenadas por codepoint.
+// =================================================================================================================
+void Font::SetAtlasExtendido(const std::string& ruta){ extRuta = ruta; }
+
+bool Font::CargarExt(){
+    if (extTex) return true;
+    if (extIntentado || extRuta.empty()) return false;
+    extIntentado = true;                       // (si no esta, no se lo vuelve a buscar en cada letra)
+    unsigned int id = 0; int w = 0, h = 0;
+    if (!w3dEngine::LoadTexture(extRuta.c_str(), id, &w, &h) || !id || w <= 0 || h <= 0) return false;
+    const int celdas = W3D_FUENTE_EXT_COLUMNAS * (h / 12);
+    extUV = (GLfloat*)malloc(sizeof(GLfloat) * 12 * (celdas > 0 ? celdas : 1));
+    if (!extUV) return false;
+    for (int i = 0; i < celdas; i++){
+        const int x = 1 + (i % W3D_FUENTE_EXT_COLUMNAS) * 6, y = (i / W3D_FUENTE_EXT_COLUMNAS) * 12;
+        const GLfloat u1 = (GLfloat)x / w, u2 = (GLfloat)(x + 5) / w;
+        const GLfloat v1 = (GLfloat)y / h, v2 = (GLfloat)(y + 11) / h;
+        GLfloat* t = extUV + i * 12;   // el mismo orden de triangulos que los glifos de font.png (addGlyph)
+        t[0] = u1; t[1] = v1;  t[2] = u2; t[3] = v1;  t[4] = u1; t[5] = v2;
+        t[6] = u1; t[7] = v2;  t[8] = u2; t[9] = v1;  t[10] = u2; t[11] = v2;
+    }
+    extTex = id;
+    return true;
+}
+
+const GLfloat* Font::UVCeldaExt(int celda){
+    return (CargarExt() && extUV) ? extUV + celda * 12 : 0;
+}
+
+bool Font::Glifo(uint16_t cp, const GLfloat*& uv, bool& ext){
+    ext = false;
+    // lo de font.png (y sus derivados: la barra invertida y el '?' invertido)
+    if (cp == 0x5C || cp == 0x00BF || atlas.find(cp) != atlas.end()){ uv = getUVTri(cp); return true; }
+    // cirilicas iguales a una latina: la de font.png
+    {   int lo = 0, hi = (int)W3dFuenteExtIgualesN - 1;
+        while (lo <= hi){ const int m = (lo + hi) / 2; const unsigned short c = W3dFuenteExtIguales[m].cp;
+            if (c == cp){ uv = getUVTri(W3dFuenteExtIguales[m].latina); return true; }
+            if (c < cp) lo = m + 1; else hi = m - 1; } }
+    // dibujada en el extendido
+    {   int lo = 0, hi = (int)W3dFuenteExtGlifosN - 1;
+        while (lo <= hi){ const int m = (lo + hi) / 2; const unsigned short c = W3dFuenteExtGlifos[m].cp;
+            if (c == cp){ const GLfloat* u = UVCeldaExt(W3dFuenteExtGlifos[m].celda);
+                          if (!u) break; uv = u; ext = true; return true; }
+            if (c < cp) lo = m + 1; else hi = m - 1; } }
+    uv = fallback.uvsTri;
+    return false;
+}
+
+bool Font::Compuesta(uint16_t cp, uint16_t& base, const GLfloat*& uvMarca, const GLfloat*& malla, bool& extMarca){
+    int lo = 0, hi = (int)W3dFuenteExtCompuestasN - 1;
+    while (lo <= hi){
+        const int m = (lo + hi) / 2;
+        const W3dFuenteExtCompuesta& e = W3dFuenteExtCompuestas[m];
+        if (e.cp == cp){
+            base = e.base;
+            // la altura de la marca depende de la LETRA que lleva abajo: mayuscula (latina o cirilica) o no
+            const bool mayus = (base >= 0x41 && base <= 0x5A) || (base >= 0x0410 && base <= 0x042F);
+            if (e.marca <= 1){                 // agudo / tilde: de font.png, en su franja de 2px
+                uvMarca = (e.marca == 0) ? uvAgudo : uvTilde;
+                malla = getMeshAcentoTri(mayus);
+                extMarca = false;
+                return true;
+            }
+            uvMarca = UVCeldaExt(e.marca - 2);
+            if (!uvMarca) return false;        // sin el extendido: la letra base sola es mejor que un '?'
+            malla = 0;
+            extMarca = true;
+            return true;
+        }
+        if (e.cp < cp) lo = m + 1; else hi = m - 1;
+    }
+    return false;
+}
+
+bool Font::Soporta(uint16_t cp){
+    if (cp == 0x20) return true;
+    uint16_t base; const GLfloat* uvm; const GLfloat* ma; bool em;
+    if (Compuesta(cp, base, uvm, ma, em)) cp = base;
+    const GLfloat* uv; bool ext;
+    return Glifo(cp, uv, ext);
+}
