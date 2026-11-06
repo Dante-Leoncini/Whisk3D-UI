@@ -104,6 +104,7 @@ void RenderBitmapText(const std::string& text, textAlign align, int maxPixels){
     }
     if (!vext.empty() && WhiskFont->getTextureExt()) {
         w3dEngine::BindTexture(WhiskFont->getTextureExt());
+        w3dEngine::TexFilter(false);   // pixel perfect (cacheado por textura: si ya esta, no manda nada)
         w3dEngine::VertexPointer2f(0, &vext[0]);
         w3dEngine::TexCoordPointer2f(0, &uext[0]);
         w3dEngine::DrawTrianglesArray((int)(vext.size() / 2));

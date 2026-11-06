@@ -115,6 +115,9 @@ class Font {
 // ================= UTF-8 helper =================
 
 uint16_t UTF8_Char(const char* s, size_t& i);
+// Cuantas LETRAS (no bytes) tiene un texto UTF-8. El ancho en pantalla es letras * CharacterWidthGS: con .size()
+// una letra acentuada o cirilica (2 bytes) contaba doble y los botones y menus salian anchos de mas.
+int UTF8_Largo(const std::string& s);
 
 // ================= GLOBAL =================
 

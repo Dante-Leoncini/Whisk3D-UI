@@ -1,6 +1,7 @@
 #include "font.h"
 #include "FuenteExt.h"     // el atlas extendido: tablas generadas por tools/fuente_ext.py
 #include "w3dTexture.h"    // w3dEngine::LoadTexture (cargarlo recien cuando haga falta)
+#include "w3dGraphics.h"   // w3dEngine::BindTexture / TexFilter (el extendido, pixel perfect como font.png)
 #include <stdlib.h>
 
 // ================= UTF-8 helpers =================
@@ -36,6 +37,12 @@ uint16_t UTF8_Char(const char* s, size_t& i) {
     // Fallback
     i += 1;
     return '?';
+}
+
+int UTF8_Largo(const std::string& s) {
+    int n = 0;
+    for (size_t i = 0; i < s.size(); i++) if (((unsigned char)s[i] & 0xC0) != 0x80) n++;   // los bytes de continuacion no cuentan
+    return n;
 }
 
 // ---------------------------------------------------------------------------------------------------------------
@@ -370,6 +377,11 @@ bool Font::CargarExt(){
         t[0] = u1; t[1] = v1;  t[2] = u2; t[3] = v1;  t[4] = u1; t[5] = v2;
         t[6] = u1; t[7] = v2;  t[8] = u2; t[9] = v1;  t[10] = u2; t[11] = v2;
     }
+    // PIXEL PERFECT, como font.png: NEAREST (la UI le pone ese filtro a font.png cuando lo usa; a este atlas nadie
+    // se lo ponia y quedaba con el LINEAR + mipmaps de LoadTexture: el cirilico se veia borroso al lado del resto)
+    w3dEngine::BindTexture(id);
+    w3dEngine::TexFilter(false);
+    w3dEngine::BindTexture(FontTexture);
     extTex = id;
     return true;
 }

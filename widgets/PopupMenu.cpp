@@ -1,3 +1,4 @@
+#include "WhiskUI/text/font.h"   // UTF8_Largo
 #include "WhiskUI/widgets/PopupMenu.h"
 #include "w3dGraphics.h"
 #include "WhiskUI/draw/glesdraw.h"
@@ -19,7 +20,7 @@ std::string MenuAtajoVisible(const MenuItem* it){
 static int MenuItemDerecha(const MenuItem* it){
     if (it->valorFloat) return 80 * GlobalScale + gapGS; // slider (no convive con atajo)
     int icono = (it->submenu || it->checkbox) ? IconSizeGS : 0;
-    int atajo = (int)MenuAtajoVisible(it).size() * CharacterWidthGS;
+    int atajo = UTF8_Largo(MenuAtajoVisible(it)) * CharacterWidthGS;
     if (atajo > 0) return (icono > 0) ? icono + gapGS + atajo : atajo;
     return icono;
 }
@@ -167,13 +168,13 @@ void PopupMenu::Resize(){
     int maxFila = 0;
     for (size_t i = 0; i < items.size(); i++){
         if (items[i]->icon >= 0) hayIconos = true;
-        int fila = (int)items[i]->text.size() * CharacterWidthGS;
+        int fila = UTF8_Largo(items[i]->text) * CharacterWidthGS;
         int der = MenuItemDerecha(items[i]);
         if (der > 0) fila += gapGS * 2 + der; // separacion label <-> columna derecha
         if (fila > maxFila) maxFila = fila;
     }
-    if ((int)titulo.size() * CharacterWidthGS > maxFila) // la cabecera no tiene columna derecha
-        maxFila = (int)titulo.size() * CharacterWidthGS;
+    if (UTF8_Largo(titulo) * CharacterWidthGS > maxFila) // la cabecera no tiene columna derecha
+        maxFila = UTF8_Largo(titulo) * CharacterWidthGS;
     // si alguna fila tiene icono, TODAS reservan la columna izquierda (los labels se alinean)
     width = bordersGS + gapGS * 2 + maxFila;
     if (hayIconos) width += IconSizeGS + gapGS;

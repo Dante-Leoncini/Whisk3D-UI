@@ -1,3 +1,4 @@
+#include "WhiskUI/text/font.h"   // UTF8_Largo
 #include "WhiskUI/widgets/Tab.h"
 #include "w3dGraphics.h"
 #include "WhiskUI/draw/glesdraw.h"
@@ -27,7 +28,7 @@ void Tab::Resize(int maxW) {
     int contenido = gapGS * 2;
     if (icon >= 0) contenido += IconSizeGS;
     if (icon >= 0 && !text.empty()) contenido += gapGS;
-    contenido += (int)text.size() * CharacterWidthGS;
+    contenido += UTF8_Largo(text) * CharacterWidthGS;
 
     width = contenido;
     if (width > maxW) width = maxW;

@@ -1,3 +1,4 @@
+#include "WhiskUI/text/font.h"   // UTF8_Largo
 #include "WhiskUI/widgets/Button.h"
 #include "w3dGraphics.h"
 #include "WhiskUI/draw/glesdraw.h"
@@ -41,7 +42,7 @@ void Button::Resize(int maxW){
     int contenido = gapGS * 2; // padding L+R (debe matchear el render: gapGS por lado)
     if (icon >= 0) contenido += IconSizeGS;
     if (icon >= 0 && !text.empty()) contenido += gapGS;
-    contenido += (int)text.size() * CharacterWidthGS;
+    contenido += UTF8_Largo(text) * CharacterWidthGS;
     if (caretMenu) contenido += IconSizeGS + gapGS; // la flechita opcional suma ancho (sino trunca el texto)
 
     width = adaptar ? contenido : maxW;
@@ -120,7 +121,7 @@ void Button::Render(){
     if (text.empty() && icon >= 0 && !editField) { x0 = (width - IconSizeGS) / 2; if (x0 < 0) x0 = 0; }
     else if ((centrado || barra >= 0.0f) && !editField) {   // (el numero de una barra va en el medio) // como INPUT (editField) se alinea a la IZQUIERDA, no centrado
         // icono+texto centrados en el boton (OK / Cancel / switch)
-        int contenido = (int)text.size() * CharacterWidthGS;
+        int contenido = UTF8_Largo(text) * CharacterWidthGS;
         if (icon >= 0) contenido += IconSizeGS + (text.empty() ? 0 : gapGS);
         x0 = (width - contenido) / 2;
         if (x0 < gapGS) x0 = gapGS;
