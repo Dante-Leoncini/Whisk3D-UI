@@ -185,6 +185,9 @@ void RenderTextField(const TextField& f, bool foco, int align, int maxPixels) {
     RectCampo(x0 + c * cw - (c > 0 ? g / 2 : 0), -g, g, LetterHeightGS + 2 * g);   // el palito (del color del texto)
 }
 
+// el campo enfocado (NULL = ninguno): estado de la biblioteca, lo lee el palito y lo pone quien enfoca
+TextField* g_textFieldActivo = NULL;
+
 // el palito parpadea: con un campo enfocado, cada medio segundo hay que redibujar (el loop lo pregunta por cuadro)
 bool TextFieldParpadeoTick() {
     static int fase = -1;

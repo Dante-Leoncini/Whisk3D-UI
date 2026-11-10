@@ -38,7 +38,8 @@ static const char* KNombres[ICON_TOTAL] = {
     "numero", "reloj", "columnas", "filas", "maximizar", "minimizar", "expandir",
     "candado_abierto", "consola",
     "interp_sine", "interp_quad", "interp_cubic", "interp_quart", "interp_quint", "interp_expo", "interp_circ", "interp_back", "interp_bounce", "interp_elastic", "ease_auto", "ease_in", "ease_out", "ease_inout", "grabar",
-    "handle_free", "handle_aligned", "handle_vector", "handle_auto", "handle_autoclamped", "handle_flat"
+    "handle_free", "handle_aligned", "handle_vector", "handle_auto", "handle_autoclamped", "handle_flat",
+    "tijera", "copiar", "pegar", "intercambiar", "cruz", "esfera"
 };
 const char* IconoNombre(int i) {
     return (i >= 0 && i < (int)ICON_TOTAL) ? KNombres[i] : "";
@@ -168,7 +169,13 @@ static const IconRect* TablaLegacy() {
         {  72, 117, 10, 10 }, // handle_vector
         {  72, 117, 10, 10 }, // handle_auto
         {  72, 117, 10, 10 }, // handle_autoclamped
-        {  72, 117, 10, 10 }  // handle_flat
+        {  72, 117, 10, 10 }, // handle_flat
+        {  72, 117, 10, 10 }, // tijera (sin arte en font.png: su png en atlas/iconos/)
+        {  72, 117, 10, 10 }, // copiar
+        {  72, 117, 10, 10 }, // pegar
+        {  72, 117, 10, 10 }, // intercambiar (idem)
+        {  72, 117, 10, 10 }, // cruz (idem: el Vacio)
+        {  72, 117, 10, 10 }  // esfera (idem)
     };
     return lista;
 }

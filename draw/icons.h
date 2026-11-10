@@ -23,7 +23,7 @@ extern GLshort IconLineMesh[8];
 extern int IconSize;
 extern int IconSizeGS;
 
-const size_t ICON_TOTAL = 103; // (constexpr es C++11)
+const size_t ICON_TOTAL = 109; // (constexpr es C++11)
 
 // dialecto C++03 compartido
 struct IconType {
@@ -133,7 +133,11 @@ struct IconType {
         // un PUNTO relleno: el Auto Keyframe del timeline (rojo = grabando)
         grabar,
         // los TIPOS DE HANDLE de un keyframe (timeline: Handle Type): un rombo y como salen sus brazos
-        handle_free, handle_aligned, handle_vector, handle_auto, handle_autoclamped, handle_flat
+        handle_free, handle_aligned, handle_vector, handle_auto, handle_autoclamped, handle_flat,
+        tijera, copiar, pegar,  // Cortar / Copiar / Pegar (menu Objeto, click derecho, IDE)
+        intercambiar,           // dos flechas, una a la derecha y otra a la izquierda: intercambiar dos viewports
+        cruz,                   // la CRUZ de tres ejes: el objeto Vacio (su pestania de Propiedades)
+        esfera                  // un circulo con su ecuador y su meridiano: el Vacio con forma de esfera
     };
     Enum v;
     IconType(Enum e) : v(e) {}

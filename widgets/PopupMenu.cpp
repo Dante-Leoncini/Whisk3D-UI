@@ -12,6 +12,7 @@ int MenuPantallaH = 100000;
 // Se usa item-por-item: el ancho del menu es el MINIMO que hace entrar cada fila (no una
 // columna unica compartida) y el label se recorta justo antes de ESTA columna.
 std::string (*W3dMenuAtajoTexto)(const std::string&) = NULL;
+void (*W3dMenuElegidoHook)(const PopupMenu*, const MenuItem*) = NULL;
 std::string MenuAtajoVisible(const MenuItem* it){
     if (!it || it->atajo.empty()) return std::string();
     if (W3dMenuAtajoTexto) return W3dMenuAtajoTexto(it->atajo);
@@ -89,6 +90,7 @@ PopupMenu::PopupMenu(){
     scroll = 0;
     abierto = false;
     submenuAbierto = NULL;
+    padre = NULL;
     action = NULL;
     card = new Card(NULL, 10, 10);
     highlight = new Card(NULL, 10, RenglonHeightGS);
@@ -126,14 +128,15 @@ void PopupMenu::Construir(const MenuDef* defs, int n){
     }
 }
 
-void PopupMenu::Ejecutar(int id){
+bool PopupMenu::Ejecutar(int id){
     for (size_t i = 0; i < items.size(); i++){
         if (items[i]->id == id){
-            if (items[i]->accion){ items[i]->accion(); return; }  // declarativo: la accion vive en el item
+            if (items[i]->accion){ items[i]->accion(); return true; }  // declarativo: la accion vive en el item
             break;
         }
     }
-    if (action) action(id);   // menu del camino viejo (id -> switch): sigue funcionando igual
+    if (action) { action(id); return true; }   // menu del camino viejo (id -> switch): sigue funcionando igual
+    return false;
 }
 
 MenuItem* PopupMenu::Agregar(const std::string& text, int id, int icon,
@@ -226,6 +229,7 @@ void PopupMenu::AsegurarVisible(){
 
 void PopupMenu::Abrir(int sx, int sy, int pantallaW, int pantallaH){
     scroll = 0; // arranca desde arriba
+    padre = NULL; // (abierto solo: de nivel tope. Como submenu, AbrirSubmenuAlLado lo vuelve a enganchar)
     Resize();
     x = sx;
     y = sy;
@@ -254,6 +258,7 @@ void PopupMenu::AbrirSubmenuAlLado(PopupMenu* sub, int fila){
     const int oy = titulo.empty() ? 0 : (RenglonHeightGS + gapGS);
     const int sy = y + borderGS + oy + (fila - scroll) * (RenglonHeightGS + gapGS);   // la fila VISIBLE
     sub->Abrir(x + width - gapGS, sy, MenuPantallaW, MenuPantallaH);   // (mide su ancho y acomoda la altura)
+    sub->padre = this;
     const int W = MenuPantallaW;
     const int der = x + width - gapGS, izq = x + gapGS - sub->width;
     if (der + sub->width <= W) { sub->x = der; return; }
@@ -560,7 +565,9 @@ int PopupMenu::Click(int mx, int my){
             PopupMenu* sub = submenuAbierto;
             submenuAbierto = NULL;
             Cerrar();
-            if (id >= 0) sub->Ejecutar(id);
+            // un submenu SIN accion propia (ni en sus items ni en el menu: Definir Origen, Aplicar, Transformar,
+            // Punto de Vista...) le deja el id a ESTE menu, como antes: si no, el click no hacia nada
+            if (id >= 0 && !sub->Ejecutar(id) && action) action(id);
             return -1; // ya ejecutado
         }
         return id;
@@ -600,7 +607,7 @@ int PopupMenu::Enter(){
             PopupMenu* sub = submenuAbierto;
             submenuAbierto = NULL;
             Cerrar();
-            sub->Ejecutar(id);
+            if (!sub->Ejecutar(id) && action) action(id);   // (submenu sin accion propia: ver Click)
             return -1; // ya ejecutado: el llamador (if id>=0 Ejecutar) no re-despacha
         }
         return id;
@@ -617,8 +624,10 @@ int PopupMenu::Enter(){
     if (it->checkbox){
         // togglea el bool y DEJA el menu abierto (para prender/apagar varios)
         *it->checkbox = !*it->checkbox;
+        if (W3dMenuElegidoHook) W3dMenuElegidoHook(this, it);
         return it->id;
     }
+    if (W3dMenuElegidoHook) W3dMenuElegidoHook(this, it);   // (antes de cerrar: la ruta se lee de los padres abiertos)
     int id = it->id;
     Cerrar();
     return id;

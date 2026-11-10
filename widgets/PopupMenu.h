@@ -48,6 +48,9 @@ extern const char* (*W3dMenuTraducir)(const char*);
 // El hint de atajo que se MUESTRA. Los items guardan "@<funcion>" (no la tecla): la app instala este hook y devuelve lo
 // que corresponde (la combinacion configurada, la tecla del telefono...). Sin hook, un "@..." no se muestra.
 extern std::string (*W3dMenuAtajoTexto)(const std::string&);
+// La app se entera de cada opcion ELEGIDA (una comun o una casilla, ya cambiada), antes de que se ejecute. La usa la
+// grabadora de pasos del editor (main/test/W3dHistorial.cpp). NULL = nadie escucha.
+extern void (*W3dMenuElegidoHook)(const PopupMenu* menu, const MenuItem* item);
 std::string MenuAtajoVisible(const MenuItem* it);
 
 class MenuItem {
@@ -92,6 +95,8 @@ class PopupMenu {
         // como el de "pantalla externa"): el mouse tiene que poder ir hasta el
         bool cerrarLejos;
         PopupMenu* submenuAbierto;
+        PopupMenu* padre;   // el menu que abrio a este como submenu la ultima vez (NULL = de nivel tope). Con su
+                            // fila resaltada se arma la ruta de lo elegido: Objeto > Definir Origen > Origen al Cursor 3D
         Card* card;
         Card* highlight;
         Card* sliderCard; // barra del slider (items float)
@@ -115,7 +120,7 @@ class PopupMenu {
         // Reemplaza a la retahila de ->Agregar(...) + el switch de acciones: la accion vive en la propia fila.
         void Construir(const MenuDef* defs, int n);
         // dispara el item 'id': su accion PROPIA si tiene (declarativo), si no el action(id) del menu (viejo).
-        void Ejecutar(int id);
+        bool Ejecutar(int id);   // false = este menu no sabe ejecutarlo (ni la opcion ni el menu tienen accion)
         void Limpiar(); // borra todas las opciones (menus dinamicos)
         void Resize();      // ancho/alto segun el contenido
         void Abrir(int sx, int sy, int pantallaW, int pantallaH);
