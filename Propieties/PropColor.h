@@ -12,7 +12,7 @@ class PropColor : public PropertieBase {
         PropColor(const std::string& Name);
 
         GLfloat* value;   // apunta a float[4] (init en ctor)
-        bool Seleccionable() { return value != NULL; }
+        bool Seleccionable() W3D_OVERRIDE { return value != NULL; }
         GLfloat originalValue[4];
         // contexto de PALETA para el ColorPicker (pestania "Pal"): el campo
         // indice pal* del elemento (-1 = color propio) y el objeto dueno.

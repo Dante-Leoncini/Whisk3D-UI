@@ -10,7 +10,7 @@ class PropGap : public PropertieBase {
         PropGap(const std::string& Name);
 
         PropertyType GetType() W3D_OVERRIDE;
-        bool Seleccionable() { return false; }
+        bool Seleccionable() W3D_OVERRIDE { return false; }
 
         void RenderPropertiBox(Card* propertiBox) W3D_OVERRIDE;
         void RenderPropertiValue(Card* propertiBox) W3D_OVERRIDE;
