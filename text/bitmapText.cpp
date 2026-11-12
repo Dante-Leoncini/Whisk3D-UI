@@ -121,7 +121,7 @@ void RenderBitmapFloat(float value, textAlign align, int maxPixels, const std::s
     int ent = (int)av;
     int frac = (int)((av - (float)ent) * 10000.0f + 0.5f);
     if (frac >= 10000) { ent++; frac -= 10000; }
-    sprintf(buf, "%s%d.%04d", neg ? "-" : "", ent, frac);
+    snprintf(buf, sizeof(buf), "%s%d.%04d", neg ? "-" : "", ent, frac);
     RenderBitmapText(std::string(buf) + unit, align, maxPixels);
 }
 // ============================================================================
