@@ -276,6 +276,20 @@ void PropListMeshParts::RenderPropertiLabel(Card* propertiBox){
                     w3dEngine::PopMatrix();
                     SetColorID(selectIndex == i ? ColorID::accent : ColorID::grisUI, 1.0f);
                 }
+            } else if (modo == 12 && obj && obj->scriptDatos && i < (int)obj->scriptDatos->scripts.size()) {
+                // los SCRIPTS: el nombre del archivo y A LA DERECHA el OJO (prendido / apagado: el motor no llama a
+                // ninguna de sus funciones). Apagado, el nombre y el ojo van tenues. El click en el ojo lo maneja
+                // Properties::ClickEn y su cartelito de ayuda PropsAyudaEn (Properties.cpp)
+                const bool prendido = !obj->scriptDatos->scripts[i].apagado;
+                const ColorID colTexto = selectIndex == i ? ColorID::accent : ColorID::grisUI;
+                SetColorID(colTexto, prendido ? 1.0f : 0.45f);
+                RenderBitmapText(ListaNombre(i), textAlign::left, width - bordersGS - (int)IconSizeGS - gapGS * 4);
+                w3dEngine::PushMatrix();
+                w3dEngine::Translatef((GLfloat)(width - (int)IconSizeGS - gapGS * 4), 0, 0);
+                SetColorID(ColorID::grisUI, prendido ? 1.0f : 0.45f);
+                W3dDrawStrip4(IconMesh, IconsUV[static_cast<size_t>(prendido ? IconType::visible : IconType::hidden)]->uvs);
+                w3dEngine::PopMatrix();
+                SetColorID(colTexto, 1.0f);
             } else
             RenderBitmapText(ListaNombre(i), textAlign::left, width -bordersGS);
 
