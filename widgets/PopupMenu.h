@@ -158,6 +158,13 @@ class PopupMenu {
 
 extern PopupMenu* MenuAbierto; // el desplegable activo (NULL = ninguno)
 
+// Registro en runtime de todos los PopupMenu vivos. La UI registra y elimina
+// cada menu en constructor/destructor; los consumidores pueden inspeccionarlos
+// sin mantener otra lista ni depender de globales especificos del editor.
+int        W3dMenuRegistroCantidad();
+PopupMenu* W3dMenuRegistro(int index);
+int        W3dMenuRegistroIndice(const PopupMenu* menu);
+
 // ---- DRAG del item-slider (AgregarFloat): mantener apretado sobre la fila y
 // arrastrar horizontal edita el valor EN VIVO (mismo mapeo de X que el click).
 // El DOWN lo arma solo (dentro de Click); la app rutea el motion/up con esto:

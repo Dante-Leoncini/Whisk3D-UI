@@ -4,6 +4,17 @@
 #include "WhiskUI/draw/glesdraw.h"
 
 PopupMenu* MenuAbierto = NULL;
+static std::vector<PopupMenu*> g_menuRegistro;
+
+int W3dMenuRegistroCantidad(){ return (int)g_menuRegistro.size(); }
+PopupMenu* W3dMenuRegistro(int index){
+    return (index >= 0 && index < (int)g_menuRegistro.size()) ? g_menuRegistro[(size_t)index] : NULL;
+}
+int W3dMenuRegistroIndice(const PopupMenu* menu){
+    for (size_t i = 0; i < g_menuRegistro.size(); i++) if (g_menuRegistro[i] == menu) return (int)i;
+    return -1;
+}
+
 int MenuPantallaW = 100000;
 int MenuPantallaH = 100000;
 
@@ -79,6 +90,7 @@ MenuItem::MenuItem(const std::string& Text, int Id, int Icon, PopupMenu* Submenu
 const char* (*W3dMenuTraducir)(const char*) = NULL;
 
 PopupMenu::PopupMenu(){
+    g_menuRegistro.push_back(this);
     titulo = "";
     cerrarLejos = true;
     x = 0;
@@ -99,6 +111,9 @@ PopupMenu::PopupMenu(){
 
 PopupMenu::~PopupMenu(){
     if (g_sliderDragMenu == this) MenuSliderDragSoltar();
+    for (size_t i = 0; i < g_menuRegistro.size(); i++) {
+        if (g_menuRegistro[i] == this) { g_menuRegistro.erase(g_menuRegistro.begin() + i); break; }
+    }
     for (size_t i = 0; i < items.size(); i++) delete items[i];
     items.clear();
     delete card;
