@@ -47,7 +47,7 @@ PropFloat::PropFloat(const std::string& Name, const std::string& Unit):
     dragStep = 0.1f;   // por pixel arrastrado
     minVal = 0.0f; maxVal = 1.0f; tieneRango = false;
     onChange = NULL;
-    entero = false; centrado = false; flechas = false; opciones = NULL; nOpciones = 0;
+    entero = false; centrado = false; flechas = false; mixto = false; opciones = NULL; nOpciones = 0;
     acelera = false; holdDir = 0; holdCount = 0;
     animProp = -1; animComp = 0;
     // (unit viene del init-list: el ° de rotacion vive)
@@ -109,7 +109,9 @@ void PropFloat::RenderPropertiValue(Card* propertiBox){
             RenderBitmapText(">", textAlign::center, aw);
             w3dEngine::PopMatrix();
         }
-        if (entero && opciones && nOpciones > 0){
+        if (mixto){
+            RenderBitmapText("-", al, boxW);   // seleccion multiple con valores distintos
+        } else if (entero && opciones && nOpciones > 0){
             int r = (int)(*value + 0.5f); if (r < 0) r = 0; if (r >= nOpciones) r = nOpciones - 1;
             extern const char* (*W3dMenuTraducir)(const char*);
             RenderBitmapText(W3dMenuTraducir ? W3dMenuTraducir(opciones[r]) : opciones[r], al, boxW);

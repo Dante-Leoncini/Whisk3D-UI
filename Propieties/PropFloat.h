@@ -30,6 +30,8 @@ class PropFloat : public PropertieBase {
         bool entero;                // muestra/escalona como entero (redondeado)
         bool centrado;              // centra el valor en su columna
         bool flechas;               // dibuja < > clickeables a los lados
+        bool mixto;                 // VARIOS valores distintos (una seleccion multiple): se muestra "-". Editarlo
+                                    // pone el valor nuevo en todos (lo hace el onChange de quien lo usa)
         // una LISTA DE OPCIONES (con 'entero'): el valor es el indice y se muestra su nombre (en ingles: se traduce con
         // W3dMenuTraducir). Asi un "elegir uno" (Width Type: Offset / Width / Depth...) usa las mismas flechas < >
         const char* const* opciones;

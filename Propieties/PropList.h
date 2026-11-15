@@ -29,6 +29,10 @@ extern int  (*MixFilaActiva)();
 extern int (*PostFilasCount)();
 extern std::string (*PostFilaTexto)(int fila);
 extern void (*PostFilaSeleccionar)(int fila);
+// modo 16: la pila de MODIFICADORES DE LA CURVA activa del timeline (Animation.h): la llenan estos ganchos (Properties.cpp)
+extern int (*CurvaModFilasCount)();
+extern std::string (*CurvaModFilaTexto)(int fila);
+extern void (*CurvaModFilaSeleccionar)(int fila);
 extern int  (*MixFilaPlegada)(int fila);      // -1 no se pliega (capa), 0 desplegada, 1 plegada
 extern int  (*MixFilaIcono)(int fila);        // IconType de la fila
 

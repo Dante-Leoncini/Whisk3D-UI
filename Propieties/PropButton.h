@@ -11,6 +11,9 @@ class PropButton : public PropertieBase {
         bool conLabel; // true (los desplegables): el NOMBRE a la izquierda, del ancho de su texto, y el boton en TODO
                        // el resto del renglon. false: boton a lo ancho.
         int colBoton;  // (conLabel) donde empieza el boton, desde el borde izquierdo del renglon (lo calcula Resize)
+        bool enColumna; // (conLabel) COMO UN INPUT: el nombre en la columna de etiquetas (alineado igual que el de un
+                        // numero o un texto) y el boton en la columna de valores, del MISMO ancho que esos boxes. Para los
+                        // desplegables que van entre inputs (Formato entre Nombre y Ancho): alineados con ellos
         int ColBoton() const { return conLabel ? colBoton : 0; }
         bool oculto; // true: no ocupa fila (material por defecto)
         bool gris;   // true: se dibuja atenuado y NO ejecuta su accion (ej: Render Animation sin animaciones)

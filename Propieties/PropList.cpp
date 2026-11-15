@@ -63,7 +63,11 @@ PropListMeshParts::PropListMeshParts(const std::string& Name):
 int (*PostFilasCount)() = NULL;
 std::string (*PostFilaTexto)(int) = NULL;
 void (*PostFilaSeleccionar)(int) = NULL;
+int (*CurvaModFilasCount)() = NULL;
+std::string (*CurvaModFilaTexto)(int) = NULL;
+void (*CurvaModFilaSeleccionar)(int) = NULL;
 int PropListMeshParts::ListaCount() const {
+    if (modo == 16) return CurvaModFilasCount ? CurvaModFilasCount() : 0;   // los modificadores de la curva activa
     if (modo == 15) return PostFilasCount ? PostFilasCount() : 0;   // la pila de postprocesado
     if (modo == 13) return MixFilasCount ? MixFilasCount() : 0;   // arbol del MIX
     if (modo == 14) return RutinaFilasCount ? RutinaFilasCount(obj) : 0;   // pasos de una rutina
@@ -83,6 +87,7 @@ int PropListMeshParts::ListaCount() const {
     return (int)mesh->materialsGroup.size();
 }
 std::string PropListMeshParts::ListaNombre(int i) const {
+    if (modo == 16) return CurvaModFilaTexto ? CurvaModFilaTexto(i) : std::string();
     if (modo == 15) return PostFilaTexto ? PostFilaTexto(i) : std::string();
     if (modo == 13) return MixFilaTexto ? MixFilaTexto(i) : std::string();
     if (modo == 14) return RutinaFilaTexto ? RutinaFilaTexto(obj, i) : std::string();
@@ -109,6 +114,7 @@ std::string PropListMeshParts::ListaNombre(int i) const {
 }
 void PropListMeshParts::ListaSeleccionar(int i) {
     selectIndex = i;
+    if (modo == 16) { if (CurvaModFilaSeleccionar) CurvaModFilaSeleccionar(i); return; }
     if (modo == 15) { if (PostFilaSeleccionar) PostFilaSeleccionar(i); return; }
     if (modo == 13) { if (MixFilaSeleccionar) MixFilaSeleccionar(i); return; }
     if (modo == 14) { if (RutinaFilaSeleccionar) RutinaFilaSeleccionar(obj, i); return; }

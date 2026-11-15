@@ -23,7 +23,7 @@ extern GLshort IconLineMesh[8];
 extern int IconSize;
 extern int IconSizeGS;
 
-const size_t ICON_TOTAL = 109; // (constexpr es C++11)
+const size_t ICON_TOTAL = 111; // (constexpr es C++11)
 
 // dialecto C++03 compartido
 struct IconType {
@@ -137,7 +137,8 @@ struct IconType {
         tijera, copiar, pegar,  // Cortar / Copiar / Pegar (menu Objeto, click derecho, IDE)
         intercambiar,           // dos flechas, una a la derecha y otra a la izquierda: intercambiar dos viewports
         cruz,                   // la CRUZ de tres ejes: el objeto Vacio (su pestania de Propiedades)
-        esfera                  // un circulo con su ecuador y su meridiano: el Vacio con forma de esfera
+        esfera,                 // un circulo con su ecuador y su meridiano: el Vacio con forma de esfera
+        deshacer, rehacer       // la flecha curva para atras / para adelante (la de siempre: deshacer y rehacer)
     };
     Enum v;
     IconType(Enum e) : v(e) {}
