@@ -49,6 +49,10 @@ class GroupPropertie {
         void button_right();
 
         void Render();
+        // UNA sola fila (su caja, su valor y su nombre) en el lugar que ocupa dentro del grupo, sin la tarjeta: la que se
+        // esta editando, opaca encima del grupo dibujado translucido (las tarjetas de la ultima operacion al arrastrar)
+        void RenderFila(int idx);
+        int  IndiceDe(const PropertieBase* p) const;   // -1 = no es de este grupo
         void RenderPropertiBox();
         void RenderPropertiValue();
         void RenderPropertiLabel();

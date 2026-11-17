@@ -340,6 +340,33 @@ void GroupPropertie::Render(){
     w3dEngine::Translatef(-borderGS, borderGS, 0);
 }
 
+int GroupPropertie::IndiceDe(const PropertieBase* p) const {
+    for (size_t i = 0; i < properties.size(); ++i) if (properties[i] == p) return (int)i;
+    return -1;
+}
+
+// Las tres pasadas de Render (cajas, valores, nombres) con la lista reducida a ESA fila, corridas hasta donde cae: se ve
+// igual que dentro del grupo (la seleccion y el hover de la fila se respetan)
+void GroupPropertie::RenderFila(int idx){
+    if (!visible || !open || idx < 0 || idx >= (int)properties.size()) return;
+    int dy = 0;
+    for (int j = 0; j < idx; ++j) dy += properties[(size_t)j]->Resize(width);
+    std::vector<PropertieBase*> todas; todas.swap(properties);
+    properties.push_back(todas[(size_t)idx]);
+    const int selAntes = selectIndex, hoverAntes = PropHoverFila;
+    selectIndex = (selAntes == idx) ? 0 : -2;                         // (-1 seria el titulo)
+    if (PropHoverGroup == this) PropHoverFila = (hoverAntes == idx) ? 0 : -1;
+    w3dEngine::PushMatrix();
+    w3dEngine::Translatef((float)borderGS, (float)(borderGS + RenglonHeightGS + gapGS + dy), 0);
+    SetColorID(ColorID::background, 1.0f);
+    w3dEngine::PushMatrix(); RenderPropertiBox();   w3dEngine::PopMatrix();
+    w3dEngine::PushMatrix(); RenderPropertiValue(); w3dEngine::PopMatrix();
+    RenderPropertiLabel();
+    w3dEngine::PopMatrix();
+    properties.swap(todas);
+    selectIndex = selAntes; PropHoverFila = hoverAntes;
+}
+
 GroupPropertie* PropHoverGroup = NULL;
 int PropHoverFila = -1;
 int PropColEtiqueta = 150;

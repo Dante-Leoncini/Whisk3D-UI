@@ -23,7 +23,7 @@ extern GLshort IconLineMesh[8];
 extern int IconSize;
 extern int IconSizeGS;
 
-const size_t ICON_TOTAL = 111; // (constexpr es C++11)
+const size_t ICON_TOTAL = 112; // (constexpr es C++11)
 
 // dialecto C++03 compartido
 struct IconType {
@@ -138,7 +138,8 @@ struct IconType {
         intercambiar,           // dos flechas, una a la derecha y otra a la izquierda: intercambiar dos viewports
         cruz,                   // la CRUZ de tres ejes: el objeto Vacio (su pestania de Propiedades)
         esfera,                 // un circulo con su ecuador y su meridiano: el Vacio con forma de esfera
-        deshacer, rehacer       // la flecha curva para atras / para adelante (la de siempre: deshacer y rehacer)
+        deshacer, rehacer,      // la flecha curva para atras / para adelante (la de siempre: deshacer y rehacer)
+        atajo                   // la FLECHA DE ACCESO DIRECTO (caja negra con una flecha): un recurso EXTERNO (biblioteca)
     };
     Enum v;
     IconType(Enum e) : v(e) {}

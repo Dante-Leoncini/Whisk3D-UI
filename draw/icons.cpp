@@ -39,7 +39,7 @@ static const char* KNombres[ICON_TOTAL] = {
     "candado_abierto", "consola",
     "interp_sine", "interp_quad", "interp_cubic", "interp_quart", "interp_quint", "interp_expo", "interp_circ", "interp_back", "interp_bounce", "interp_elastic", "ease_auto", "ease_in", "ease_out", "ease_inout", "grabar",
     "handle_free", "handle_aligned", "handle_vector", "handle_auto", "handle_autoclamped", "handle_flat",
-    "tijera", "copiar", "pegar", "intercambiar", "cruz", "esfera", "deshacer", "rehacer"
+    "tijera", "copiar", "pegar", "intercambiar", "cruz", "esfera", "deshacer", "rehacer", "atajo"
 };
 const char* IconoNombre(int i) {
     return (i >= 0 && i < (int)ICON_TOTAL) ? KNombres[i] : "";
@@ -177,7 +177,8 @@ static const IconRect* TablaLegacy() {
         {  72, 117, 10, 10 }, // cruz (idem: el Vacio)
         {  72, 117, 10, 10 }, // esfera (idem)
         {  72, 117, 10, 10 }, // deshacer (idem)
-        {  72, 117, 10, 10 }  // rehacer (idem)
+        {  72, 117, 10, 10 }, // rehacer (idem)
+        {  72, 117, 10, 10 }  // atajo (idem: un recurso externo en la biblioteca)
     };
     return lista;
 }

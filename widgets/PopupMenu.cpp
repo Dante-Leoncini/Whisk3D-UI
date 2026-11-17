@@ -239,6 +239,18 @@ void PopupMenu::Abrir(int sx, int sy, int pantallaW, int pantallaH){
     if (y < 0) y = 0;
     selectIndex = -1;
     abierto = true;
+    // una lista LARGA con la opcion ACTIVA (verde: la animacion que se esta editando entre cientos de clips) abre
+    // MOSTRANDOLA, centrada, en vez de arrancar siempre desde arriba
+    if (MaxScroll() > 0)
+        for (size_t i = 0; i < items.size(); i++)
+            if (items[i] && items[i]->verde) {
+                int s = (int)i - FilasVisibles() / 2;
+                const int ms = MaxScroll();
+                if (s > ms) s = ms;
+                if (s < 0) s = 0;
+                scroll = s;
+                break;
+            }
 }
 
 void PopupMenu::AnchoMax(int w){
@@ -593,6 +605,17 @@ int PopupMenu::Click(int mx, int my){
         g_sliderDragMenu = this; g_sliderDragItem = itF;
         return itF->id;
     }
+    // un click en una fila de ESTE menu es para ESA fila. Enter() le pasa la tecla al submenu abierto (la navegacion con
+    // el teclado: Enter con el submenu abierto elige SU opcion resaltada) y el submenu de "Malla" ya estaba abierto por el
+    // dedo apoyado (el resaltado abre submenus, como el hover del mouse) con su primera opcion resaltada: tocar "Malla" en
+    // el telefono agregaba un Plano. Ahora la fila con submenu lo abre (o lo deja abierto) y no elige nada; otra fila
+    // cierra el submenu que hubiera abierto y se elige ella
+    if (itF->submenu){
+        if (submenuAbierto == itF->submenu && submenuAbierto->abierto) return -1;   // ya abierto: queda asi
+        if (submenuAbierto){ submenuAbierto->Cerrar(); submenuAbierto = NULL; }
+        return Enter();   // (lo abre al lado: -2)
+    }
+    if (submenuAbierto){ submenuAbierto->Cerrar(); submenuAbierto = NULL; }
     return Enter();
 }
 
