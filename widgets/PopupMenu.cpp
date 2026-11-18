@@ -35,6 +35,10 @@ static int MenuItemDerecha(const MenuItem* it){
 static PopupMenu* g_sliderDragMenu = NULL; // menu dueno de la fila arrastrada (NULL = no hay drag)
 static MenuItem*  g_sliderDragItem = NULL;
 
+static PopupMenu* g_scrollDragMenu = NULL;
+bool MenuScrollDragActivo(){ return g_scrollDragMenu && g_scrollDragMenu->abierto; }
+void MenuScrollDragMover(int my){ if (MenuScrollDragActivo()) g_scrollDragMenu->ScrollDesdeY(my); }
+void MenuScrollDragSoltar(){ g_scrollDragMenu = NULL; }
 bool MenuSliderDragActivo(){
     return g_sliderDragMenu != NULL && g_sliderDragMenu->abierto &&
            g_sliderDragItem != NULL;
@@ -88,6 +92,7 @@ PopupMenu::PopupMenu(){
     reservaDerecha = 0;
     selectIndex = -1;
     scroll = 0;
+    sbHover = false;
     abierto = false;
     submenuAbierto = NULL;
     padre = NULL;
@@ -210,6 +215,26 @@ int PopupMenu::FilasVisibles() const {
     int v = (height - bordersGS - tituloH + gapGS) / rowH;
     return v < 1 ? 1 : v;
 }
+// la franja de la barra: el borde derecho del menu, ancha para apuntarle con el mouse o el dedo
+bool PopupMenu::EnBarraScroll(int mx, int my) const {
+    if (!abierto || MaxScroll() <= 0) return false;
+    const int ancho = GlobalScale * 9;
+    return mx >= x + width - borderGS - ancho && mx <= x + width && my >= y && my <= y + height;
+}
+void PopupMenu::ScrollDesdeY(int my) {
+    const int ms = MaxScroll();
+    if (ms <= 0) return;
+    const int rowH = RenglonHeightGS + gapGS;
+    const int tituloH = titulo.empty() ? 0 : rowH;
+    const int trackTop = y + borderGS + tituloH, trackH = height - bordersGS - tituloH;
+    const int nItems = items.empty() ? 1 : (int)items.size();
+    int thumbH = trackH * FilasVisibles() / nItems; if (thumbH < GlobalScale * 6) thumbH = GlobalScale * 6;
+    const int rango = trackH - thumbH;
+    int t = my - trackTop - thumbH / 2;
+    if (t < 0) t = 0; if (t > rango) t = rango;
+    scroll = rango > 0 ? (t * ms + rango / 2) / rango : 0;
+    if (scroll < 0) scroll = 0; if (scroll > ms) scroll = ms;
+}
 int PopupMenu::MaxScroll() const {
     int m = (int)items.size() - FilasVisibles();
     return m < 0 ? 0 : m;
@@ -290,6 +315,8 @@ void PopupMenu::AbrirSubmenuAlLado(PopupMenu* sub, int fila){
 
 void PopupMenu::Cerrar(){
     if (g_sliderDragMenu == this) MenuSliderDragSoltar(); // menu cerrado (ESC, etc): corta el drag
+    if (g_scrollDragMenu == this) g_scrollDragMenu = NULL;
+    sbHover = false;
     abierto = false;
     selectIndex = -1;
     if (submenuAbierto){
@@ -477,13 +504,15 @@ void PopupMenu::Render(){
         int thumbH = trackH * FilasVisibles() / nItems; if (thumbH < GlobalScale * 6) thumbH = GlobalScale * 6;
         int ms = MaxScroll();
         int thumbY = trackTop + (ms > 0 ? scroll * (trackH - thumbH) / ms : 0);
-        int sbW = GlobalScale * 2, sbX = width - borderGS - sbW;
-        const float* ac = ListaColores[static_cast<int>(ColorID::grisUI)];
+        // (como las barras de los paneles: con el puntero encima se agranda y va en blanco; agarrada, en verde)
+        const bool agarrada = (g_scrollDragMenu == this);
+        int sbW = GlobalScale * ((sbHover || agarrada) ? 5 : 2), sbX = width - borderGS - sbW;
+        const float* ac = ListaColores[static_cast<int>(agarrada ? ColorID::accent : (sbHover ? ColorID::blanco : ColorID::grisUI))];
         float x0 = (float)sbX, x1 = (float)(sbX + sbW), y0 = (float)thumbY, y1 = (float)(thumbY + thumbH);
         GLfloat sb[18] = { x0,y0,0, x1,y0,0, x1,y1,0,  x0,y0,0, x1,y1,0, x0,y1,0 };
         w3dEngine::PushMatrix();
         w3dEngine::Translatef((GLfloat)x, (GLfloat)y, 0);
-        w3dEngine::Color4f(ac[0], ac[1], ac[2], 0.85f);
+        w3dEngine::Color4f(ac[0], ac[1], ac[2], (sbHover || agarrada) ? 1.0f : 0.85f);
         w3dEngine::Disable(w3dEngine::Texture2D);
         w3dEngine::DisableArray(w3dEngine::TexCoordArray);
         w3dEngine::VertexPointer3f(0, sb);
@@ -538,6 +567,9 @@ bool PopupMenu::MouseMove(int mx, int my){
     // si el mouse esta sobre ESTE menu (y no sobre el submenu), manda este menu: resalta la fila y
     // abre/cierra el submenu segun corresponda (sin click)
     if (Contains(mx, my)){
+        // sobre la BARRA DE SCROLL: se marca (no resalta ninguna opcion)
+        sbHover = EnBarraScroll(mx, my);
+        if (sbHover) return true;
         int oy = titulo.empty() ? 0 : (RenglonHeightGS + gapGS);
         int fila = scroll + (my - y - borderGS - oy) / (RenglonHeightGS + gapGS); // + scroll: fila absoluta
         if (fila < 0) fila = 0;
@@ -546,6 +578,7 @@ bool PopupMenu::MouseMove(int mx, int my){
         SincronizarSubmenu();
         return true;
     }
+    sbHover = false;
     // fuera de este menu: el mouse puede estar sobre un sub-submenu mas profundo (que se extiende mas alla del submenu directo)
     if (submenuAbierto && submenuAbierto->abierto){
         if (submenuAbierto->MouseMove(mx, my)) return true;
@@ -588,6 +621,8 @@ int PopupMenu::Click(int mx, int my){
         Cerrar(); // click afuera: cierra (y el click no llega atras)
         return -1;
     }
+    // la BARRA DE SCROLL: el agarre salta a donde se apreto y queda agarrado (arrastrar lo sigue moviendo)
+    if (EnBarraScroll(mx, my)) { ScrollDesdeY(my); g_scrollDragMenu = this; sbHover = true; return -1; }
     int oy = titulo.empty() ? 0 : (RenglonHeightGS + gapGS);
     int fila = scroll + (my - y - borderGS - oy) / (RenglonHeightGS + gapGS); // + scroll: fila absoluta
     if (fila < 0 || fila >= (int)items.size()) return -1;

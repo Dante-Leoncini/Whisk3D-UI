@@ -22,7 +22,7 @@ class PropSeparator : public PropertieBase {
             if (oculto) return;
             // linea OSCURA fina (negro, IDENTICA al separador de titulo de los submenus: 2px FIJOS con
             // triangulos, sin textura) a lo ancho de UN BOTON (width - bordersGS), al margen izquierdo.
-            const float* ac = ListaColores[static_cast<int>(ColorID::negro)];
+            const float* ac = ListaColores[static_cast<int>(ColorID::grisLinea)];   // (el mismo gris que las de los menus)
             float x0 = (float)-PropColEtiqueta, x1 = x0 + (float)(width - bordersGS);
             float y0 = (float)gapGS, y1 = y0 + 2.0f;
             GLfloat sep[18] = { x0,y0,0, x1,y0,0, x1,y1,0,  x0,y0,0, x1,y1,0, x0,y1,0 };

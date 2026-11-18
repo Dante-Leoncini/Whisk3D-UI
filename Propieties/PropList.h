@@ -6,6 +6,7 @@
 #include "WhiskUI/widgets/card.h"
 #include "objects/Mesh.h"
 
+class Button;
 class Armature; // objects/Armature.h (lista de clips de animacion, modo 5)
 
 // modo 13: el ARBOL del MIX de animaciones (objetos -> capas). La lista no conoce el modelo: lo pregunta a
@@ -33,6 +34,16 @@ extern void (*PostFilaSeleccionar)(int fila);
 extern int (*CurvaModFilasCount)();
 extern std::string (*CurvaModFilaTexto)(int fila);
 extern void (*CurvaModFilaSeleccionar)(int fila);
+// modo 17 (las CAPAS DE TEXTURA del material activo): los instala Properties.cpp
+extern int (*CapaTexFilasCount)();
+extern std::string (*CapaTexFilaTexto)(int fila);
+extern void (*CapaTexFilaSeleccionar)(int fila);
+extern int (*CapaTexFilaActiva)();
+// modo 18 (las CAPAS DE MATERIAL del mesh part activo): los instala Properties.cpp
+extern int (*CapaMatFilasCount)();
+extern std::string (*CapaMatFilaTexto)(int fila);
+extern void (*CapaMatFilaSeleccionar)(int fila);
+extern int (*CapaMatFilaActiva)();
 extern int  (*MixFilaPlegada)(int fila);      // -1 no se pliega (capa), 0 desplegada, 1 plegada
 extern int  (*MixFilaIcono)(int fila);        // IconType de la fila
 
@@ -65,6 +76,43 @@ class PropListMeshParts : public PropList {
         int filasMax;   // alto de la VENTANA (ajustable arrastrando)
         int scrollFila; // primera fila visible
         int modo;       // 0 = mesh parts; 1 = UV maps; 2 = colores; 3 = modificadores; 4 = vertex groups; 5 = animaciones (armature); 6 = huesos (armature); 7 = animaciones del OBJETO (vertex anims del mesh); 8 = huesos 2D del armature 2D ACTIVO; 10 = armatures 2D del mesh (Mesh::armatures2d); 11 = stack de constraints (Object::constraints, va por 'obj'); 12 = scripts lua del objeto (Object::scriptDatos, va por 'obj'; el ORDEN es el de ejecucion); 13 = el arbol del MIX de animaciones (ganchos Mix*)
+        // LO QUE SE HACE CON UNA FILA (lo pone el panel al armar la lista; NULL = esa lista no lo tiene). Actuan sobre
+        // la fila ACTIVA: el que las llama la elige antes. Con ellas la lista muestra el TACHO a la derecha de cada fila
+        // (si hay mas de 'minItems'), el menu contextual (click derecho / mantener y soltar), renombra con doble click
+        // y se reordena arrastrando una fila
+        void (*opBorrar)(); void (*opRenombrar)(); void (*opSubir)(); void (*opBajar)();
+        bool (*opSoloLectura)();   // true = ahora no se puede tocar (una libreria): sin tacho ni arrastre
+        void (*opCambiar)();       // != NULL: cada fila lleva una FLECHA (a la izquierda del tacho) que abre un menu para
+                                   // cambiar lo que tiene (las capas de material: elegir otro material)
+        int minItems;              // con esta cantidad (o menos) no se borra: el tacho no esta (mesh parts: 1)
+        struct Extra { const char* texto; void (*accion)(); int icono; bool soloEdit; };
+        Extra extras[4]; int nExtras;   // opciones de mas para el menu (Asignar / Seleccionar...; soloEdit: en Edicion)
+        void AgregarExtra(const char* texto, void (*accion)(), int icono, bool soloEdit);
+        bool ConTacho() const;     // las filas llevan el tacho
+        bool Reordenable() const;  // se puede arrastrar una fila
+        Button* renBoton;          // el campo de RENOMBRAR en linea (se dibuja en la fila renFila mientras edita)
+        int renFila;
+        int filaDestino;           // arrastrando una fila: la linea de donde cae (-1 = no se arrastra)
+        static int Asa();          // el alto de la franja de abajo (la linea para agrandar / achicar la lista)
+        // EL ALTO: sin tocar, las filas que hay (hasta filasMax). Si el usuario lo cambio (altoFijo) o la lista tiene
+        // un minimo (minFilas), mide eso aunque sobren renglones en blanco
+        bool altoFijo; int minFilas;
+        int altoPx;                // (altoFijo) el alto de las filas en PIXELES: el asa lo mueve de a pixel, no de a renglon
+        int asaEstado;             // la linea de abajo: 0 normal (el color de la caja), 1 el puntero encima (blanca), 2 agarrada (verde)
+        int AltoFilasPx() const;   // el alto del area de las filas (sin los bordes de la caja)
+        // LA BARRITA DE SCROLL de la lista (con mas filas que renglones): 0 normal, 1 el puntero encima (mas ancha y
+        // blanca), 2 agarrada (verde). ScrollGeo: el largo del riel, el del agarre y donde esta (pixeles, desde arriba)
+        int sbEstado;
+        int hoverFila;             // la fila con el puntero encima (su texto va en blanco); -1 = ninguna
+        bool ScrollGeo(int* riel, int* agarre, int* pos) const;
+        void ScrollDesdeY(int y);  // el agarre con su centro en 'y' (pixeles desde arriba del riel)
+        bool mostrarVacia;         // se dibuja aunque no tenga nada (las capas de textura: sus 3 renglones)
+        bool oculto;               // no se dibuja ni ocupa lugar (las capas de textura con el material por defecto)
+        int FilasAlto() const;     // los renglones que mide la caja
+        // TRES BOTONES A LA DERECHA de la caja, a lo alto (subir / bajar / opciones de la fila elegida)
+        bool botonesLado; Button* ladoBtn[3];
+        int AnchoLado() const;     // lo que ocupa esa columna (0 sin botones)
+        bool LadoHabilitado(int k) const;   // se puede usar ahora (subir: no es la primera; bajar: no es la ultima)
         void AjustarVentana(); // mantiene la seleccion a la vista
         // segun 'modo' lee la lista correcta (la MISMA lista para parts/uvmaps/colors):
         int         ListaCount() const;       // cantidad de items

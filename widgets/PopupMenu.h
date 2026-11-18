@@ -90,6 +90,9 @@ class PopupMenu {
                             // el texto tapaba las tildes y no se veia si estaban marcadas)
         int selectIndex;    // opcion resaltada (-1 = ninguna)
         int scroll;         // primera fila VISIBLE (>0 cuando el menu es mas alto que la pantalla -> scrollbar)
+        bool sbHover;       // el puntero esta sobre la barra de scroll (se agranda y va en blanco)
+        bool EnBarraScroll(int mx, int my) const;   // el punto cae en la franja de la barra (con scroll)
+        void ScrollDesdeY(int my);                  // el agarre con su centro en esa y de pantalla
         bool abierto;
         // se cierra solo si el mouse se aleja (default). false = uno que no se abrio en el mouse (centrado en la pantalla,
         // como el de "pantalla externa"): el mouse tiene que poder ir hasta el
@@ -164,6 +167,11 @@ extern PopupMenu* MenuAbierto; // el desplegable activo (NULL = ninguno)
 bool MenuSliderDragActivo();      // hay un drag de slider armado (y su menu sigue abierto)
 int  MenuSliderDragMover(int mx); // re-mapea mx a la barra del item; devuelve el id del item (-1 sin drag)
 void MenuSliderDragSoltar();      // corta el drag (mouse-up, o up perdido)
+// ---- la BARRA DE SCROLL de un menu largo: un click en ella lleva el agarre ahi y lo deja agarrado (verde); la app
+// rutea el motion / up con esto, igual que el slider
+bool MenuScrollDragActivo();
+void MenuScrollDragMover(int my);
+void MenuScrollDragSoltar();
 
 // tamano de la pantalla para que Abrir() pueda clampear (lo setea cada
 // plataforma al hacer resize)
