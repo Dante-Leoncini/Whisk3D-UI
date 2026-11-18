@@ -12,7 +12,7 @@ class PropBool : public PropertieBase {
         PropBool(const std::string& Name);
 
         bool* value;
-        bool Seleccionable() { return value != NULL; }
+        bool Seleccionable() W3D_OVERRIDE { return value != NULL; }
         void (*onChange)(); // se llama al togglear (lo usa el redo-panel: Regenerar)
         int animProp, animComp;
         int AnimProp() W3D_OVERRIDE { return animProp; }

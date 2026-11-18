@@ -14,7 +14,7 @@ class PropFloat : public PropertieBase {
         TextField field;            // edicion por texto: al hacer click/OK se enfoca con TODO seleccionado (tipear
                                     // reemplaza), se escribe el numero y Enter lo aplica (mas rapido que arrastrar).
         void IniciarEdicionTexto(); // enfoca el campo con el valor actual formateado + SelectAll
-        bool Seleccionable() { return value != NULL; }
+        bool Seleccionable() W3D_OVERRIDE { return value != NULL; }
         float originalValue;
         std::string unit;
 
