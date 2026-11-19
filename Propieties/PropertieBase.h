@@ -20,6 +20,7 @@
 #include "WhiskUI/widgets/card.h"
 #include "WhiskUI/text/bitmapText.h"
 #include "objects/Objects.h"
+#include "w3dGraphics.h"   // ColorAlterado (w3dEngine::Color4f)
 
 // dialecto C++03 compartido
 struct PropertyType {
@@ -61,6 +62,8 @@ void W3dRenderRomboKey(int estado);
 // Titulo de una tarjeta: [flecha abrir/cerrar] [icono opcional] texto.
 // iconExtra = NULL -> no se dibuja y el texto no reserva su lugar (la tarjeta queda igual que siempre).
 void CardTitulo(GLfloat* icon, const std::string& texto, int maxPixels = 1920, GLfloat* iconExtra = NULL);
+// el AMARILLO de lo alterado (un override: ver PropertieBase::alterado)
+inline void ColorAlterado() { w3dEngine::Color4f(1.0f, 0.86f, 0.18f, 1.0f); }
 
 class PropertieBase {
     public:
@@ -73,6 +76,9 @@ class PropertieBase {
         virtual PropertyType GetType();
 
         bool editando;
+        // ALTERADO: el valor no es el ORIGINAL (un objeto que genera un proxy o una instancia, cambiado en ESTE proyecto: un
+        // override). El numero y la casilla se ven en AMARILLO. Lo pone Properties en cada cuadro
+        bool alterado;
 
         virtual void button_up();
         virtual void button_down();

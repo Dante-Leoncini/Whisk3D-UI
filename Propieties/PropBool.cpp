@@ -30,7 +30,13 @@ void PropBool::RenderPropertiBoxBorder(Card* propertiBox){
     if (value){
         float dx = (float)(width - PropColEtiqueta - propertiBox->width - bordersGS - g_propKeyBtnCol);
         w3dEngine::Translatef(dx, -RenglonHeightGS - gapGS, 0);
-        propertiBox->RenderBorder(false);
+        if (alterado) {
+            // (un override de este proyecto: el BORDE de la casilla en amarillo, se vea tildada o no)
+            GLubyte r = propertiBox->color[0], g = propertiBox->color[1], b = propertiBox->color[2];
+            propertiBox->color[0] = 255; propertiBox->color[1] = 220; propertiBox->color[2] = 46;
+            propertiBox->RenderBorder(true);
+            propertiBox->color[0] = r; propertiBox->color[1] = g; propertiBox->color[2] = b;
+        } else propertiBox->RenderBorder(false);
         w3dEngine::Translatef(-dx, RenglonHeightGS + gapGS, 0);
     }
 };
@@ -42,6 +48,8 @@ void PropBool::RenderPropertiValue(Card* propertiBox){
         // borde izq que el box (width-PropColEtiqueta-cb-bordersGS), corrido el borderGS del origen.
         float dx = (float)(width - PropColEtiqueta - cb - bordersGS - borderGS - g_propKeyBtnCol);
         w3dEngine::Translatef(dx, 0, 0);
+        // (la tilde va SIEMPRE del color que puso el grupo: apagada es la del fondo y no se ve. Un override se marca
+        //  solo con el BORDE amarillo; la tilde amarilla aparecia en una casilla apagada y parecia tildada)
         RenderBitmapText(unicodeCheck, textAlign::center, cb);
         w3dEngine::Translatef(-dx, RenglonHeightGS + gapGS, 0);
     }

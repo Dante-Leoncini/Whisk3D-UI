@@ -50,6 +50,7 @@ PropertieBase::PropertieBase(const std::string& Name): name(Name){
     // C++03: defaults (name viene del init-list; "?" era solo el default)
     width = 300;
     editando = false;
+    alterado = false;
 }
 
 PropertieBase::~PropertieBase() {}

@@ -109,6 +109,7 @@ void PropFloat::RenderPropertiValue(Card* propertiBox){
             RenderBitmapText(">", textAlign::center, aw);
             w3dEngine::PopMatrix();
         }
+        if (alterado) ColorAlterado();   // (un override de este proyecto: en amarillo)
         if (mixto){
             RenderBitmapText("-", al, boxW);   // seleccion multiple con valores distintos
         } else if (entero && opciones && nOpciones > 0){
@@ -122,6 +123,7 @@ void PropFloat::RenderPropertiValue(Card* propertiBox){
         } else {
             RenderBitmapFloat(*value, al, boxW, unit);
         }
+        if (alterado) SetColorID(ColorID::blanco);
         w3dEngine::Translatef(0, RenglonHeightGS + gapGS, 0);
     }
 }
