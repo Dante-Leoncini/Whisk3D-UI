@@ -1,5 +1,6 @@
 #include "bitmapText.h"
 #include "w3dGraphics.h"
+#include "WhiskUI/draw/glesdraw.h"   // W3dPantallaAlto: el campo enfocado, en la pantalla (el mouse)
 #include <stdio.h>
 #include <vector>
 
@@ -158,6 +159,45 @@ static int CharsUTF8(const std::string& s, size_t bytes) {
 }
 static bool CursorPrendido() { return ((w3dGetTicks() / kParpadeoMs) & 1u) == 0u; }
 
+// DONDE SE DIBUJO EL CAMPO ENFOCADO, en la pantalla (pixeles de la ventana, Y para abajo, como el mouse): el texto
+// empieza en x0 y cada letra mide cw; la caja que se puede tocar va de (rx0, ry0) a (rx1, ry1); vis = las letras que se ven
+struct GeomCampo { const TextField* f; float x0, cw, rx0, ry0, rx1, ry1; int vis; };
+static GeomCampo gGeomCampo = { NULL, 0, 1, 0, 0, 0, 0, 0 };
+static bool gArrastrandoCampo = false;
+// un punto del origen actual (la modelview y la proyeccion de la UI, el viewport de su panel) -> la pantalla
+static void APantalla(const float* M, const int* vp, float lx, float ly, float& sx, float& sy) {
+    const float cx = M[0] * lx + M[4] * ly + M[12], cy = M[1] * lx + M[5] * ly + M[13], cw = M[3] * lx + M[7] * ly + M[15];
+    const float w = (cw != 0.0f) ? cw : 1.0f;
+    sx = (float)vp[0] + (cx / w + 1.0f) * 0.5f * (float)vp[2];
+    sy = (float)W3dPantallaAlto - ((float)vp[1] + (cy / w + 1.0f) * 0.5f * (float)vp[3]);
+}
+static void AnotarGeometria(const TextField& f, int x0, int vis, int cw, int align, int maxPixels) {
+    float mv[16], pr[16], M[16];
+    w3dEngine::GetMatrix(w3dEngine::ModelView, mv); w3dEngine::GetMatrix(w3dEngine::Projection, pr);
+    for (int c = 0; c < 4; c++) for (int r = 0; r < 4; r++) {
+        float v = 0.0f; for (int k = 0; k < 4; k++) v += pr[k * 4 + r] * mv[c * 4 + k];
+        M[c * 4 + r] = v;
+    }
+    int vp[4] = { 0, 0, 1, 1 }; w3dEngine::GetViewport(vp);
+    const int lh = LetterHeightGS > 0 ? LetterHeightGS : 8;
+    // la caja: el ancho del campo y media letra de mas arriba y abajo (el dedo y el mouse no tienen que ser exactos)
+    const float bx0 = (align == 1) ? (float)-maxPixels : 0.0f, bx1 = (align == 1) ? 0.0f : (float)maxPixels;
+    float ax, ay, bx, by, tx, ty, ux, uy;
+    APantalla(M, vp, bx0 - (float)cw, -(float)lh * 0.5f, ax, ay);
+    APantalla(M, vp, bx1 + (float)cw, (float)lh * 1.5f, bx, by);
+    APantalla(M, vp, (float)x0, 0.0f, tx, ty);
+    APantalla(M, vp, (float)(x0 + cw), 0.0f, ux, uy);
+    gGeomCampo.f = &f; gGeomCampo.x0 = tx; gGeomCampo.cw = (ux - tx) != 0.0f ? (ux - tx) : 1.0f; gGeomCampo.vis = vis;
+    gGeomCampo.rx0 = ax < bx ? ax : bx; gGeomCampo.rx1 = ax < bx ? bx : ax;
+    gGeomCampo.ry0 = ay < by ? ay : by; gGeomCampo.ry1 = ay < by ? by : ay;
+}
+// el byte del texto donde empieza la letra numero 'n' (UTF-8)
+static int ByteDeLetra(const std::string& s, int n) {
+    int i = 0, letras = 0;
+    while (i < (int)s.size() && letras < n) { i++; while (i < (int)s.size() && ((unsigned char)s[i] & 0xC0) == 0x80) i++; letras++; }
+    return i;
+}
+
 void RenderTextField(const TextField& f, bool foco, int align, int maxPixels) {
     const textAlign al((textAlign::Enum)align);
     if (!foco) { RenderBitmapText(f.text, al, maxPixels); return; }
@@ -170,6 +210,7 @@ void RenderTextField(const TextField& f, bool foco, int align, int maxPixels) {
     if (al == textAlign::right)       x0 = -vis * cw;
     else if (al == textAlign::center) x0 = (maxPixels - vis * cw) / 2;
     const int g = GlobalScale > 0 ? GlobalScale : 1;
+    if (&f == g_textFieldActivo) AnotarGeometria(f, x0, vis, cw, align, maxPixels);
     if (f.selectAll && total > 0) {
         // el FONDO de la seleccion atras del texto (y el texto en blanco encima, que se lea)
         w3dEngine::Color4fv(ListaColores[static_cast<int>(ColorID::accentDark)]);
@@ -179,11 +220,60 @@ void RenderTextField(const TextField& f, bool foco, int align, int maxPixels) {
         return;
     }
     RenderBitmapText(f.text, al, maxPixels);
+    // UNA PARTE seleccionada (Shift + flechas, arrastrar el mouse): su fondo y esas letras en blanco encima
+    if (f.HaySeleccion()) {
+        int a, b; f.Seleccion(a, b);
+        int ca = CharsUTF8(f.text, (size_t)a), cb = CharsUTF8(f.text, (size_t)b);
+        if (ca > vis) ca = vis; if (cb > vis) cb = vis;
+        if (cb > ca) {
+            w3dEngine::Color4fv(ListaColores[static_cast<int>(ColorID::accentDark)]);
+            RectCampo(x0 + ca * cw, -g, (cb - ca) * cw, LetterHeightGS + 2 * g);
+            w3dEngine::Color4fv(ListaColores[static_cast<int>(ColorID::blanco)]);
+            const int ba = ByteDeLetra(f.text, ca), bb = ByteDeLetra(f.text, cb);
+            w3dEngine::PushMatrix();
+            w3dEngine::Translatef((float)(x0 + ca * cw), 0.0f, 0.0f);
+            RenderBitmapText(f.text.substr((size_t)ba, (size_t)(bb - ba)), textAlign(textAlign::left), (cb - ca) * cw + cw);
+            w3dEngine::PopMatrix();
+        }
+    }
     if (!CursorPrendido()) return;
     int c = CharsUTF8(f.text, f.caret < 0 ? 0 : (size_t)f.caret);
     if (c > vis) c = vis;
     RectCampo(x0 + c * cw - (c > 0 ? g / 2 : 0), -g, g, LetterHeightGS + 2 * g);   // el palito (del color del texto)
 }
+
+// ---- EL MOUSE sobre el campo enfocado (ver TextField.h) ----
+bool TextFieldPuntoEnActivo(int mx, int my) {
+    if (!g_textFieldActivo || gGeomCampo.f != g_textFieldActivo) return false;
+    return (float)mx >= gGeomCampo.rx0 && (float)mx <= gGeomCampo.rx1 && (float)my >= gGeomCampo.ry0 && (float)my <= gGeomCampo.ry1;
+}
+// la letra mas cercana a esa x -> su byte
+static int PosicionEn(int mx) {
+    TextField* f = g_textFieldActivo;
+    float n = ((float)mx - gGeomCampo.x0) / gGeomCampo.cw;
+    int letra = (int)(n + 0.5f);
+    if (letra < 0) letra = 0; if (letra > gGeomCampo.vis) letra = gGeomCampo.vis;
+    return ByteDeLetra(f->text, letra);
+}
+bool TextFieldMouseAbajo(int mx, int my, bool shift, bool doble) {
+    if (!TextFieldPuntoEnActivo(mx, my)) return false;
+    TextField* f = g_textFieldActivo;
+    if (doble) { f->SelectAll(); gArrastrandoCampo = false; return true; }
+    const int p = PosicionEn(mx);
+    if (shift) f->MoverA(p, true);
+    else { f->Deseleccionar(); f->caret = p; f->ancla = p; }
+    gArrastrandoCampo = true;
+    return true;
+}
+bool TextFieldMouseArrastrar(int mx) {
+    if (!gArrastrandoCampo || !g_textFieldActivo || gGeomCampo.f != g_textFieldActivo) return false;
+    TextField* f = g_textFieldActivo;
+    if (f->ancla < 0) f->ancla = f->caret;
+    f->selectAll = false;
+    f->caret = PosicionEn(mx);
+    return true;
+}
+void TextFieldMouseArriba() { gArrastrandoCampo = false; }
 
 // el campo enfocado (NULL = ninguno): estado de la biblioteca, lo lee el palito y lo pone quien enfoca
 TextField* g_textFieldActivo = NULL;

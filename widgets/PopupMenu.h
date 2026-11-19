@@ -71,6 +71,9 @@ class MenuItem {
                             // (ej: el modo de pivot actual en el menu de pivot)
         float* valorFloat;  // NULL = opcion comun; si no, es un SLIDER (ej: size)
         float vmin, vmax;   // rango del slider (click en la barra setea el valor)
+        float paso;         // > 0: el slider lleva un "-" a la izquierda y un "+" a la derecha que lo mueven de a 'paso'
+        bool entero;        // el valor del slider se muestra sin decimales (con 'unidad' detras: "100%")
+        std::string unidad;
         bool lineaArriba;   // una LINEA separadora arriba de esta fila (separa dos grupos de opciones)
 
         MenuItem(const std::string& Text, int Id, int Icon = -1,

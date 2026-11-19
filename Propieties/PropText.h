@@ -14,10 +14,11 @@ class PropText : public PropertieBase {
         TextField field;
         bool oculto;        // true = no ocupa fila (lo usa el campo de rename: visible solo al renombrar)
         bool error;         // validacion: true = marcar el campo en ROJO (falta completarlo). Se autolimpia al escribir.
+        bool rojo;          // el TEXTO del valor en rojo: un dato que avisa (un recurso que nadie usa: "0" usuarios)
         void (*onClick)();  // NULL = campo editable normal; si no, al clickear se llama esto (ej: Path -> Browse) y NO se edita
 
         PropText(const std::string& Name, const std::string& valor = "")
-            : PropertieBase(Name) { field.SetText(valor); oculto = false; error = false; onClick = 0; }
+            : PropertieBase(Name) { field.SetText(valor); oculto = false; error = false; rojo = false; onClick = 0; }
 
         PropertyType GetType() { return PropertyType::Text; }
         int Resize(int w) { if (oculto) return 0; width = w; return RenglonHeightGS + gapGS; }
@@ -52,7 +53,9 @@ class PropText : public PropertieBase {
             if (oculto) return;
             int boxW = propertiBox->width - bordersGS;
             // (todo seleccionado: fondo atras del texto, tipear lo reemplaza; si no, el cursor que parpadea)
+            if (rojo) w3dEngine::Color4f(240.0f / 255.0f, 90.0f / 255.0f, 90.0f / 255.0f, 1.0f);
             RenderTextField(field, g_textFieldActivo == &field, textAlign::left, boxW);
+            if (rojo) w3dEngine::Color4fv(ListaColores[static_cast<int>(ColorID::blanco)]);
             w3dEngine::Translatef(0, RenglonHeightGS + gapGS, 0);
         }
         void RenderPropertiLabel(Card* propertiBox) {

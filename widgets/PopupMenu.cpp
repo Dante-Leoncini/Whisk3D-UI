@@ -1,3 +1,4 @@
+#include <stdio.h>   // snprintf: el valor entero de un slider ("100%")
 #include "WhiskUI/text/font.h"   // UTF8_Largo
 #include "WhiskUI/widgets/PopupMenu.h"
 #include "w3dGraphics.h"
@@ -18,8 +19,18 @@ std::string MenuAtajoVisible(const MenuItem* it){
     if (W3dMenuAtajoTexto) return W3dMenuAtajoTexto(it->atajo);
     return (it->atajo[0] == '@') ? std::string() : it->atajo;
 }
+// EL SLIDER de una fila, en coordenadas del menu: la barra (barX, de 80 de ancho) y, con 'paso', el "-" a su izquierda
+// (menosX) y el "+" a su derecha (masX), cuadrados del alto del renglon (bw). El mismo lugar para dibujar y para tocar
+static void GeomSlider(int anchoMenu, const MenuItem* it, int& barX, int& menosX, int& masX, int& bw){
+    const int sliderW = 80 * GlobalScale;
+    bw = (it->paso > 0.0f) ? RenglonHeightGS : 0;
+    const int g = (it->paso > 0.0f) ? gapGS : 0;
+    masX = anchoMenu - bordersGS - bw;
+    barX = masX - g - sliderW;
+    menosX = barX - g - bw;
+}
 static int MenuItemDerecha(const MenuItem* it){
-    if (it->valorFloat) return 80 * GlobalScale + gapGS; // slider (no convive con atajo)
+    if (it->valorFloat) return 80 * GlobalScale + gapGS + (it->paso > 0.0f ? 2 * (RenglonHeightGS + gapGS) : 0); // slider (no convive con atajo)
     int icono = (it->submenu || it->checkbox) ? IconSizeGS : 0;
     int atajo = UTF8_Largo(MenuAtajoVisible(it)) * CharacterWidthGS;
     if (atajo > 0) return (icono > 0) ? icono + gapGS + atajo : atajo;
@@ -50,8 +61,8 @@ int MenuSliderDragMover(int mx){
     if (!it->valorFloat) return -1;
     if (it->gris && !*it->gris) return -1; // se deshabilito en el medio: no editar
     int sliderW = 80 * GlobalScale;        // mismo ancho/mapeo que Click y Render
-    int barXscreen = g_sliderDragMenu->x + borderGS +
-                     (g_sliderDragMenu->width - bordersGS - sliderW);
+    int bx, mnx, msx, bw; GeomSlider(g_sliderDragMenu->width, it, bx, mnx, msx, bw);
+    int barXscreen = g_sliderDragMenu->x + borderGS + bx;
     float frac = (float)(mx - barXscreen) / (float)sliderW;
     if (frac < 0.0f) frac = 0.0f; if (frac > 1.0f) frac = 1.0f;
     *it->valorFloat = it->vmin + frac * (it->vmax - it->vmin);
@@ -77,6 +88,7 @@ MenuItem::MenuItem(const std::string& Text, int Id, int Icon, PopupMenu* Submenu
     verde = false;
     valorFloat = NULL;
     vmin = 0.0f; vmax = 1.0f;
+    paso = 0.0f; entero = false;
     accion = NULL;
 }
 
@@ -460,8 +472,24 @@ void PopupMenu::Render(){
             float frac = rango > 0.0f ? (*items[i]->valorFloat - items[i]->vmin) / rango : 0.0f;
             if (frac < 0.0f) frac = 0.0f; if (frac > 1.0f) frac = 1.0f;
             int sliderW = 80 * GlobalScale;
-            int barX = width - bordersGS - sliderW;
+            int barX, menosX, masX, bw; GeomSlider(width, items[i], barX, menosX, masX, bw);
             int barH = RenglonHeightGS - 2 * GlobalScale;
+            if (items[i]->paso > 0.0f){
+                // el "-" y el "+" (cajitas del alto del renglon, como los botones de la UI)
+                const int xs[2] = { menosX, masX }; const char* ts[2] = { "-", "+" };
+                for (int b = 0; b < 2; b++){
+                    w3dEngine::PushMatrix();
+                    w3dEngine::Translatef((GLfloat)xs[b], (GLfloat)GlobalScale, 0);
+                    SetColorID(ColorID::headerColor, 1.0f);
+                    sliderCard->Resize(bw, barH); sliderCard->RenderObject(false);
+                    w3dEngine::PopMatrix();
+                    SetColorID(ColorID::blanco, 1.0f);
+                    w3dEngine::PushMatrix();
+                    w3dEngine::Translatef((GLfloat)xs[b], 0, 0);
+                    RenderBitmapText(ts[b], textAlign::center, bw);
+                    w3dEngine::PopMatrix();
+                }
+            }
             w3dEngine::PushMatrix();
             w3dEngine::Translatef((GLfloat)barX, (GLfloat)GlobalScale, 0);
             SetColorID(ColorID::headerColor, 1.0f);
@@ -475,7 +503,10 @@ void PopupMenu::Render(){
             SetColorID(ColorID::blanco, 1.0f);
             w3dEngine::PushMatrix();
             w3dEngine::Translatef((GLfloat)barX, 0, 0);
-            RenderBitmapFloat(*items[i]->valorFloat, textAlign::center, sliderW);
+            if (items[i]->entero){
+                char b[32]; snprintf(b, sizeof(b), "%d%s", (int)(*items[i]->valorFloat + (*items[i]->valorFloat < 0 ? -0.5f : 0.5f)), items[i]->unidad.c_str());
+                RenderBitmapText(b, textAlign::center, sliderW);
+            } else RenderBitmapFloat(*items[i]->valorFloat, textAlign::center, sliderW);
             w3dEngine::PopMatrix();
         }
         const std::string atajoTxt = MenuAtajoVisible(items[i]);
@@ -631,7 +662,15 @@ int PopupMenu::Click(int mx, int my){
     MenuItem* itF = items[fila];
     if (itF->valorFloat && !(itF->gris && !*itF->gris)){
         int sliderW = 80 * GlobalScale;
-        int barXscreen = x + borderGS + (width - bordersGS - sliderW);
+        int bx, mnx, msx, bw; GeomSlider(width, itF, bx, mnx, msx, bw);
+        // el "-" / el "+": un paso (no arma el arrastre)
+        if (itF->paso > 0.0f){
+            const int lx = mx - x - borderGS;
+            if (lx >= mnx && lx < mnx + bw) { float v = *itF->valorFloat - itF->paso; if (v < itF->vmin) v = itF->vmin; *itF->valorFloat = v; return itF->id; }
+            if (lx >= msx && lx < msx + bw) { float v = *itF->valorFloat + itF->paso; if (v > itF->vmax) v = itF->vmax; *itF->valorFloat = v; return itF->id; }
+            if (lx < bx) return -1;   // (el nombre de la fila: nada)
+        }
+        int barXscreen = x + borderGS + bx;
         float frac = (float)(mx - barXscreen) / (float)sliderW;
         if (frac < 0.0f) frac = 0.0f; if (frac > 1.0f) frac = 1.0f;
         *itF->valorFloat = itF->vmin + frac * (itF->vmax - itF->vmin);
@@ -717,7 +756,7 @@ void PopupMenu::AjustarSlider(int dir){
     MenuItem* it = ItemActual();
     if (!it || !it->valorFloat) return;
     if (it->gris && !*it->gris) return; // deshabilitado
-    float paso = (it->vmax - it->vmin) / 20.0f;
+    float paso = it->paso > 0.0f ? it->paso : (it->vmax - it->vmin) / 20.0f;
     if (paso <= 0.0f) paso = 0.01f;
     float v = *it->valorFloat + (float)dir * paso;
     if (v < it->vmin) v = it->vmin;
