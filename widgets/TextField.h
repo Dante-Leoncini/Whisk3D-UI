@@ -16,7 +16,12 @@ struct TextField {
     bool selectAll;            // true = TODO seleccionado: tipear/borrar reemplaza todo; la flecha deselecciona
     int ancla;                 // la otra punta de una seleccion PARCIAL (Shift + flechas, arrastrar el mouse); -1 = ninguna
     bool soloLectura;          // se puede seleccionar y copiar, no cambiar (los datos de un recurso)
-    TextField() : caret(0), selectAll(false), ancla(-1), soloLectura(false) {}
+    // un NUMERO (un PropFloat, el valor de un mapa del material): solo entran digitos, el punto y la matematica
+    // (+ - * / y parentesis). El keypad del telefono escribe los digitos directo (sin el multi-tap de las letras)
+    bool numerico;
+    TextField() : caret(0), selectAll(false), ancla(-1), soloLectura(false), numerico(false) {}
+    static bool CharNumerico(int c) { return (c >= '0' && c <= '9') || c == '.' || c == ',' || c == '+' || c == '-' ||
+                                             c == '*' || c == '/' || c == '(' || c == ')' || c == ' '; }
     void SetText(const std::string& t) { text = t; caret = (int)t.size(); selectAll = false; ancla = -1; }
     void SelectAll() { selectAll = true; caret = (int)text.size(); ancla = -1; } // al renombrar: todo seleccionado
     // ---- LA SELECCION: todo (selectAll) o un tramo (de ancla al cursor) ----

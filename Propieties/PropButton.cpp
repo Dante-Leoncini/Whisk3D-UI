@@ -15,6 +15,7 @@ PropButton::PropButton(const std::string& Name, int Icon):
     animProp = -1; animComp = 0;
     extras[0] = extras[1] = NULL; accionExtra[0] = accionExtra[1] = NULL; nExtras = 0; slotsExtras = 0; colExtras = 0;
     prefijo = NULL; accionPrefijo = NULL; colPrefijo = 0; labelChars = 0;
+    focoKb = -1;
 }
 void PropButton::AgregarPrefijo(void (*accion)(), const char* ayuda) {
     if (prefijo) return;
@@ -45,6 +46,22 @@ int PropButton::ExtraEnX(int lx) const {
         if (lx >= x && lx < x + extras[i]->width) return i;
     }
     return -1;
+}
+
+// el orden VISUAL de izquierda a derecha: el cuadradito, el boton grande y los chicos (solo los visibles)
+bool PropButton::KbMover(int dir) {
+    if (oculto || !conLabel) return false;
+    int orden[4]; int n = 0;
+    if (prefijo && prefijo->visible && accionPrefijo) orden[n++] = -2;
+    orden[n++] = -1;
+    for (int i = 0; i < nExtras; i++) if (extras[i] && extras[i]->visible && accionExtra[i]) orden[n++] = i;
+    int pos = 0;
+    for (int i = 0; i < n; i++) if (orden[i] == focoKb) pos = i;
+    if (orden[pos] != focoKb) { for (int i = 0; i < n; i++) if (orden[i] == -1) pos = i; }   // (el foco ya no existe)
+    const int nueva = pos + (dir > 0 ? 1 : -1);
+    if (nueva < 0 || nueva >= n) { focoKb = orden[pos]; return false; }
+    focoKb = orden[nueva];
+    return true;
 }
 
 PropButton::~PropButton(){
@@ -138,10 +155,16 @@ void PropButton::RenderPropertiBox(Card* propertiBox){
 
 void PropButton::RenderPropertiBoxBorder(Card* propertiBox){
     if (oculto) return;
-    // fila seleccionada con el teclado: borde resaltado sobre el boton
-    const GLfloat dx = (GLfloat)(ColBoton() - PropColEtiqueta);
+    // fila seleccionada con el teclado: borde resaltado sobre el boton (o sobre el chico / el cuadradito con foco)
+    Button* conFoco = button; int col = ColBoton();
+    if (conLabel && focoKb >= 0 && focoKb < nExtras && extras[focoKb] && extras[focoKb]->visible) {
+        conFoco = extras[focoKb]; col = ExtraX(focoKb);
+    } else if (conLabel && focoKb == -2 && prefijo && prefijo->visible) {
+        conFoco = prefijo; col = colPrefijo;
+    }
+    const GLfloat dx = (GLfloat)(col - PropColEtiqueta);
     w3dEngine::Translatef(dx, (GLfloat)-Avance(), 0);
-    button->card->RenderBorder(false);
+    conFoco->card->RenderBorder(false);
     w3dEngine::Translatef(-dx, (GLfloat)Avance(), 0);
 }
 

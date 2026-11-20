@@ -20,11 +20,15 @@ void PropFloat::IniciarEdicionTexto(){
 }
 
 bool NumEditActivo(){ return g_propFloatEditando != NULL; }
+// el evaluador de la matematica (+ - * / y parentesis): lo pone el editor (W3dEvalExpr, NumInput.cpp). Sin el, atof
+bool (*g_propFloatEval)(const std::string&, float&) = NULL;
 
 void NumEditCommit(){
     if (g_propFloatEditando){
         PropFloat* p = g_propFloatEditando;
-        p->Set((float)atof(p->field.text.c_str())); // texto vacio/invalido -> 0 (atof)
+        float v = 0.0f;
+        if (!(g_propFloatEval && g_propFloatEval(p->field.text, v))) v = (float)atof(p->field.text.c_str()); // invalido -> atof
+        p->Set(v);
         p->editando = false;
     }
     g_propFloatEditando = NULL;
@@ -50,6 +54,7 @@ PropFloat::PropFloat(const std::string& Name, const std::string& Unit):
     entero = false; centrado = false; flechas = false; mixto = false; opciones = NULL; nOpciones = 0;
     acelera = false; holdDir = 0; holdCount = 0;
     animProp = -1; animComp = 0;
+    field.numerico = true;
     // (unit viene del init-list: el ° de rotacion vive)
 };
 

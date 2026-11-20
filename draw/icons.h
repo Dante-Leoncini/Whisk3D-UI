@@ -23,7 +23,7 @@ extern GLshort IconLineMesh[8];
 extern int IconSize;
 extern int IconSizeGS;
 
-const size_t ICON_TOTAL = 115; // (constexpr es C++11)
+const size_t ICON_TOTAL = 116; // (constexpr es C++11)
 
 // dialecto C++03 compartido
 struct IconType {
@@ -142,7 +142,8 @@ struct IconType {
         atajo,                  // la FLECHA DE ACCESO DIRECTO (caja negra con una flecha): un recurso EXTERNO (biblioteca)
         recargar,               // la flecha en circulo: ACTUALIZAR (el explorador de archivos, volver a leer una textura del disco)
         usuarios,               // dos personas: los USUARIOS de un recurso (la tarjeta Recurso: cuantos lo usan, seleccionarlos)
-        cerrar                  // una X: CANCELAR / cerrar (el horneado de la luz mientras calcula)
+        cerrar,                 // una X: CANCELAR / cerrar (el horneado de la luz mientras calcula)
+        raton                   // un MOUSE: que se elige con el click / el dedo / el lapiz (el timeline: curva, keyframe o ambos)
     };
     Enum v;
     IconType(Enum e) : v(e) {}

@@ -38,6 +38,10 @@ class PropButton : public PropertieBase {
         int colPrefijo;
         void AgregarPrefijo(void (*accion)(), const char* ayuda);
         int labelChars;    // > 0: la columna del nombre mide esto (las filas de los mapas quedan alineadas)
+        // FOCO DE TECLADO dentro de la fila (flechas izq/der del telefono): -2 = el cuadradito (prefijo), -1 = el boton
+        // grande, 0..nExtras-1 = un boton chico. Asi sin mouse se llega al color, al numero / textura y a la capa UV
+        int focoKb;
+        bool KbMover(int dir);        // -1 / +1: al anterior / siguiente VISIBLE. false = no hay mas (la fila no lo usa)
         int AnimProp() { return oculto ? -1 : animProp; }
         int AnimComp() { return animComp; }
 
