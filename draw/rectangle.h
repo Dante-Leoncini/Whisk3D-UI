@@ -28,8 +28,8 @@ class Rec2D : public Object2D {
 
 		// Métodos
 		void SetSize(GLshort x, GLshort y, GLshort w, GLshort h);
-		void SetColor(GLubyte red, GLubyte green, GLubyte blue);
-		void RenderObject(bool usarColorPropio = true) W3D_OVERRIDE;
+		void SetColor(GLubyte net, GLubyte green, GLubyte blue);
+		void RenderObject(bool useColorOwn = true) W3D_OVERRIDE;
 };
 
 #endif

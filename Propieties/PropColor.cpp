@@ -5,7 +5,6 @@ PropColor::PropColor(const std::string& Name):
     PropertieBase(Name){
     value = NULL;
     palRef = NULL; palObj = NULL;  // sin contexto de paleta (el bind del editor lo setea)
-    animProp = -1; animComp = 0;   // sin rombo por defecto (se activa desde el panel: AnimColor)
 };
 
 // el swatch de color = un CUADRADO pegado a la DERECHA (mismo tamaño/posicion que el checkbox);
@@ -14,37 +13,37 @@ PropColor::PropColor(const std::string& Name):
 // se dibujaba encima del rombo y no se podia ni poner un keyframe ni abrir el color.
 void PropColor::RenderPropertiBox(Card* propertiBox){
     if (value){
-        float dx = (float)(width - PropColEtiqueta - propertiBox->width - bordersGS - g_propKeyBtnCol); // deja la columna del rombo
+        float dx = (float)(width - PropColLabel - propertiBox->width - bordersGS - g_propKeyBtnCol); // deja la columna del rombo
         w3dEngine::Translatef(dx, 0, 0);
         propertiBox->Render(false);
-        w3dEngine::Translatef(-dx, RenglonHeightGS + gapGS, 0);
+        w3dEngine::Translatef(-dx, RowHeightGS + gapGS, 0);
     }
 }
 
 void PropColor::RenderPropertiBoxBorder(Card* propertiBox){
     if (value){
-        float dx = (float)(width - PropColEtiqueta - propertiBox->width - bordersGS - g_propKeyBtnCol); // deja la columna del rombo
-        w3dEngine::Translatef(dx, -RenglonHeightGS - gapGS, 0);
+        float dx = (float)(width - PropColLabel - propertiBox->width - bordersGS - g_propKeyBtnCol); // deja la columna del rombo
+        w3dEngine::Translatef(dx, -RowHeightGS - gapGS, 0);
         propertiBox->RenderBorder(false);
-        w3dEngine::Translatef(-dx, RenglonHeightGS + gapGS, 0);
+        w3dEngine::Translatef(-dx, RowHeightGS + gapGS, 0);
     }
 };
 
 void PropColor::RenderPropertiValue(Card* propertiBox){
     if (value){
         //RenderBitmapFloat(*value, textAlign::left, propertiBox->width -bordersGS, unit);
-        w3dEngine::Translatef(0, RenglonHeightGS + gapGS, 0);
+        w3dEngine::Translatef(0, RowHeightGS + gapGS, 0);
     }
 }
 
 void PropColor::RenderPropertiLabel(Card* propertiBox){
     if (value){
-        int cb = RenglonHeightGS + GlobalScale * 2; // mismo ancho que el checkbox/swatch
-        float dx = (float)(width - PropColEtiqueta - cb - bordersGS - gapGS - g_propKeyBtnCol);
+        int cb = RowHeightGS + GlobalScale * 2; // mismo ancho que el checkbox/swatch
+        float dx = (float)(width - PropColLabel - cb - bordersGS - gapGS - g_propKeyBtnCol);
         int wLabel = width - cb - bordersGS - gapGS * 2 - g_propKeyBtnCol;
         w3dEngine::Translatef(dx, 0, 0);
-        RenderBitmapEtiqueta(name, wLabel);
-        w3dEngine::Translatef(-dx, RenglonHeightGS + gapGS, 0);
+        RenderBitmapLabel(name, wLabel);
+        w3dEngine::Translatef(-dx, RowHeightGS + gapGS, 0);
     }
 };
 
@@ -76,19 +75,19 @@ bool PropColor::Cancel(){
     value[1] = originalValue[1];
     value[2] = originalValue[2];
     value[3] = originalValue[3];
-    editando = false;
-    return editando;
+    editing  = false;
+    return editing;
 };
 
 bool PropColor::EditPropertie(){
-    editando = !editando;
-    if (editando && value){
+    editing = !editing;
+    if (editing && value){
         originalValue[0] = value[0];
         originalValue[1] = value[1];
         originalValue[2] = value[2];
         originalValue[3] = value[3];
     }
-    return editando;
+    return editing;
 }
 
 PropertyType PropColor::GetType(){
@@ -99,5 +98,5 @@ int PropColor::Resize(int w){
     if (!value) return 0; // sin valor no se dibuja: la tarjeta de mesh
     // parts se expandia de mas con el material por defecto
     width = w;
-    return RenglonHeightGS + gapGS;
+    return RowHeightGS + gapGS;
 }

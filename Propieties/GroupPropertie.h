@@ -10,25 +10,25 @@
 #include "PropBool.h"
 #include "PropColor.h"
 
-#include "WhiskUI/theme/colores.h"
+#include "WhiskUI/theme/colors.h"
 
 class GroupPropertie {
     public:
         // ancho de la columna de valores (fraccion del ancho del grupo);
         // Transform usa 0.5, Mesh Parts 0.30 (mas lugar para etiquetas)
-        float anchoValores;
-        bool reservaKeyBtn;   // reserva una columna a la derecha para el boton de KEYFRAME (tarjeta Transform)
+        float valueWidth;
+        bool reserveKeyBtn;   // reserva una columna a la derecha para el boton de KEYFRAME (tarjeta Transform)
         int keyBtnCol;        // ancho de esa columna (0 si no se reserva)
-        int colEtiqueta; // donde empieza la columna de valores
+        int colLabel; // donde empieza la columna de valores
         std::string name;
-        int icono;       // IconType de la tarjeta, o -1 = sin icono (default). Va entre la flecha y el titulo.
+        int icon;       // IconType de la tarjeta, o -1 = sin icono (default). Va entre la flecha y el titulo.
         Card* card;
         Card* propertiBox;
         Card* checkBox;
         bool open;
-        bool flecha;     // false = sin la flecha de plegar en el titulo (una ventana flotante, no una tarjeta del panel)
+        bool arrow;     // false = sin la flecha de plegar en el titulo (una ventana flotante, no una tarjeta del panel)
         bool visible;
-        bool editando;
+        bool editing;
 
         int width;
         int height;
@@ -51,8 +51,8 @@ class GroupPropertie {
         void Render();
         // UNA sola fila (su caja, su valor y su nombre) en el lugar que ocupa dentro del grupo, sin la tarjeta: la que se
         // esta editando, opaca encima del grupo dibujado translucido (las tarjetas de la ultima operacion al arrastrar)
-        void RenderFila(int idx);
-        int  IndiceDe(const PropertieBase* p) const;   // -1 = no es de este grupo
+        void RenderRow(int idx);
+        int  IndexOf(const PropertieBase* p) const;   // -1 = no es de este grupo
         void RenderPropertiBox();
         void RenderPropertiValue();
         void RenderPropertiLabel();
@@ -66,10 +66,10 @@ extern std::vector<GroupPropertie*> GroupProperties;
 
 // la fila bajo el mouse (hover): texto blanco / borde del checkbox
 extern GroupPropertie* PropHoverGroup;
-extern int PropHoverFila;
+extern int PropHoverRow;
 
 // donde ARRANCA la columna de valores del grupo que se esta dibujando
 // (las filas la usan para volver al borde izquierdo)
-extern int PropColEtiqueta;
+extern int PropColLabel;
 
 #endif

@@ -3,34 +3,34 @@
 #include "w3dGraphics.h"
 #include "WhiskUI/draw/glesdraw.h"
 
-Button::Button(const std::string& Text, int Icon, bool Adaptar){
+Button::Button(const std::string& Text, int Icon, bool Adapt){
     // (eran inicializadores de clase: C++03)
     text = Text;
     icon = Icon;
-    adaptar = Adaptar;
-    desplegable = false;
+    adapt = Adapt;
+    dropdown = false;
     caretMenu = false;
-    altoRenglon = false;
-    centrado = false;
-    cuadrado = false;
+    rowHeight = false;
+    centered = false;
+    square   = false;
     visible = true;
     hover = false;
-    separador = false;
-    focoMenu = false;
-    tinte = NULL;
-    colorTexto = NULL;
-    colorBorde = NULL;
+    separator = false;
+    focusMenu = false;
+    tint = NULL;
+    textColor   = NULL;
+    borderColor = NULL;
     alpha = 1.0f;
     iconFlip = 0;
-    relleno = NULL;
-    barra = -1.0f;
+    fill = NULL;
+    bar = -1.0f;
     editField = NULL;
-    rol = -1;
+    role = -1;
     width = 10;
-    height = RenglonHeightGS;
+    height = RowHeightGS;
     sx = -10000;
     sy = -10000;
-    card = new Card(NULL, 10, RenglonHeightGS);
+    card = new Card(NULL, 10, RowHeightGS);
 }
 
 Button::~Button(){
@@ -39,60 +39,60 @@ Button::~Button(){
 
 void Button::Resize(int maxW){
     // contenido: padding + icono opcional + texto (fuente monoespaciada)
-    int contenido = gapGS * 2; // padding L+R (debe matchear el render: gapGS por lado)
-    if (icon >= 0) contenido += IconSizeGS;
-    if (icon >= 0 && !text.empty()) contenido += gapGS;
-    contenido += UTF8_Largo(text) * CharacterWidthGS;
-    if (caretMenu) contenido += IconSizeGS + gapGS; // la flechita opcional suma ancho (sino trunca el texto)
+    int content = gapGS * 2; // padding L+R (debe matchear el render: gapGS por lado)
+    if (icon >= 0) content += IconSizeGS;
+    if (icon >= 0 && !text.empty()) content += gapGS;
+    content += UTF8_Length(text) * CharacterWidthGS;
+    if (caretMenu) content += IconSizeGS + gapGS; // la flechita opcional suma ancho (sino trunca el texto)
 
-    width = adaptar ? contenido : maxW;
+    width = adapt ? content : maxW;
     if (width > maxW) width = maxW; // tope: el tamano del contenedor
-    if (width < RenglonHeightGS) width = RenglonHeightGS;
+    if (width < RowHeightGS) width = RowHeightGS;
     // mas alto que un renglon: el icono queda centrado con aire arriba y
     // abajo. La altura depende del modo (tactil: mas alto; compacto: 2px menos)
-    // altoRenglon: EXACTAMENTE el alto del box de los inputs de propiedades
-    // (RenglonHeightGS + GlobalScale*2, ver GroupPropertie::Resize) -> todo parejo
-    height = altoRenglon ? RenglonHeightGS + GlobalScale * 2 : UIBotonAltura();
-    if (cuadrado) width = height; // botones de icono cuadrados (transporte del timeline)
+    // rowHeight: EXACTAMENTE el alto del box de los inputs de propiedades
+    // (RowHeightGS + GlobalScale*2, ver GroupPropertie::Resize) -> todo parejo
+    height = rowHeight ? RowHeightGS + GlobalScale * 2 : UIButtonHeight();
+    if (square) width = height; // botones de icono cuadrados (transporte del timeline)
     card->Resize(width, height);
 }
 
 void Button::Render(){
-    const float* gris = ListaColores[static_cast<int>(ColorID::gris)];
-    const float* blanco = ListaColores[static_cast<int>(ColorID::blanco)];
-    const float* fondo = ListaColores[static_cast<int>(ColorID::background)];
+    const float* gray = ColorList[static_cast<int>(ColorID::gray)];
+    const float* white = ColorList[static_cast<int>(ColorID::white)];
+    const float* background = ColorList[static_cast<int>(ColorID::background)];
 
     w3dEngine::PushMatrix();
     // interior: el mismo solido que las tarjetas (hover: mas claro). 'tinte'
     // permite un boton de color (p.ej. la accion verde) con el mismo estilo.
-    const float* base = tinte ? tinte : gris;
+    const float* base = tint ? tint : gray;
     // 'alpha' viene del contenedor: 1.0 en los paneles (nada cambia) y el barAlpha de
     // la barra en el viewport 3D, donde el fondo deja ver la escena y los botones
     // quedaban opacos encima. El icono ya se dibujaba con blend habilitado: lo opaco
     // era este Card.
     const float a = (alpha < 0.0f) ? 0.0f : (alpha > 1.0f ? 1.0f : alpha);
     if (hover) {
-        w3dEngine::Color4f(base[0] + (blanco[0] - base[0]) * 0.15f,
-                  base[1] + (blanco[1] - base[1]) * 0.15f,
-                  base[2] + (blanco[2] - base[2]) * 0.15f, a);
+        w3dEngine::Color4f(base[0] + (white[0] - base[0]) * 0.15f,
+                  base[1] + (white[1] - base[1]) * 0.15f,
+                  base[2] + (white[2] - base[2]) * 0.15f, a);
     } else {
         w3dEngine::Color4f(base[0], base[1], base[2], a);
     }
     card->RenderObject(false);
     // borde oscuro (hover: blanco): es lo que lo hace notar como boton.
-    // colorBorde fuerza el color (p.ej. = fondo para un boton "desactivado").
-    const float* accent = ListaColores[static_cast<int>(ColorID::accent)];
-    if (colorBorde)      w3dEngine::Color4f(colorBorde[0], colorBorde[1], colorBorde[2], a);
-    else if (focoMenu)   w3dEngine::Color4f(accent[0], accent[1], accent[2], a); // menu enfocado
-    else if (hover)      w3dEngine::Color4f(blanco[0], blanco[1], blanco[2], a);
-    else                 w3dEngine::Color4f(fondo[0], fondo[1], fondo[2], a);
+    // borderColor fuerza el color (p.ej. = fondo para un boton "desactivado").
+    const float* accent = ColorList[static_cast<int>(ColorID::accent)];
+    if (borderColor)      w3dEngine::Color4f(borderColor[0], borderColor[1], borderColor[2], a);
+    else if (focusMenu)   w3dEngine::Color4f(accent[0], accent[1], accent[2], a); // menu enfocado
+    else if (hover)      w3dEngine::Color4f(white[0], white[1], white[2], a);
+    else                 w3dEngine::Color4f(background[0], background[1], background[2], a);
     card->RenderBorder(false);
     // la BARRA de un numero de 0 a 1 (el relleno de su largo, en accent oscuro)
-    if (barra >= 0.0f && !editField) {
-        const float f = barra > 1.0f ? 1.0f : barra;
+    if (bar >= 0.0f && !editField) {
+        const float f = bar > 1.0f ? 1.0f : bar;
         const int wb = (int)((float)(width - 2 * GlobalScale) * f);
         if (wb > 0) {
-            const float* ad = ListaColores[static_cast<int>(ColorID::accentDark)];
+            const float* ad = ColorList[static_cast<int>(ColorID::accentDark)];
             w3dEngine::Color4f(ad[0], ad[1], ad[2], a);
             w3dEngine::PushMatrix();
             w3dEngine::Translatef((GLfloat)GlobalScale, (GLfloat)GlobalScale, 0);
@@ -102,9 +102,9 @@ void Button::Render(){
         }
     }
     // el CUADRADO de color (el color base, la emision): ocupa el boton con un margen
-    if (relleno) {
+    if (fill) {
         const int m = 3 * GlobalScale;
-        w3dEngine::Color4f(relleno[0], relleno[1], relleno[2], 1.0f);
+        w3dEngine::Color4f(fill[0], fill[1], fill[2], 1.0f);
         w3dEngine::PushMatrix();
         w3dEngine::Translatef((GLfloat)m, (GLfloat)m, 0);
         card->Resize(width - 2 * m, height - 2 * m); card->RenderObject(false);
@@ -119,20 +119,20 @@ void Button::Render(){
     int x0 = gapGS;
     // solo ICONO (sin texto): centrado en el boton (los cuadrados de solo icono quedaban corridos a la derecha)
     if (text.empty() && icon >= 0 && !editField) { x0 = (width - IconSizeGS) / 2; if (x0 < 0) x0 = 0; }
-    else if ((centrado || barra >= 0.0f) && !editField) {   // (el numero de una barra va en el medio) // como INPUT (editField) se alinea a la IZQUIERDA, no centrado
+    else if ((centered || bar >= 0.0f) && !editField) {   // (el numero de una barra va en el medio) // como INPUT (editField) se alinea a la IZQUIERDA, no centrado
         // icono+texto centrados en el boton (OK / Cancel / switch)
-        int contenido = UTF8_Largo(text) * CharacterWidthGS;
-        if (icon >= 0) contenido += IconSizeGS + (text.empty() ? 0 : gapGS);
-        x0 = (width - contenido) / 2;
+        int content = UTF8_Length(text) * CharacterWidthGS;
+        if (icon >= 0) content += IconSizeGS + (text.empty() ? 0 : gapGS);
+        x0 = (width - content) / 2;
         if (x0 < gapGS) x0 = gapGS;
     }
     w3dEngine::Translatef((GLfloat)x0, 0, 0);
-    int disponible = width - x0 - gapGS;
+    int available = width - x0 - gapGS;
     // caret opcional: reservar el lugar de la flechita de la derecha
-    if (caretMenu && !editField) disponible -= IconSizeGS + gapGS;
-    const float* tc = colorTexto ? colorTexto
-        : (focoMenu ? ListaColores[static_cast<int>(ColorID::accent)]
-        : (hover ? blanco : ListaColores[static_cast<int>(ColorID::grisUI)]));
+    if (caretMenu && !editField) available -= IconSizeGS + gapGS;
+    const float* tc = textColor ? textColor
+        : (focusMenu ? ColorList[static_cast<int>(ColorID::accent)]
+        : (hover ? white : ColorList[static_cast<int>(ColorID::grayUI)]));
     w3dEngine::Color4f(tc[0], tc[1], tc[2], 1.0f);
     if (icon >= 0) {
         w3dEngine::PushMatrix();
@@ -149,15 +149,15 @@ void Button::Render(){
         W3dDrawStrip4(IconMesh, uv);
         w3dEngine::PopMatrix();
         w3dEngine::Translatef((GLfloat)(IconSizeGS + gapGS), 0, 0);
-        disponible -= IconSizeGS + gapGS;
+        available -= IconSizeGS + gapGS;
     }
     // texto: si es un INPUT (editField), el campo (todo seleccionado = fondo atras; si no, el cursor que parpadea)
-    if (editField && disponible > 0) {
+    if (editField && available > 0) {
         w3dEngine::Translatef(0, (GLfloat)((height - LetterHeightGS) / 2), 0);
-        RenderTextField(*editField, g_textFieldActivo == editField, textAlign::left, disponible);
-    } else if (!text.empty() && disponible > 0) {
+        RenderTextField(*editField, g_activeTextField == editField, textAlign::left, available);
+    } else if (!text.empty() && available > 0) {
         w3dEngine::Translatef(0, (GLfloat)((height - LetterHeightGS) / 2), 0);
-        RenderBitmapText(text, textAlign::left, disponible);
+        RenderBitmapText(text, textAlign::left, available);
     }
     w3dEngine::PopMatrix();
 
@@ -171,7 +171,7 @@ void Button::Render(){
     }
 
     // dejar el color como lo esperan las filas de propiedades
-    w3dEngine::Color4f(fondo[0], fondo[1], fondo[2], 1.0f);
+    w3dEngine::Color4f(background[0], background[1], background[2], 1.0f);
 }
 
 bool Button::Contains(int mx, int my) const {

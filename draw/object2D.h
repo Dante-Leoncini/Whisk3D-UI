@@ -53,10 +53,10 @@ public:
     Object2D(Object2D* parent = NULL);
 
     virtual Object2DType getType();
-    virtual void RenderObject(bool usarColorPropio = true);
+    virtual void RenderObject(bool useColorOwn = true);
     virtual ~Object2D();
 
-    void Render(bool usarColorPropio = true);
+    void Render(bool useColorOwn = true);
 };
 
 #endif

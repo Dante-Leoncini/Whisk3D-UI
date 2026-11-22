@@ -18,7 +18,7 @@
 #include "WhiskUI/widgets/card.h"
 #include "WhiskUI/draw/rectangle.h"
 #include "WhiskUI/draw/icons.h"
-#include "WhiskUI/theme/colores.h"
+#include "WhiskUI/theme/colors.h"
 #include "WhiskUI/text/bitmapText.h"
 
 // Pestania compartida (4 OS): como un boton pero SIN el borde inferior,
@@ -29,8 +29,8 @@ class Tab {
     public:
         std::string text;
         int icon;       // IconType o -1
-        bool activa;    // la pestania seleccionada (texto/icono blanco)
-        bool foco;      // enfocada con las flechas (texto/icono VERDE, sin mouse)
+        bool active;    // la pestania seleccionada (texto/icono blanco)
+        bool focus;     // enfocada con las flechas (texto/icono VERDE, sin mouse)
         bool visible;   // false: no se dibuja ni ocupa lugar (ej: Mesh sin mesh)
         bool hover;
         int width, height;

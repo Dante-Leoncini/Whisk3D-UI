@@ -32,7 +32,7 @@
 
 // alto de pantalla para el flip de Y (arbol arriba-izq -> GL abajo-izq);
 // lo setea cada plataforma al hacer resize
-extern int W3dPantallaAlto;
+extern int W3dScreenHeight;
 
 // quad en orden de strip (4 vertices GLshort xy) + UVs float (8)
 void W3dDrawStrip4(const GLshort* aVerts8, const GLfloat* aUVs8);
@@ -43,7 +43,7 @@ void W3dDrawElemsB(const GLshort* aVerts, const GLfloat* aUVs,
 
 // lineas indexadas (GL_LINES): el drawElements del N95 tampoco es confiable
 // en el pase 3D para lineas. Vertices de 3 componentes.
-void W3dDrawLinesS(int aLineWidth, int aCantidad,
+void W3dDrawLinesS(int aLineWidth, int aCount,
                    const GLshort* aVerts3, const GLushort* aIdx);
 void W3dDrawLinesF(const GLfloat* aVerts3, const GLushort* aIdx, int aIdxCount);
 

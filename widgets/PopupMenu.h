@@ -18,7 +18,7 @@
 #include "WhiskUI/core/UI.h"
 #include "WhiskUI/widgets/card.h"
 #include "WhiskUI/draw/icons.h"
-#include "WhiskUI/theme/colores.h"
+#include "WhiskUI/theme/colors.h"
 #include "WhiskUI/text/bitmapText.h"
 
 class PopupMenu;
@@ -28,30 +28,30 @@ class PopupMenu;
 // ---------------------------------------------------------------------------------------------------------------
 //  MENU DECLARATIVO. Un menu se describe como una TABLA de estos: el texto y la accion del item JUNTOS, en una sola
 //  linea. Se acabo el id magico apuntando a un switch lejano (y el bug de "me olvide de conectarlo": aca no se puede
-//  agregar un item sin su accion). PopupMenu::Construir(tabla) arma el menu; el id de cada item es su fila.
+//  agregar un item sin su accion). PopupMenu::Build(tabla) arma el menu; el id de cada item es su fila.
 // ---------------------------------------------------------------------------------------------------------------
 class PopupMenu;
 class MenuItem;
 struct MenuDef {
     const char* text;       // la CLAVE es el texto. Se traduce con el hook de abajo al construir.
-    void      (*accion)();  // que hace el item. NULL = es submenu (ver 'submenu') o item padre sin accion.
-    const char* atajo;      // hint del atajo ("Shift D"); NULL = sin atajo
-    int         icon;       // 0 = SIN icono. Los reales via ICONO(x) (= IconType+1: deja el 0 libre como "ninguno").
+    void      (*action)();  // que hace el item. NULL = es submenu (ver 'submenu') o item padre sin accion.
+    const char* shortcut;   // hint del atajo ("Shift D"); NULL = sin atajo
+    int         icon;       // 0 = SIN icono. Los reales via ICON(x) (= IconType+1: deja el 0 libre como "ninguno").
     PopupMenu** submenu;    // NULL = item comun; si no, apunta al PUNTERO del submenu (que ya tiene que existir)
     bool*       checkbox;   // NULL = comun; si no, es un checkbox sobre *checkbox
 };
-#define ICONO(x) ((int)(x) + 1)   // para MenuDef.icon; sin ICONO(...) el campo queda 0 = sin icono
+#define ICON(x) ((int)(x) + 1)   // para MenuDef.icon; sin ICON(...) el campo queda 0 = sin icono
 
 // Traduccion opcional de los textos de menu. El toolkit NO conoce el sistema de idiomas del editor: si la app
 // instala este hook (con su T()), las tablas salen traducidas; si queda NULL, el texto va tal cual.
-extern const char* (*W3dMenuTraducir)(const char*);
+extern const char* (*W3dMenuTranslate)(const char*);
 // El hint de atajo que se MUESTRA. Los items guardan "@<funcion>" (no la tecla): la app instala este hook y devuelve lo
 // que corresponde (la combinacion configurada, la tecla del telefono...). Sin hook, un "@..." no se muestra.
-extern std::string (*W3dMenuAtajoTexto)(const std::string&);
+extern std::string (*W3dMenuShortcutText)(const std::string&);
 // La app se entera de cada opcion ELEGIDA (una comun o una casilla, ya cambiada), antes de que se ejecute. La usa la
-// grabadora de pasos del editor (main/test/W3dHistorial.cpp). NULL = nadie escucha.
-extern void (*W3dMenuElegidoHook)(const PopupMenu* menu, const MenuItem* item);
-std::string MenuAtajoVisible(const MenuItem* it);
+// grabadora de pasos del editor (main/test/W3dHistory.cpp). NULL = nadie escucha.
+extern void (*W3dPickedMenuHook)(const PopupMenu* menu, const MenuItem* item);
+std::string MenuShortcutVisible(const MenuItem* it);
 
 class MenuItem {
     public:
@@ -61,20 +61,20 @@ class MenuItem {
         PopupMenu* submenu; // NULL = opcion comun
         bool* checkbox;     // NULL = opcion comun; si no, muestra/togglea este
                             // bool (un check a la derecha) y NO cierra el menu
-        bool* gris;         // NULL = nunca; si no, se ve GRIS (deshabilitada)
+        bool* gray;         // NULL = nunca; si no, se ve GRIS (deshabilitada)
                             // cuando *gris es false (ej: depende de "overlays")
-        void (*accion)();   // accion PROPIA del item (estilo declarativo, ver MenuDef). NULL = usa el id + el
+        void (*action)();   // accion PROPIA del item (estilo declarativo, ver MenuDef). NULL = usa el id + el
                             // action(id) del menu (camino viejo). El que dispara PREFIERE esta si esta.
-        std::string atajo;  // hint del atajo a la derecha, gris tenue ("Shift D",
+        std::string shortcut;  // hint del atajo a la derecha, gris tenue ("Shift D",
                             // "Ctrl I", "X"...); "" = sin atajo. Solo visual.
-        bool verde;         // true = opcion ACTIVA: icono + texto en VERDE accent
+        bool green;         // true = opcion ACTIVA: icono + texto en VERDE accent
                             // (ej: el modo de pivot actual en el menu de pivot)
-        float* valorFloat;  // NULL = opcion comun; si no, es un SLIDER (ej: size)
+        float* valueFloat;  // NULL = opcion comun; si no, es un SLIDER (ej: size)
         float vmin, vmax;   // rango del slider (click en la barra setea el valor)
-        float paso;         // > 0: el slider lleva un "-" a la izquierda y un "+" a la derecha que lo mueven de a 'paso'
-        bool entero;        // el valor del slider se muestra sin decimales (con 'unidad' detras: "100%")
-        std::string unidad;
-        bool lineaArriba;   // una LINEA separadora arriba de esta fila (separa dos grupos de opciones)
+        float step;         // > 0: el slider lleva un "-" a la izquierda y un "+" a la derecha que lo mueven de a 'paso'
+        bool integer;       // el valor del slider se muestra sin decimales (con 'unidad' detras: "100%")
+        std::string unit;
+        bool lineUp;   // una LINEA separadora arriba de esta fila (separa dos grupos de opciones)
 
         MenuItem(const std::string& Text, int Id, int Icon = -1,
                  PopupMenu* Submenu = NULL, bool* Checkbox = NULL);
@@ -85,23 +85,23 @@ class MenuItem {
 class PopupMenu {
     public:
         std::vector<MenuItem*> items;
-        std::string titulo; // cabecera opcional ("Set Parent To", etc)
-        int x, y;           // posicion ABSOLUTA en pantalla
+        std::string title; // cabecera opcional ("Set Parent To", etc)
+        int x, y;          // posicion ABSOLUTA en pantalla
         int width, height;
-        int reservaDerecha; // px reservados a la derecha (tildes/flecha submenu/slider): el label se
+        int reserveRight; // px reservados a la derecha (tildes/flecha submenu/slider): el label se
                             // trunca ANTES de esta columna (sino, al clampear el ancho a la pantalla,
                             // el texto tapaba las tildes y no se veia si estaban marcadas)
         int selectIndex;    // opcion resaltada (-1 = ninguna)
         int scroll;         // primera fila VISIBLE (>0 cuando el menu es mas alto que la pantalla -> scrollbar)
         bool sbHover;       // el puntero esta sobre la barra de scroll (se agranda y va en blanco)
-        bool EnBarraScroll(int mx, int my) const;   // el punto cae en la franja de la barra (con scroll)
-        void ScrollDesdeY(int my);                  // el agarre con su centro en esa y de pantalla
-        bool abierto;
+        bool InBarScroll(int mx, int my) const;   // el punto cae en la franja de la barra (con scroll)
+        void ScrollFromY(int my);                 // el agarre con su centro en esa y de pantalla
+        bool open;
         // se cierra solo si el mouse se aleja (default). false = uno que no se abrio en el mouse (centrado en la pantalla,
         // como el de "pantalla externa"): el mouse tiene que poder ir hasta el
-        bool cerrarLejos;
-        PopupMenu* submenuAbierto;
-        PopupMenu* padre;   // el menu que abrio a este como submenu la ultima vez (NULL = de nivel tope). Con su
+        bool closeFar;
+        PopupMenu* openSubmenu;
+        PopupMenu* parent;   // el menu que abrio a este como submenu la ultima vez (NULL = de nivel tope). Con su
                             // fila resaltada se arma la ruta de lo elegido: Objeto > Definir Origen > Origen al Cursor 3D
         Card* card;
         Card* highlight;
@@ -114,71 +114,71 @@ class PopupMenu {
         PopupMenu();
         ~PopupMenu();
 
-        MenuItem* Agregar(const std::string& text, int id, int icon = -1,
+        MenuItem* Add(const std::string& text, int id, int icon = -1,
                           PopupMenu* submenu = NULL);
         // opcion con checkbox a la derecha: muestra/togglea *estado (no cierra)
-        MenuItem* AgregarCheck(const std::string& text, int id, bool* estado,
+        MenuItem* AddCheck(const std::string& text, int id, bool* state,
                                int icon = -1);
         // opcion SLIDER: barra a la derecha; click en ella setea *valor (no cierra)
-        MenuItem* AgregarFloat(const std::string& text, int id, float* valor,
+        MenuItem* AddFloat(const std::string& text, int id, float* value,
                                float vmin, float vmax, int icon = -1);
         // arma el menu desde una TABLA declarativa (id de cada item = su fila). n = cantidad de filas.
-        // Reemplaza a la retahila de ->Agregar(...) + el switch de acciones: la accion vive en la propia fila.
-        void Construir(const MenuDef* defs, int n);
+        // Reemplaza a la retahila de ->Add(...) + el switch de acciones: la accion vive en la propia fila.
+        void Build(const MenuDef* defs, int n);
         // dispara el item 'id': su accion PROPIA si tiene (declarativo), si no el action(id) del menu (viejo).
-        bool Ejecutar(int id);   // false = este menu no sabe ejecutarlo (ni la opcion ni el menu tienen accion)
-        void Limpiar(); // borra todas las opciones (menus dinamicos)
+        bool Run(int id);   // false = este menu no sabe ejecutarlo (ni la opcion ni el menu tienen accion)
+        void Clear(); // borra todas las opciones (menus dinamicos)
         void Resize();      // ancho/alto segun el contenido
-        void Abrir(int sx, int sy, int pantallaW, int pantallaH);
-        void Cerrar();
+        void Open(int sx, int sy, int screenW, int screenH);
+        void Close();
         bool Contains(int mx, int my) const;
         // el punto cae en ESTE menu o en alguno de sus submenus ABIERTOS, a cualquier profundidad (un
         // sub-submenu se extiende mas alla del submenu directo: Add > Core > Draw > Draw mesh)
-        bool ContieneConSubmenus(int mx, int my) const;
+        bool ContainsWithSubmenus(int mx, int my) const;
 
         void Render();      // en ortho 2D de PANTALLA completa
         // abre/cierra el submenu segun la fila resaltada (selectIndex): SOLO por
         // hover de mouse (las flechas ya NO lo auto-abren; se abre con der/enter/ok)
-        void SincronizarSubmenu();
+        void SyncSubmenu();
         // abre 'sub' al lado de la fila 'fila': a la derecha si entra, si no a la izquierda; si no entra de ningun lado,
         // angostado y dejando SIEMPRE a la vista una columna de este menu (para pasar el mouse a las otras opciones)
-        void AbrirSubmenuAlLado(PopupMenu* sub, int fila);
-        void AnchoMax(int w);   // lo angosta (el texto de cada fila se recorta)
+        void OpenSubmenuBeside(PopupMenu* sub, int row);
+        void WidthMax(int w);   // lo angosta (el texto de cada fila se recorta)
         bool MouseMove(int mx, int my); // hover + auto-cierre por lejania
         int Click(int mx, int my);  // id elegido, -1 nada, -2 abrio submenu
         int Enter();                // idem Click sobre la opcion resaltada
         void button_up();
         void button_down();
         // SCROLL (menus mas altos que la pantalla, ej: armature con 129 clips):
-        void Wheel(int dir);        // rueda: +1 arriba / -1 abajo, una fila (delega al submenu abierto)
-        int  FilasVisibles() const; // cuantas filas de items entran en la ventana visible
-        int  MaxScroll() const;     // scroll maximo (0 = entra todo, sin scrollbar)
-        void AsegurarVisible();     // ajusta scroll para que selectIndex quede visible (nav por teclado)
+        void Wheel(int dir);      // rueda: +1 arriba / -1 abajo, una fila (delega al submenu abierto)
+        int  VisibleRows() const; // cuantas filas de items entran en la ventana visible
+        int  MaxScroll() const;   // scroll maximo (0 = entra todo, sin scrollbar)
+        void EnsureVisible();     // ajusta scroll para que selectIndex quede visible (nav por teclado)
 
         // navegacion por teclado (Symbian/keypad y PC):
-        MenuItem* ItemActual();          // opcion resaltada o NULL
-        void AjustarSlider(int dir);     // +1/-1: mueve el valor del slider resaltado
-        bool AbrirSubmenuActual();       // abre el submenu de la opcion resaltada y
+        MenuItem* CurrentItem();       // opcion resaltada o NULL
+        void FitSlider(int dir);       // +1/-1: mueve el valor del slider resaltado
+        bool OpenSubmenuCurrent();     // abre el submenu de la opcion resaltada y
                                          // pre-selecciona su 1ra fila; false si no hay
 };
 
-extern PopupMenu* MenuAbierto; // el desplegable activo (NULL = ninguno)
+extern PopupMenu* OpenMenu; // el desplegable activo (NULL = ninguno)
 
-// ---- DRAG del item-slider (AgregarFloat): mantener apretado sobre la fila y
+// ---- DRAG del item-slider (AddFloat): mantener apretado sobre la fila y
 // arrastrar horizontal edita el valor EN VIVO (mismo mapeo de X que el click).
 // El DOWN lo arma solo (dentro de Click); la app rutea el motion/up con esto:
-bool MenuSliderDragActivo();      // hay un drag de slider armado (y su menu sigue abierto)
-int  MenuSliderDragMover(int mx); // re-mapea mx a la barra del item; devuelve el id del item (-1 sin drag)
-void MenuSliderDragSoltar();      // corta el drag (mouse-up, o up perdido)
+bool MenuSliderDragActive();     // hay un drag de slider armado (y su menu sigue abierto)
+int  MenuSliderDragMove(int mx); // re-mapea mx a la barra del item; devuelve el id del item (-1 sin drag)
+void MenuSliderDragRelease();    // corta el drag (mouse-up, o up perdido)
 // ---- la BARRA DE SCROLL de un menu largo: un click en ella lleva el agarre ahi y lo deja agarrado (verde); la app
 // rutea el motion / up con esto, igual que el slider
-bool MenuScrollDragActivo();
-void MenuScrollDragMover(int my);
-void MenuScrollDragSoltar();
+bool MenuScrollDragActive();
+void MenuScrollDragMove(int my);
+void MenuScrollDragRelease();
 
-// tamano de la pantalla para que Abrir() pueda clampear (lo setea cada
+// tamano de la pantalla para que Open() pueda clampear (lo setea cada
 // plataforma al hacer resize)
-extern int MenuPantallaW;
-extern int MenuPantallaH;
+extern int MenuScreenW;
+extern int MenuScreenH;
 
 #endif

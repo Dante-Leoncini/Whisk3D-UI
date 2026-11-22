@@ -1,11 +1,11 @@
-#include "colores.h"
+#include "colors.h"
 #include "w3dGraphics.h" // w3dEngine::Color4f (SetColorID)
 
 #include <fstream>
 #include <sstream>
 #include <string>
 
-float ListaColores[ColorID::Count][4] = {
+float ColorList[ColorID::Count][4] = {
     { 0.22f,  0.28f,  0.25f,  1.0f  },  // background
     { 1.0f,   1.0f,   1.0f,   1.0f  },  // blanco
     { 0.91f,  0.50f,  0.98f,  1.0f  },  // accent
@@ -13,12 +13,12 @@ float ListaColores[ColorID::Count][4] = {
     { 0.0f,   0.0f,   0.0f,   1.0f  },  // negro
     { 0.12f,  0.12f,  0.12f,  1.0f  },  // gris
     { 0.22f,  0.22f,  0.22f,  1.0f  },  // headerColor
-    { 0.0f,   0.0f,   0.0f,   0.25f },  // negroTransparente
-    { 0.757f, 0.757f, 0.757f, 1.0f  },  // grisUI
-    { 0.286f, 0.286f, 0.286f, 1.0f  }   // grisLinea (0x494949)
+    { 0.0f,   0.0f,   0.0f,   0.25f },  // blackTransparent
+    { 0.757f, 0.757f, 0.757f, 1.0f  },  // grayUI
+    { 0.286f, 0.286f, 0.286f, 1.0f  }   // grayLine (0x494949)
 };
 
-GLubyte ListaColoresUbyte[ColorID::Count][4] = {
+GLubyte ColorListUbyte[ColorID::Count][4] = {
     { (GLubyte)(0.22*255),  (GLubyte)(0.28*255),  (GLubyte)(0.25*255),  255 },
     { 255, 255, 255, 255 },
     { (GLubyte)(0.91*255),  (GLubyte)(0.50*255),  (GLubyte)(0.98*255),  255 },
@@ -31,17 +31,17 @@ GLubyte ListaColoresUbyte[ColorID::Count][4] = {
     { 0x49, 0x49, 0x49, 255 }
 };
 
-static int W3dColorIdPorNombre(const std::string& n) {
+static int W3dColorIdByName(const std::string& n) {
     if (n == "background") return ColorID::background;
-    if (n == "blanco") return ColorID::blanco;
+    if (n == "white") return ColorID::white;
     if (n == "accent") return ColorID::accent;
     if (n == "accentDark") return ColorID::accentDark;
-    if (n == "negro") return ColorID::negro;
-    if (n == "gris") return ColorID::gris;
+    if (n == "black") return ColorID::black;
+    if (n == "gray") return ColorID::gray;
     if (n == "headerColor") return ColorID::headerColor;
-    if (n == "negroTransparente") return ColorID::negroTransparente;
-    if (n == "grisUI") return ColorID::grisUI;
-    if (n == "grisLinea") return ColorID::grisLinea;
+    if (n == "blackTransparent") return ColorID::blackTransparent;
+    if (n == "grayUI") return ColorID::grayUI;
+    if (n == "grayLine") return ColorID::grayLine;
     return -1;
 }
 
@@ -53,26 +53,26 @@ bool loadColorsW3d(const char* aPath) {
     std::string line;
     while (std::getline(file, line)) {
         std::istringstream ls(line);
-        std::string nombre;
+        std::string name;
         float r, g, b, a;
-        if (!(ls >> nombre >> r >> g >> b >> a)) continue;
-        int id = W3dColorIdPorNombre(nombre);
+        if (!(ls >> name >> r >> g >> b >> a)) continue;
+        int id = W3dColorIdByName(name);
         if (id < 0) continue;
 #ifndef __ANDROID__
-        ListaColores[id][0] = r;
-        ListaColores[id][1] = g;
-        ListaColores[id][2] = b;
-        ListaColores[id][3] = a;
+        ColorList[id][0] = r;
+        ColorList[id][1] = g;
+        ColorList[id][2] = b;
+        ColorList[id][3] = a;
 #endif
-        ListaColoresUbyte[id][0] = (GLubyte)(r * 255.0f);
-        ListaColoresUbyte[id][1] = (GLubyte)(g * 255.0f);
-        ListaColoresUbyte[id][2] = (GLubyte)(b * 255.0f);
-        ListaColoresUbyte[id][3] = (GLubyte)(a * 255.0f);
+        ColorListUbyte[id][0] = (GLubyte)(r * 255.0f);
+        ColorListUbyte[id][1] = (GLubyte)(g * 255.0f);
+        ColorListUbyte[id][2] = (GLubyte)(b * 255.0f);
+        ColorListUbyte[id][3] = (GLubyte)(a * 255.0f);
     }
     return true;
 }
 
 void SetColorID(ColorID id, float a){
-    const float* c = ListaColores[static_cast<int>(id)];
+    const float* c = ColorList[static_cast<int>(id)];
     w3dEngine::Color4f(c[0], c[1], c[2], a);
 }

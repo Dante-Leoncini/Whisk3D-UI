@@ -7,23 +7,23 @@ PropSelectText::PropSelectText(const std::string& Name):
 
 void PropSelectText::RenderPropertiBox(Card* propertiBox){
     propertiBox->Render(false);
-    w3dEngine::Translatef(0, RenglonHeightGS + gapGS, 0);
+    w3dEngine::Translatef(0, RowHeightGS + gapGS, 0);
 }
 
 void PropSelectText::RenderPropertiBoxBorder(Card* propertiBox){
-    w3dEngine::Translatef(0, -RenglonHeightGS - gapGS, 0);
+    w3dEngine::Translatef(0, -RowHeightGS - gapGS, 0);
     propertiBox->RenderBorder(false);
-    w3dEngine::Translatef(0, RenglonHeightGS + gapGS, 0);
+    w3dEngine::Translatef(0, RowHeightGS + gapGS, 0);
 };
 
 void PropSelectText::RenderPropertiValue(Card* propertiBox){
     //RenderBitmapFloat(*value, textAlign::left, propertiBox->width -bordersGS, unit);
-    w3dEngine::Translatef(0, RenglonHeightGS + gapGS, 0);
+    w3dEngine::Translatef(0, RowHeightGS + gapGS, 0);
 }
 
 void PropSelectText::RenderPropertiLabel(Card* propertiBox){
-    RenderBitmapEtiqueta(name, PropColEtiqueta - bordersGS);
-    w3dEngine::Translatef(0, RenglonHeightGS + gapGS, 0);
+    RenderBitmapLabel(name, PropColLabel - bordersGS);
+    w3dEngine::Translatef(0, RowHeightGS + gapGS, 0);
 };
 
 void PropSelectText::button_up(){
@@ -42,17 +42,17 @@ bool PropSelectText::Cancel(){
     //std::cout << "se cancelo originalValue: "<< originalValue << "\n";
     //*value = originalValue;
     //std::cout << "quedo asi: "<< *value << "\n";
-    editando = false;
-    return editando;
+    editing = false;
+    return editing;
 };
 
 bool PropSelectText::EditPropertie(){
-    editando = !editando;
-    if (editando){
+    editing = !editing;
+    if (editing){
         //originalValue = *value;
         //std::cout << "se guardo originalValue: "<< originalValue << "\n";
     }
-    return editando;
+    return editing;
 };
 
 PropertyType PropSelectText::GetType(){
@@ -61,5 +61,5 @@ PropertyType PropSelectText::GetType(){
 
 int PropSelectText::Resize(int w){
     width = w;
-    return RenglonHeightGS + gapGS;
+    return RowHeightGS + gapGS;
 }

@@ -25,11 +25,11 @@
 // Variables UV/indices
 extern GLubyte CardIndices[];
 extern GLfloat CardUV[32];
-extern GLfloat CardBordeUV[32];
+extern GLfloat CardBorderUV[32];
 // version "pestania": el fondo y el borde quedan RECTOS abajo (sin esquina
 // redondeada ni borde inferior) para fundirse con el contenido de abajo
 extern GLfloat CardTabUV[32];
-extern GLfloat CardTabBordeUV[32];
+extern GLfloat CardTabBorderUV[32];
 
 void CalcCardUV(int texW, int texH);
 
@@ -37,17 +37,17 @@ void CalcCardUV(int texW, int texH);
 //  EL CHECKBOX del editor. UN solo lugar decide tamaño y colores, asi el del panel de propiedades y el de los
 //  menus no pueden divergir. Un tilde suelto (lo que hacian los menus) no se lee como checkbox: sin la tilde no
 //  se distingue de un boton comun.
-//  Es una Card (bordes redondeados) rellena: ON = grisUI con el tilde en color de fondo; OFF = fondo, sin tilde.
+//  Es una Card (bordes redondeados) rellena: ON = grayUI con el tilde en color de fondo; OFF = fondo, sin tilde.
 // ============================================================================
-int CheckboxLado();                     // lado del cuadrado (alto de renglon)
-const float* CheckboxColorCaja(bool on);// relleno de la caja
-const float* CheckboxColorTilde();      // color del tilde (va sobre la caja encendida)
-const char*  CheckboxTilde();           // el glyph del tilde
+int CheckboxSide();                     // lado del cuadrado (alto de renglon)
+const float* CheckboxBoxColor(bool on);// relleno de la caja
+const float* CheckboxCheckColor();      // color del tilde (va sobre la caja encendida)
+const char*  CheckboxCheck();           // el glyph del tilde
 // Dibuja el checkbox COMPLETO (caja + tilde) en el origen actual de la matriz. Necesita la fase CON textura
 // (la Card es un 9-patch del atlas y el tilde es texto). Lo usan los menus; el panel de propiedades dibuja la
 // caja y el tilde en pasadas separadas (su render es por fases) pero saca de aca tamaño y colores.
-void DibujarCheckbox(int lado, bool on);
-void DibujarMuestraColor(int lado, const float* rgba);   // un cuadrado de ese color (la caja del checkbox)
+void DrawCheckbox(int side, bool on);
+void DrawSampleColor(int side, const float* rgba);   // un cuadrado de ese color (la caja del checkbox)
 
 class Card : public Object2D {
 	public:
@@ -58,9 +58,9 @@ class Card : public Object2D {
 
 		// Métodos
 		void Resize(int w, int h);
-		void SetColor(GLubyte red, GLubyte green, GLubyte blue);
-		void RenderObject(bool usarColorPropio = true) W3D_OVERRIDE;
-        void RenderBorder(bool usarColorPropio);
+		void SetColor(GLubyte net, GLubyte green, GLubyte blue);
+		void RenderObject(bool useColorOwn = true) W3D_OVERRIDE;
+        void RenderBorder(bool useColorOwn);
         // como los de arriba pero con el BORDE INFERIOR recto/cuadrado (pestanias)
         void RenderObjectTab();
         void RenderBorderTab();

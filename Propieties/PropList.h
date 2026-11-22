@@ -11,41 +11,41 @@ class Armature; // objects/Armature.h (lista de clips de animacion, modo 5)
 
 // modo 13: el ARBOL del MIX de animaciones (objetos -> capas). La lista no conoce el modelo: lo pregunta a
 // estos ganchos, que instala el panel de propiedades (Properties.cpp). NULL = lista vacia.
-extern int  (*MixFilasCount)();
-extern std::string (*MixFilaTexto)(int fila);
-extern int  (*MixFilaNivel)(int fila);        // sangria (0 = objeto/escenas, 1 = capa)
-extern int  (*MixFilaOjo)(int fila);          // -1 sin ojo, 0 oculta, 1 visible
-extern void (*MixFilaSeleccionar)(int fila);
-// modo 14: los PASOS de una rutina ('obj'). La lista no conoce la Rutina (es del editor): los llena PropsRutina.cpp
-extern int (*RutinaFilasCount)(Object* o);
-extern std::string (*RutinaFilaTexto)(Object* o, int fila);
-extern void (*RutinaFilaSeleccionar)(Object* o, int fila);
-extern int (*RutinaFilaIcono)(Object* o, int fila);   // el icono del grupo del paso (-1 = sin icono)
+extern int  (*MixRowsCount)();
+extern std::string (*MixRowText)(int row);
+extern int  (*MixRowLevel)(int row);        // sangria (0 = objeto/escenas, 1 = capa)
+extern int  (*MixRowEye)(int row);          // -1 sin ojo, 0 oculta, 1 visible
+extern void (*MixRowSelect)(int row);
+// modo 14: los PASOS de una rutina ('obj'). La lista no conoce la Rutina (es del editor): los llena PropsRoutine.cpp
+extern int (*RoutineRowsCount)(Object* o);
+extern std::string (*RoutineRowText)(Object* o, int row);
+extern void (*RoutineRowSelect)(Object* o, int row);
+extern int (*RoutineRowIcon)(Object* o, int row);   // el icono del grupo del paso (-1 = sin icono)
 // lo que se ve a la DERECHA de la fila: 0 nada, 1 checkbox apagado, 2 prendido, 3 un cuadro del color 'rgba'
-extern int (*RutinaFilaValor)(Object* o, int fila, float* rgba);
+extern int (*RoutineRowValue)(Object* o, int row, float* rgba);
 // arrastrando un paso: la fila donde caeria (se dibuja una linea arriba de ella; -1 = no se arrastra)
-extern int g_rutinaFilaDestino;
-extern int  (*MixFilaActiva)();
-// modo 15: la pila de POSTPROCESADO (render/Postproceso.h, del editor): la llenan estos ganchos (Properties.cpp)
-extern int (*PostFilasCount)();
-extern std::string (*PostFilaTexto)(int fila);
-extern void (*PostFilaSeleccionar)(int fila);
+extern int g_routineRowDestination;
+extern int  (*MixActiveRow)();
+// modo 15: la pila de POSTPROCESADO (render/PostProcess.h, del editor): la llenan estos ganchos (Properties.cpp)
+extern int (*PostRowsCount)();
+extern std::string (*PostRowText)(int row);
+extern void (*PostRowSelect)(int row);
 // modo 16: la pila de MODIFICADORES DE LA CURVA activa del timeline (Animation.h): la llenan estos ganchos (Properties.cpp)
-extern int (*CurvaModFilasCount)();
-extern std::string (*CurvaModFilaTexto)(int fila);
-extern void (*CurvaModFilaSeleccionar)(int fila);
+extern int (*CurveModRowsCount)();
+extern std::string (*CurveModRowText)(int row);
+extern void (*CurveModRowSelect)(int row);
 // modo 17 (las CAPAS DE TEXTURA del material activo): los instala Properties.cpp
-extern int (*CapaTexFilasCount)();
-extern std::string (*CapaTexFilaTexto)(int fila);
-extern void (*CapaTexFilaSeleccionar)(int fila);
-extern int (*CapaTexFilaActiva)();
+extern int (*LayerTexRowsCount)();
+extern std::string (*LayerTexRowText)(int row);
+extern void (*LayerTexRowSelect)(int row);
+extern int (*LayerTexActiveRow)();
 // modo 18 (las CAPAS DE MATERIAL del mesh part activo): los instala Properties.cpp
-extern int (*CapaMatFilasCount)();
-extern std::string (*CapaMatFilaTexto)(int fila);
-extern void (*CapaMatFilaSeleccionar)(int fila);
-extern int (*CapaMatFilaActiva)();
-extern int  (*MixFilaPlegada)(int fila);      // -1 no se pliega (capa), 0 desplegada, 1 plegada
-extern int  (*MixFilaIcono)(int fila);        // IconType de la fila
+extern int (*LayerMatRowsCount)();
+extern std::string (*LayerMatRowText)(int row);
+extern void (*LayerMatRowSelect)(int row);
+extern int (*LayerMatActiveRow)();
+extern int  (*MixCollapsedRow)(int row);      // -1 no se pliega (capa), 0 desplegada, 1 plegada
+extern int  (*MixRowIcon)(int row);           // IconType de la fila
 
 class PropList : public PropertieBase {
     public:
@@ -73,51 +73,51 @@ class PropListMeshParts : public PropList {
         // una coleccion), y meter un Object* que no es malla por el campo 'mesh' seria un
         // downcast invalido -> la lista leeria basura del otro lado del objeto.
         Object* obj;
-        int filasMax;   // alto de la VENTANA (ajustable arrastrando)
-        int scrollFila; // primera fila visible
-        int modo;       // 0 = mesh parts; 1 = UV maps; 2 = colores; 3 = modificadores; 4 = vertex groups; 5 = animaciones (armature); 6 = huesos (armature); 7 = animaciones del OBJETO (vertex anims del mesh); 8 = huesos 2D del armature 2D ACTIVO; 10 = armatures 2D del mesh (Mesh::armatures2d); 11 = stack de constraints (Object::constraints, va por 'obj'); 12 = scripts lua del objeto (Object::scriptDatos, va por 'obj'; el ORDEN es el de ejecucion); 13 = el arbol del MIX de animaciones (ganchos Mix*)
+        int rowsMax;   // alto de la VENTANA (ajustable arrastrando)
+        int scrollRow; // primera fila visible
+        int mode;      // 0 = mesh parts; 1 = UV maps; 2 = colores; 3 = modificadores; 4 = vertex groups; 5 = animaciones (armature); 6 = huesos (armature); 7 = animaciones del OBJETO (vertex anims del mesh); 8 = huesos 2D del armature 2D ACTIVO; 10 = armatures 2D del mesh (Mesh::armatures2d); 11 = stack de constraints (Object::constraints, va por 'obj'); 12 = scripts lua del objeto (Object::scriptData, va por 'obj'; el ORDEN es el de ejecucion); 13 = el arbol del MIX de animaciones (ganchos Mix*)
         // LO QUE SE HACE CON UNA FILA (lo pone el panel al armar la lista; NULL = esa lista no lo tiene). Actuan sobre
         // la fila ACTIVA: el que las llama la elige antes. Con ellas la lista muestra el TACHO a la derecha de cada fila
         // (si hay mas de 'minItems'), el menu contextual (click derecho / mantener y soltar), renombra con doble click
         // y se reordena arrastrando una fila
-        void (*opBorrar)(); void (*opRenombrar)(); void (*opSubir)(); void (*opBajar)();
-        bool (*opSoloLectura)();   // true = ahora no se puede tocar (una libreria): sin tacho ni arrastre
-        void (*opCambiar)();       // != NULL: cada fila lleva una FLECHA (a la izquierda del tacho) que abre un menu para
+        void (*opDelete)(); void (*opRename)(); void (*opUpload)(); void (*opLower)();
+        bool (*opReadOnly)();   // true = ahora no se puede tocar (una libreria): sin tacho ni arrastre
+        void (*opChange)();     // != NULL: cada fila lleva una FLECHA (a la izquierda del tacho) que abre un menu para
                                    // cambiar lo que tiene (las capas de material: elegir otro material)
         int minItems;              // con esta cantidad (o menos) no se borra: el tacho no esta (mesh parts: 1)
-        struct Extra { const char* texto; void (*accion)(); int icono; bool soloEdit; };
-        Extra extras[4]; int nExtras;   // opciones de mas para el menu (Asignar / Seleccionar...; soloEdit: en Edicion)
-        void AgregarExtra(const char* texto, void (*accion)(), int icono, bool soloEdit);
-        bool ConTacho() const;     // las filas llevan el tacho
+        struct Extra { const char* text; void (*action)(); int icon; bool onlyEdit; };
+        Extra extras[4]; int nExtras;   // opciones de mas para el menu (Asignar / Seleccionar...; onlyEdit: en Edicion)
+        void AddExtra(const char* text, void (*action)(), int icon, bool onlyEdit);
+        bool WithTrash() const;    // las filas llevan el tacho
         bool Reordenable() const;  // se puede arrastrar una fila
-        Button* renBoton;          // el campo de RENOMBRAR en linea (se dibuja en la fila renFila mientras edita)
-        int renFila;
-        int filaDestino;           // arrastrando una fila: la linea de donde cae (-1 = no se arrastra)
-        static int Asa();          // el alto de la franja de abajo (la linea para agrandar / achicar la lista)
-        // EL ALTO: sin tocar, las filas que hay (hasta filasMax). Si el usuario lo cambio (altoFijo) o la lista tiene
-        // un minimo (minFilas), mide eso aunque sobren renglones en blanco
-        bool altoFijo; int minFilas;
-        int altoPx;                // (altoFijo) el alto de las filas en PIXELES: el asa lo mueve de a pixel, no de a renglon
-        int asaEstado;             // la linea de abajo: 0 normal (el color de la caja), 1 el puntero encima (blanca), 2 agarrada (verde)
-        int AltoFilasPx() const;   // el alto del area de las filas (sin los bordes de la caja)
+        Button* rowButton;         // el campo de RENOMBRAR en linea (se dibuja en la fila rowRow mientras edita)
+        int rowRow;
+        int rowDestination;           // arrastrando una fila: la linea de donde cae (-1 = no se arrastra)
+        static int Handle();          // el alto de la franja de abajo (la linea para agrandar / achicar la lista)
+        // EL ALTO: sin tocar, las filas que hay (hasta rowsMax). Si el usuario lo cambio (heightFixed) o la lista tiene
+        // un minimo (minRows), mide eso aunque sobren renglones en blanco
+        bool heightFixed; int minRows;
+        int heightPx;              // (heightFixed) el alto de las filas en PIXELES: el asa lo mueve de a pixel, no de a renglon
+        int handleState;           // la linea de abajo: 0 normal (el color de la caja), 1 el puntero encima (blanca), 2 agarrada (verde)
+        int RowHeightPx() const;   // el alto del area de las filas (sin los bordes de la caja)
         // LA BARRITA DE SCROLL de la lista (con mas filas que renglones): 0 normal, 1 el puntero encima (mas ancha y
         // blanca), 2 agarrada (verde). ScrollGeo: el largo del riel, el del agarre y donde esta (pixeles, desde arriba)
-        int sbEstado;
-        int hoverFila;             // la fila con el puntero encima (su texto va en blanco); -1 = ninguna
-        bool ScrollGeo(int* riel, int* agarre, int* pos) const;
-        void ScrollDesdeY(int y);  // el agarre con su centro en 'y' (pixeles desde arriba del riel)
-        bool mostrarVacia;         // se dibuja aunque no tenga nada (las capas de textura: sus 3 renglones)
-        bool oculto;               // no se dibuja ni ocupa lugar (las capas de textura con el material por defecto)
-        int FilasAlto() const;     // los renglones que mide la caja
+        int sbState;
+        int hoverRow;             // la fila con el puntero encima (su texto va en blanco); -1 = ninguna
+        bool ScrollGeo(int* rail, int* grab, int* pos) const;
+        void ScrollFromY(int y);  // el agarre con su centro en 'y' (pixeles desde arriba del riel)
+        bool showEmpty;           // se dibuja aunque no tenga nada (las capas de textura: sus 3 renglones)
+        bool hidden;              // no se dibuja ni ocupa lugar (las capas de textura con el material por defecto)
+        int RowsHeight() const;   // los renglones que mide la caja
         // TRES BOTONES A LA DERECHA de la caja, a lo alto (subir / bajar / opciones de la fila elegida)
-        bool botonesLado; Button* ladoBtn[3];
-        int AnchoLado() const;     // lo que ocupa esa columna (0 sin botones)
-        bool LadoHabilitado(int k) const;   // se puede usar ahora (subir: no es la primera; bajar: no es la ultima)
-        void AjustarVentana(); // mantiene la seleccion a la vista
+        bool buttonsSide; Button* sideBtn[3];
+        int SideWidth() const;     // lo que ocupa esa columna (0 sin botones)
+        bool SideEnabled(int k) const;   // se puede usar ahora (subir: no es la primera; bajar: no es la ultima)
+        void FitWindow(); // mantiene la seleccion a la vista
         // segun 'modo' lee la lista correcta (la MISMA lista para parts/uvmaps/colors):
-        int         ListaCount() const;       // cantidad de items
-        std::string ListaNombre(int i) const; // nombre del item i
-        void        ListaSeleccionar(int i);  // setea el ACTIVO (selectIndex + activo de la malla) + re-bake
+        int         ListCount() const;     // cantidad de items
+        std::string ListName(int i) const; // nombre del item i
+        void        ListSelect(int i);     // setea el ACTIVO (selectIndex + activo de la malla) + re-bake
 
         void button_up() W3D_OVERRIDE;
         void button_down() W3D_OVERRIDE;

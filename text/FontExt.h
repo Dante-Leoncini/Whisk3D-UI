@@ -1,33 +1,33 @@
-#ifndef W3D_FUENTE_EXT_H
-#define W3D_FUENTE_EXT_H
+#ifndef W3D_FONT_EXT_H
+#define W3D_FONT_EXT_H
 // GENERADO por tools/fuente_ext.py -- no editar a mano: se cambia el script y se lo vuelve a correr.
 // El atlas EXTENDIDO de la fuente (res/Skins/<skin>/font-ext.png): marcas de acentos, letras y signos que no
 // entran en font.png y el cirilico. Ver font.cpp: se carga recien cuando un texto lo necesita.
 
-#define W3D_FUENTE_EXT_ANCHO 128
-#define W3D_FUENTE_EXT_ALTO 64
-#define W3D_FUENTE_EXT_COLUMNAS 21   // celda i: x = 1 + (i % columnas) * 6, y = (i / columnas) * 12
+#define W3D_FONT_EXT_WIDTH 128
+#define W3D_FONT_EXT_HEIGHT 64
+#define W3D_FONT_EXT_COLUMNS 21   // celda i: x = 1 + (i % columnas) * 6, y = (i / columnas) * 12
 
 // las marcas de los acentos: su celda (el glifo entero de 5x11, con la marca en su fila)
-enum W3dFuenteExtMarca {
-    W3dMarcaGraveMin = 0,
-    W3dMarcaGraveMay = 1,
-    W3dMarcaCircunflejoMin = 2,
-    W3dMarcaCircunflejoMay = 3,
-    W3dMarcaDieresisMin = 4,
-    W3dMarcaDieresisMay = 5,
-    W3dMarcaPuntoMin = 6,
-    W3dMarcaPuntoMay = 7,
-    W3dMarcaBreveMin = 8,
-    W3dMarcaBreveMay = 9,
-    W3dMarcaCedilla = 10,
-    W3dMarcaOgonek = 11,
-    W3dMarcaCantidad = 12
+enum W3dFontExtMark {
+    W3dMarkGraveLower = 0,
+    W3dMarkGraveUpper = 1,
+    W3dMarkCircumflexLower = 2,
+    W3dMarkCircumflexUpper = 3,
+    W3dMarkDiaeresisLower = 4,
+    W3dMarkDiaeresisUpper = 5,
+    W3dMarkDotLower = 6,
+    W3dMarkDotUpper = 7,
+    W3dMarkBreveLower = 8,
+    W3dMarkBreveUpper = 9,
+    W3dMarkCedilla = 10,
+    W3dMarkOgonek = 11,
+    W3dMarkCount = 12
 };
 
 // los caracteres dibujados en este atlas (ordenados por codepoint): su celda
-struct W3dFuenteExtGlifo { unsigned short cp; unsigned char celda; };
-static const W3dFuenteExtGlifo W3dFuenteExtGlifos[] = {
+struct W3dFontExtGlyph { unsigned short cp; unsigned char cell; };
+static const W3dFontExtGlyph W3dFontExtGlyphs[] = {
     { 0x003B, 20 },   // ;
     { 0x005E, 27 },   // ^
     { 0x0060, 29 },   // `
@@ -91,11 +91,11 @@ static const W3dFuenteExtGlifo W3dFuenteExtGlifos[] = {
     { 0x2014, 24 },   // —
     { 0x2026, 26 },   // …
 };
-static const unsigned W3dFuenteExtGlifosN = 62;
+static const unsigned W3dFontExtGlyphsN = 62;
 
 // cirilicas que son IGUALES a una latina: se dibujan con la de font.png
-struct W3dFuenteExtIgual { unsigned short cp; unsigned short latina; };
-static const W3dFuenteExtIgual W3dFuenteExtIguales[] = {
+struct W3dFontExtEqual { unsigned short cp; unsigned short latina; };
+static const W3dFontExtEqual W3dFontExtEquals[] = {
     { 0x0410, 'A' },   // А
     { 0x0412, 'B' },   // В
     { 0x0415, 'E' },   // Е
@@ -115,86 +115,86 @@ static const W3dFuenteExtIgual W3dFuenteExtIguales[] = {
     { 0x0443, 'y' },   // у
     { 0x0445, 'x' },   // х
 };
-static const unsigned W3dFuenteExtIgualesN = 18;
+static const unsigned W3dFontExtEqualsN = 18;
 
 // letras COMPUESTAS: la letra base + una marca. marca: 0 = agudo y 1 = tilde (de font.png, ver font.cpp);
 // 2 + n = la celda n de este atlas (ya elegida: la version de la marca para mayuscula o minuscula)
-struct W3dFuenteExtCompuesta { unsigned short cp; unsigned short base; unsigned char marca; };
-static const W3dFuenteExtCompuesta W3dFuenteExtCompuestas[] = {
+struct W3dFontExtComposite { unsigned short cp; unsigned short base; unsigned char mark; };
+static const W3dFontExtComposite W3dFontExtComposites[] = {
     { 0x00C0, 0x0041, 3 },   // À = A + Grave
-    { 0x00C1, 0x0041, 0 },   // Á = A + Agudo
-    { 0x00C2, 0x0041, 5 },   // Â = A + Circunflejo
+    { 0x00C1, 0x0041, 0 },   // Á = A + Acute
+    { 0x00C2, 0x0041, 5 },   // Â = A + Circumflex
     { 0x00C3, 0x0041, 1 },   // Ã = A + Tilde
-    { 0x00C4, 0x0041, 7 },   // Ä = A + Dieresis
+    { 0x00C4, 0x0041, 7 },   // Ä = A + Diaeresis
     { 0x00C7, 0x0043, 12 },   // Ç = C + Cedilla
     { 0x00C8, 0x0045, 3 },   // È = E + Grave
-    { 0x00C9, 0x0045, 0 },   // É = E + Agudo
-    { 0x00CA, 0x0045, 5 },   // Ê = E + Circunflejo
-    { 0x00CB, 0x0045, 7 },   // Ë = E + Dieresis
+    { 0x00C9, 0x0045, 0 },   // É = E + Acute
+    { 0x00CA, 0x0045, 5 },   // Ê = E + Circumflex
+    { 0x00CB, 0x0045, 7 },   // Ë = E + Diaeresis
     { 0x00CC, 0x0049, 3 },   // Ì = I + Grave
-    { 0x00CD, 0x0049, 0 },   // Í = I + Agudo
-    { 0x00CE, 0x0049, 5 },   // Î = I + Circunflejo
-    { 0x00CF, 0x0049, 7 },   // Ï = I + Dieresis
+    { 0x00CD, 0x0049, 0 },   // Í = I + Acute
+    { 0x00CE, 0x0049, 5 },   // Î = I + Circumflex
+    { 0x00CF, 0x0049, 7 },   // Ï = I + Diaeresis
     { 0x00D2, 0x004F, 3 },   // Ò = O + Grave
-    { 0x00D3, 0x004F, 0 },   // Ó = O + Agudo
-    { 0x00D4, 0x004F, 5 },   // Ô = O + Circunflejo
+    { 0x00D3, 0x004F, 0 },   // Ó = O + Acute
+    { 0x00D4, 0x004F, 5 },   // Ô = O + Circumflex
     { 0x00D5, 0x004F, 1 },   // Õ = O + Tilde
-    { 0x00D6, 0x004F, 7 },   // Ö = O + Dieresis
+    { 0x00D6, 0x004F, 7 },   // Ö = O + Diaeresis
     { 0x00D9, 0x0055, 3 },   // Ù = U + Grave
-    { 0x00DA, 0x0055, 0 },   // Ú = U + Agudo
-    { 0x00DB, 0x0055, 5 },   // Û = U + Circunflejo
-    { 0x00DC, 0x0055, 7 },   // Ü = U + Dieresis
-    { 0x00DD, 0x0059, 0 },   // Ý = Y + Agudo
+    { 0x00DA, 0x0055, 0 },   // Ú = U + Acute
+    { 0x00DB, 0x0055, 5 },   // Û = U + Circumflex
+    { 0x00DC, 0x0055, 7 },   // Ü = U + Diaeresis
+    { 0x00DD, 0x0059, 0 },   // Ý = Y + Acute
     { 0x00E0, 0x0061, 2 },   // à = a + Grave
-    { 0x00E1, 0x0061, 0 },   // á = a + Agudo
-    { 0x00E2, 0x0061, 4 },   // â = a + Circunflejo
+    { 0x00E1, 0x0061, 0 },   // á = a + Acute
+    { 0x00E2, 0x0061, 4 },   // â = a + Circumflex
     { 0x00E3, 0x0061, 1 },   // ã = a + Tilde
-    { 0x00E4, 0x0061, 6 },   // ä = a + Dieresis
+    { 0x00E4, 0x0061, 6 },   // ä = a + Diaeresis
     { 0x00E7, 0x0063, 12 },   // ç = c + Cedilla
     { 0x00E8, 0x0065, 2 },   // è = e + Grave
-    { 0x00E9, 0x0065, 0 },   // é = e + Agudo
-    { 0x00EA, 0x0065, 4 },   // ê = e + Circunflejo
-    { 0x00EB, 0x0065, 6 },   // ë = e + Dieresis
+    { 0x00E9, 0x0065, 0 },   // é = e + Acute
+    { 0x00EA, 0x0065, 4 },   // ê = e + Circumflex
+    { 0x00EB, 0x0065, 6 },   // ë = e + Diaeresis
     { 0x00EC, 0x0131, 2 },   // ì = ı + Grave
-    { 0x00ED, 0x0069, 0 },   // í = i + Agudo
-    { 0x00EE, 0x0131, 4 },   // î = ı + Circunflejo
-    { 0x00EF, 0x0131, 6 },   // ï = ı + Dieresis
+    { 0x00ED, 0x0069, 0 },   // í = i + Acute
+    { 0x00EE, 0x0131, 4 },   // î = ı + Circumflex
+    { 0x00EF, 0x0131, 6 },   // ï = ı + Diaeresis
     { 0x00F2, 0x006F, 2 },   // ò = o + Grave
-    { 0x00F3, 0x006F, 0 },   // ó = o + Agudo
-    { 0x00F4, 0x006F, 4 },   // ô = o + Circunflejo
+    { 0x00F3, 0x006F, 0 },   // ó = o + Acute
+    { 0x00F4, 0x006F, 4 },   // ô = o + Circumflex
     { 0x00F5, 0x006F, 1 },   // õ = o + Tilde
-    { 0x00F6, 0x006F, 6 },   // ö = o + Dieresis
+    { 0x00F6, 0x006F, 6 },   // ö = o + Diaeresis
     { 0x00F9, 0x0075, 2 },   // ù = u + Grave
-    { 0x00FA, 0x0075, 0 },   // ú = u + Agudo
-    { 0x00FB, 0x0075, 4 },   // û = u + Circunflejo
-    { 0x00FC, 0x0075, 6 },   // ü = u + Dieresis
-    { 0x00FD, 0x0079, 0 },   // ý = y + Agudo
-    { 0x00FF, 0x0079, 6 },   // ÿ = y + Dieresis
+    { 0x00FA, 0x0075, 0 },   // ú = u + Acute
+    { 0x00FB, 0x0075, 4 },   // û = u + Circumflex
+    { 0x00FC, 0x0075, 6 },   // ü = u + Diaeresis
+    { 0x00FD, 0x0079, 0 },   // ý = y + Acute
+    { 0x00FF, 0x0079, 6 },   // ÿ = y + Diaeresis
     { 0x0104, 0x0041, 13 },   // Ą = A + Ogonek
     { 0x0105, 0x0061, 13 },   // ą = a + Ogonek
-    { 0x0106, 0x0043, 0 },   // Ć = C + Agudo
-    { 0x0107, 0x0063, 0 },   // ć = c + Agudo
+    { 0x0106, 0x0043, 0 },   // Ć = C + Acute
+    { 0x0107, 0x0063, 0 },   // ć = c + Acute
     { 0x0118, 0x0045, 13 },   // Ę = E + Ogonek
     { 0x0119, 0x0065, 13 },   // ę = e + Ogonek
     { 0x011E, 0x0047, 11 },   // Ğ = G + Breve
     { 0x011F, 0x0067, 10 },   // ğ = g + Breve
-    { 0x0130, 0x0049, 9 },   // İ = I + Punto
-    { 0x0143, 0x004E, 0 },   // Ń = N + Agudo
-    { 0x0144, 0x006E, 0 },   // ń = n + Agudo
-    { 0x015A, 0x0053, 0 },   // Ś = S + Agudo
-    { 0x015B, 0x0073, 0 },   // ś = s + Agudo
+    { 0x0130, 0x0049, 9 },   // İ = I + Dot
+    { 0x0143, 0x004E, 0 },   // Ń = N + Acute
+    { 0x0144, 0x006E, 0 },   // ń = n + Acute
+    { 0x015A, 0x0053, 0 },   // Ś = S + Acute
+    { 0x015B, 0x0073, 0 },   // ś = s + Acute
     { 0x015E, 0x0053, 12 },   // Ş = S + Cedilla
     { 0x015F, 0x0073, 12 },   // ş = s + Cedilla
-    { 0x0178, 0x0059, 7 },   // Ÿ = Y + Dieresis
-    { 0x0179, 0x005A, 0 },   // Ź = Z + Agudo
-    { 0x017A, 0x007A, 0 },   // ź = z + Agudo
-    { 0x017B, 0x005A, 9 },   // Ż = Z + Punto
-    { 0x017C, 0x007A, 8 },   // ż = z + Punto
-    { 0x0401, 0x0045, 7 },   // Ё = E + Dieresis
+    { 0x0178, 0x0059, 7 },   // Ÿ = Y + Diaeresis
+    { 0x0179, 0x005A, 0 },   // Ź = Z + Acute
+    { 0x017A, 0x007A, 0 },   // ź = z + Acute
+    { 0x017B, 0x005A, 9 },   // Ż = Z + Dot
+    { 0x017C, 0x007A, 8 },   // ż = z + Dot
+    { 0x0401, 0x0045, 7 },   // Ё = E + Diaeresis
     { 0x0419, 0x0418, 11 },   // Й = И + Breve
     { 0x0439, 0x0438, 10 },   // й = и + Breve
-    { 0x0451, 0x0065, 6 },   // ё = e + Dieresis
+    { 0x0451, 0x0065, 6 },   // ё = e + Diaeresis
 };
-static const unsigned W3dFuenteExtCompuestasN = 73;
+static const unsigned W3dFontExtCompositesN = 73;
 
 #endif

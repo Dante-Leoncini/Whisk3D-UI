@@ -16,11 +16,11 @@
 
 #include "WhiskUI/core/UI.h"
 #include "WhiskUI/draw/icons.h"
-#include "WhiskUI/theme/colores.h"
+#include "WhiskUI/theme/colors.h"
 #include "WhiskUI/widgets/card.h"
 #include "WhiskUI/text/bitmapText.h"
 #include "objects/Objects.h"
-#include "w3dGraphics.h"   // ColorAlterado (w3dEngine::Color4f)
+#include "w3dGraphics.h"   // AlteredColor (w3dEngine::Color4f)
 
 // dialecto C++03 compartido
 struct PropertyType {
@@ -44,26 +44,26 @@ struct PropertyType {
 
 // donde ARRANCA la columna de valores del grupo en dibujo (las filas
 // de ancho completo la usan para volver al borde izquierdo)
-extern int PropColEtiqueta;
+extern int PropColLabel;
 extern int g_propKeyBtnCol;   // ancho de la columna del boton keyframe (0 si no hay); lo setea el grupo
-extern void* g_kfFocoProp;    // la PropertieBase cuyo keyframe esta enfocado por TECLADO (borde blanco); NULL = ninguno
+extern void* g_kfFocusProp;   // la PropertieBase cuyo keyframe esta enfocado por TECLADO (borde blanco); NULL = ninguno
 
 // HOOKS del boton-rombo de keyframe (canal de animacion de una propiedad). El editor
-// los cablea (usan ObjActivo + CurrentFrame + las curvas). NULL sin editor.
-//   estado(prop,comp) -> 0 sin animacion / 1 animado sin key aqui / 2 hay key aqui
+// los cablea (usan ActiveObj + CurrentFrame + las curvas). NULL sin editor.
+//   state(prop,comp) -> 0 sin animacion / 1 animado sin key aqui / 2 hay key aqui
 //                        3 CAMBIO SIN GUARDAR (verde): el valor de ahora no es el que dice la curva en este frame;
 //                          un click lo guarda como key en el frame actual
 //   toggle(prop,comp) -> pone/quita el key del canal en el frame actual
-extern int  (*W3dKeyframeEstado)(int prop, int comp);
+extern int  (*W3dKeyframeState)(int prop, int comp);
 extern void (*W3dKeyframeToggle)(int prop, int comp);
 // dibuja el rombo (IconType::keyframe) coloreado por el estado, en el origen actual
-void W3dRenderRomboKey(int estado);
+void W3dRenderDiamondKey(int state);
 
 // Titulo de una tarjeta: [flecha abrir/cerrar] [icono opcional] texto.
 // iconExtra = NULL -> no se dibuja y el texto no reserva su lugar (la tarjeta queda igual que siempre).
-void CardTitulo(GLfloat* icon, const std::string& texto, int maxPixels = 1920, GLfloat* iconExtra = NULL);
+void CardTitle(GLfloat* icon, const std::string& text, int maxPixels = 1920, GLfloat* iconExtra = NULL);
 // el AMARILLO de lo alterado (un override: ver PropertieBase::alterado)
-inline void ColorAlterado() { w3dEngine::Color4f(1.0f, 0.86f, 0.18f, 1.0f); }
+inline void AlteredColor() { w3dEngine::Color4f(1.0f, 0.86f, 0.18f, 1.0f); }
 
 class PropertieBase {
     public:
@@ -75,10 +75,10 @@ class PropertieBase {
 
         virtual PropertyType GetType();
 
-        bool editando;
+        bool editing;
         // ALTERADO: el valor no es el ORIGINAL (un objeto que genera un proxy o una instancia, cambiado en ESTE proyecto: un
         // override). El numero y la casilla se ven en AMARILLO. Lo pone Properties en cada cuadro
-        bool alterado;
+        bool altered;
 
         virtual void button_up();
         virtual void button_down();
@@ -89,11 +89,13 @@ class PropertieBase {
         virtual bool EditPropertie();
         // false = la navegacion con flechas la saltea (gaps, filas sin
         // valor enlazado: antes se "seleccionaban" filas que no se ven)
-        virtual bool Seleccionable() { return true; }
-        // canal de animacion de esta propiedad (para el boton de KEYFRAME a la
-        // derecha). -1 = no animable. Lo overridean PropFloat/PropBool.
-        virtual int AnimProp() { return -1; }
-        virtual int AnimComp() { return 0; }
+        virtual bool Selectable() { return true; }
+        // canal de animacion de esta propiedad (el boton de KEYFRAME a la derecha): animProp = el canal del Core
+        // (AnimPosition, AnimColor, AnimLightMisc...), animComp = AnimX/Y/Z; -1 = no animable. Una fila que no se ve
+        // (sin valor enlazado, oculta) no tiene rombo: antes se dibujaba igual, encima de la fila de arriba
+        int animProp, animComp;
+        int AnimProp() { return Selectable() ? animProp : -1; }
+        int AnimComp() { return animComp; }
 
         virtual void RenderPropertiBox(Card* propertiBox);
         virtual void RenderPropertiBoxBorder(Card* propertiBox);

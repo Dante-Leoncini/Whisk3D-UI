@@ -8,7 +8,7 @@ class Image {
 	public:
 		//int parent = -1;
     	Object2D& parent;
-		int interpolacion = closest;
+		int interpolation = closest;
 		int TextureID = 0;
 		//colores RGB
 		GLubyte color[3] = { 255, 255, 255 };
@@ -20,8 +20,8 @@ class Image {
 			img.SetVertices(x, y, w, h);
 		}
 
-		void SetColor(GLubyte red, GLubyte green, GLubyte blue){
-			color[0] = red;
+		void SetColor(GLubyte net, GLubyte green, GLubyte blue){
+			color[0] = net;
 			color[1] = green;
 			color[2] = blue;
 		}
@@ -36,7 +36,7 @@ class Image {
 
 			// esto se hace despues del bind de la textura. sino no le afecta.
 			// via la abstraccion (no GL directo): closest=NEAREST, si no LINEAR.
-			w3dEngine::TexFilter(interpolacion != closest);
+			w3dEngine::TexFilter(interpolation != closest);
 
 			img.Render();
 		}

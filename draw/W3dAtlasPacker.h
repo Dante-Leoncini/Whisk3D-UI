@@ -14,7 +14,7 @@
 struct W3dAtlasItem {
     const unsigned char* rgba;  // pixeles RGBA 8888 de la imagen (no se liberan aca)
     int w, h;                   // su tamano
-    bool fijo;                  // true: va SI o SI en la posicion (x,y) pedida
+    bool fixed;                 // true: va SI o SI en la posicion (x,y) pedida
                                 // (ej: font.png en el (0,0) para no invalidar coords)
     int x, y;                   // fijo: la posicion pedida. SALIDA: donde quedo.
 };

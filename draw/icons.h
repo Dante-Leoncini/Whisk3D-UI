@@ -15,7 +15,7 @@
     #include <GL/gl.h>
 #endif
 
-#include "UI.h" // para RenglonHeight
+#include "UI.h" // para RowHeight
 
 // Tamaños iniciales
 extern GLshort IconMesh[8];
@@ -43,21 +43,21 @@ struct IconType {
     instance,
     constraint,
     curve,
-    textura,
+    texture,
     empty,
-    lista,
-    cuadricula,
-    carpeta,
-    foto,
+    list,
+    grid,
+    folder,
+    photo,
     object,    // cubo (pestania "Objeto" y Add > Cube)
     material,  // pestania de mesh parts
     plane,     // Add > Plane
     circle,    // Add > Circle
-    cono,      // Add > Cone
+    cone,      // Add > Cone
     normalVertex, // overlay normales: vertex normal
     normalCustom, // overlay normales: custom/split normal
     normalFace,   // overlay normales: face normal
-    cilindro,     // Add > Cylinder
+    cylinder,     // Add > Cylinder
     selVertex,    // Edit Mode: seleccion de vertices (default)
     selEdge,      // Edit Mode: seleccion de bordes
     selFace,      // Edit Mode: seleccion de caras
@@ -67,19 +67,19 @@ struct IconType {
     pivotCursor,     // Transform Pivot: cursor 3D
     notifError,      // notificacion de ERROR (se pinta rojo)
     notifOk,         // notificacion OK/exito (se pinta verde)
-    modificador,     // pestania "Modificadores" en Properties
+    modifier,        // pestania "Modificadores" en Properties
     armature,        // esqueleto (Add > Armature / outliner)
     keyframe,        // rombo: tarjeta "Keyframe" del panel de propiedades
     monitor,         // pantalla: el menu "View" (sin texto, para ahorrar ancho de barra)
     snap,            // iman: el boton "Snap" de la barra del viewport3d
-    guardar,         // diskette: Guardar proyecto (tarjeta Archivo)
+    save,            // diskette: Guardar proyecto (tarjeta Archivo)
     camera_off,      // camara TACHADA: el objeto no se renderiza (outliner)
-    borrar,          // tacho: item "Borrar" del menu Animacion (Delete Keyframe)
-    mas,             // signo +: menu "Add"/Anadir de la barra del viewport
-    seleccion,       // cursor/marco: boton "Seleccionar" de la barra (reemplaza el texto largo)
+    trash,           // tacho: item "Borrar" del menu Animacion (Delete Keyframe)
+    plus,            // signo +: menu "Add"/Anadir de la barra del viewport
+    selection,       // cursor/marco: boton "Seleccionar" de la barra (reemplaza el texto largo)
     // FALLOFF: la curva de caida de una herramienta con radio (menu Falloff del pincel). Cada
     // uno DIBUJA su curva, asi se eligen de un vistazo sin leer. Van en el orden del enum
-    // W3dFalloffTipo salvo los que todavia no tienen arte (smooth, sharper, inverse square),
+    // W3dFalloffType salvo los que todavia no tienen arte (smooth, sharper, inverse square),
     // que caen a texto hasta que llegue el png.
     falloff_custom,
     falloff_smoother,
@@ -88,62 +88,62 @@ struct IconType {
     falloff_sharp,
     falloff_linear,
     falloff_constant
-        , menos,  // signo -: modo "Restar" de una capa del Mix de animaciones
-        igual,    // signo =: el modo Mix (capas mezcladas) y el modo "Mezclar" de una capa
-        niebla,   // tres lineas onduladas: el objeto Niebla (glFog en el arbol)
-        limpiarz, // capas con una goma: el objeto Limpiar Z
-        recorte,  // rectangulo punteado dentro de la pantalla: el objeto Recorte
-        hitbox,   // caja de alambre con una marca: el objeto Hitbox (caja de deteccion)
+        , minus, // signo -: modo "Restar" de una capa del Mix de animaciones
+        equal,   // signo =: el modo Mix (capas mezcladas) y el modo "Mezclar" de una capa
+        fog,     // tres lineas onduladas: el objeto Niebla (glFog en el arbol)
+        clearz,  // capas con una goma: el objeto Limpiar Z
+        clip,    // rectangulo punteado dentro de la pantalla: el objeto Recorte
+        hitbox,  // caja de alambre con una marca: el objeto Hitbox (caja de deteccion)
         // el OUTLINER POR RECURSOS (selector de vista): los tipos de recurso que no tenian icono
-        animacion, // tira de pelicula con un "play": los animsets (clips de esqueleto)
+        animation, // tira de pelicula con un "play": los animsets (clips de esqueleto)
         prefab,    // caja en perspectiva: un prefab (una "clase" instanciable)
-        libreria,  // libros en un estante: una libreria externa (otro .w3d de solo lectura)
+        lib,       // libros en un estante: una libreria externa (otro .w3d de solo lectura)
         // (las raices ESCENA y JUEGO usan los iconos que ya habia: camera y gamepad)
         // la BIBLIOTECA (el outliner como explorador del .w3d): los tipos de archivo y el filtro
-        sonido,    // parlante con ondas: un sonido (.wav / .ogg)
+        sound,     // parlante con ondas: un sonido (.wav / .ogg)
         script,    // hoja con llaves: un script .lua
         video,     // pantalla con un "play": un video
-        filtro,    // embudo: el filtro por tipo de la biblioteca
+        filter,    // embudo: el filtro por tipo de la biblioteca
         // las LIBRERIAS externas: lo que genera un proxy W3D es de SOLO LECTURA (outliner)
-        candado,   // candado cerrado: de solo lectura (lo generado por un proxy de una libreria)
+        lock,   // candado cerrado: de solo lectura (lo generado por un proxy de una libreria)
         // la INTERPOLACION de una key (timeline: Key > Interpolation Mode; Properties > Keyframe)
         interp_constant,   // escalon: el valor se queda y salta en la key siguiente
         interp_linear,     // recta
         interp_bezier,     // curva suave
         // un MAPA del material como NUMERO (para toda la superficie) en vez de una textura
-        numero,
+        number,
         // un RELOJ: el tipo de viewport Linea de tiempo (el boton de tipo de su barra)
-        reloj,
+        clock,
         // dividir un viewport (el menu de tipo): dos cuadrados lado a lado (en columnas) o uno arriba del otro (en filas)
-        columnas,
-        filas,
+        columns,
+        rows,
         // el menu de tipo: MAXIMIZAR (un rectangulo), MINIMIZAR (dos rectangulos superpuestos), EXPANDIR (flechas en las esquinas)
-        maximizar,
-        minimizar,
-        expandir,
+        maximize,
+        minimize,
+        expand,
         // el candado ABIERTO (el de la vista de camara: abierto = navegar te saca de la camara)
-        candadoAbierto,
+        lockOpen,
         // una TERMINAL (">_" en una ventana): el viewport Consola
-        consola,
+        console,
         // las curvas de EASING (timeline: Set Keyframe Interpolation): por fuerza y con efecto
         interp_sine, interp_quad, interp_cubic, interp_quart, interp_quint, interp_expo, interp_circ,
         interp_back, interp_bounce, interp_elastic,
         // el EASING de esas curvas (Ctrl+E): automatico, al arrancar, al llegar, en las dos puntas
         ease_auto, ease_in, ease_out, ease_inout,
         // un PUNTO relleno: el Auto Keyframe del timeline (rojo = grabando)
-        grabar,
+        record,
         // los TIPOS DE HANDLE de un keyframe (timeline: Handle Type): un rombo y como salen sus brazos
         handle_free, handle_aligned, handle_vector, handle_auto, handle_autoclamped, handle_flat,
-        tijera, copiar, pegar,  // Cortar / Copiar / Pegar (menu Objeto, click derecho, IDE)
-        intercambiar,           // dos flechas, una a la derecha y otra a la izquierda: intercambiar dos viewports
-        cruz,                   // la CRUZ de tres ejes: el objeto Vacio (su pestania de Propiedades)
-        esfera,                 // un circulo con su ecuador y su meridiano: el Vacio con forma de esfera
-        deshacer, rehacer,      // la flecha curva para atras / para adelante (la de siempre: deshacer y rehacer)
-        atajo,                  // la FLECHA DE ACCESO DIRECTO (caja negra con una flecha): un recurso EXTERNO (biblioteca)
-        recargar,               // la flecha en circulo: ACTUALIZAR (el explorador de archivos, volver a leer una textura del disco)
-        usuarios,               // dos personas: los USUARIOS de un recurso (la tarjeta Recurso: cuantos lo usan, seleccionarlos)
-        cerrar,                 // una X: CANCELAR / cerrar (el horneado de la luz mientras calcula)
-        raton                   // un MOUSE: que se elige con el click / el dedo / el lapiz (el timeline: curva, keyframe o ambos)
+        scissors, copy, paste,  // Cortar / Copiar / Pegar (menu Objeto, click derecho, IDE)
+        swap,                   // dos flechas, una a la derecha y otra a la izquierda: intercambiar dos viewports
+        cross,                  // la CRUZ de tres ejes: el objeto Vacio (su pestania de Propiedades)
+        sphere,                 // un circulo con su ecuador y su meridiano: el Vacio con forma de esfera
+        undo, redo,             // la flecha curva para atras / para adelante (la de siempre: deshacer y rehacer)
+        shortcut,               // la FLECHA DE ACCESO DIRECTO (caja negra con una flecha): un recurso EXTERNO (biblioteca)
+        reload,                 // la flecha en circulo: ACTUALIZAR (el explorador de archivos, volver a leer una textura del disco)
+        users,                  // dos personas: los USUARIOS de un recurso (la tarjeta Recurso: cuantos lo usan, seleccionarlos)
+        close,                  // una X: CANCELAR / cerrar (el horneado de la luz mientras calcula)
+        mouse                   // un MOUSE: que se elige con el click / el dedo / el lapiz (el timeline: curva, keyframe o ambos)
     };
     Enum v;
     IconType(Enum e) : v(e) {}
@@ -167,19 +167,19 @@ class IconUV {
 // ===================================================
 extern std::vector<IconUV*> IconsUV;
 
-// nombre estable de cada icono (el archivo atlas/iconos/<nombre>.png del skin)
-const char* IconoNombre(int i);
+// nombre estable de cada icono (el archivo atlas/icons/<nombre>.png del skin)
+const char* IconName(int i);
 // el INVERSO: indice del icono que se llama asi, -1 si no existe. Lo usa el codigo que elige
 // el icono por NOMBRE en vez de por enum (ej: el falloff, que ya nombra su arte en su tabla).
-int IconoIndice(const char* nombre);
+int IconIndex(const char* name);
 // arma IconsUV desde una lista de rects EXTERNA (el atlas dinamico); un rect con
 // x = -1 usa el arte legacy de font.png (que vive en el (0,0) del atlas nuevo)
-void CrearIconosDesde(const IconRect* lista, int texW, int texH);
+void CreateIconsFrom(const IconRect* list, int texW, int texH);
 
 // ===================================================
 // Funciones
 // ===================================================
 void SetIconScale(int scale);
-void CrearIconos(int texW, int texH);
+void CreateIcons(int texW, int texH);
 
 #endif

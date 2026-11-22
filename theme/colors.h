@@ -1,5 +1,5 @@
-#ifndef COLORES_H
-#define COLORES_H
+#ifndef COLORS_H
+#define COLORS_H
 
 #ifdef _WIN32
 #ifndef W3D_SYMBIAN
@@ -18,15 +18,15 @@
 struct ColorID {
     enum Enum {
         background,
-        blanco,
+        white,
         accent,
         accentDark,
-        negro,
-        gris,
+        black,
+        gray,
         headerColor,
-        negroTransparente,
-        grisUI,
-        grisLinea, // gris medio (0x494949) para lineas del timeline
+        blackTransparent,
+        grayUI,
+        grayLine, // gris medio (0x494949) para lineas del timeline
         Count
     };
     Enum v;
@@ -34,15 +34,15 @@ struct ColorID {
     operator Enum() const { return v; }
 };
 
-extern GLubyte ListaColoresUbyte[ColorID::Count][4];
-extern float ListaColores[ColorID::Count][4];
+extern GLubyte ColorListUbyte[ColorID::Count][4];
+extern float ColorList[ColorID::Count][4];
 
 // Setea el color de dibujo a un ColorID de la paleta (alpha opcional). Colapsa el patron repetido
-// w3dEngine::Color4f(ListaColores[ColorID::X][0..2], a) que estaba copiado en decenas de lugares.
+// w3dEngine::Color4f(ColorList[ColorID::X][0..2], a) que estaba copiado en decenas de lugares.
 void SetColorID(ColorID id, float a = 1.0f);
 
-// Carga la paleta de la UI desde un skin.ini ("nombre r g b a" por linea; ignora
+// Carga la paleta de la UI desde un skin.start ("nombre r g b a" por linea; ignora
 // los nombres que no reconoce). Devuelve false si no pudo abrir el archivo.
 bool loadColorsW3d(const char* aPath);
 
-#endif // COLORES_H
+#endif // COLORS_H

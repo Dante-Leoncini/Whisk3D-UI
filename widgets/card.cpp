@@ -1,7 +1,7 @@
 #include "card.h"
 #include "w3dGraphics.h"
 #include "WhiskUI/draw/glesdraw.h"
-#include "WhiskUI/theme/colores.h"    // ListaColores (colores del checkbox)
+#include "WhiskUI/theme/colors.h"    // ColorList (colores del checkbox)
 #include "WhiskUI/text/bitmapText.h" // RenderBitmapText (el tilde)
 
 // UVs e indices
@@ -36,7 +36,7 @@ GLfloat CardUV[32] = {
     0.0f,      0.0f
 };
 
-GLfloat CardBordeUV[32] = {
+GLfloat CardBorderUV[32] = {
     0.0f,      0.0f,
     0.0f,      0.0f,
     0.0f,      0.0f,
@@ -55,8 +55,8 @@ GLfloat CardBordeUV[32] = {
     0.0f,      0.0f
 };
 
-GLfloat CardTabUV[32]      = {0};
-GLfloat CardTabBordeUV[32] = {0};
+GLfloat CardTabUV[32]       = {0};
+GLfloat CardTabBorderUV[32] = {0};
 
 void CalcCardUV(int texW, int texH) {
     GLfloat* uv = CardUV;
@@ -74,7 +74,7 @@ void CalcCardUV(int texW, int texH) {
         }
     }
 
-    GLfloat* uvBorder = CardBordeUV;
+    GLfloat* uvBorder = CardBorderUV;
 
     // Coordenadas UV en píxeles (borde de 13px, esquinas de 6px, centro de 1px)
     float Ub[4] = { 116.0f / texW, 118.0f / texW, 119.0f / texW, 121.0f / texW };
@@ -94,12 +94,12 @@ void CalcCardUV(int texW, int texH) {
     // la parte RECTA (sin esquina redondeada ni borde inferior) y la pestania
     // se funde plana con la tarjeta de contenido de abajo.
     for (int i = 0; i < 32; i++) {
-        CardTabUV[i]      = CardUV[i];
-        CardTabBordeUV[i] = CardBordeUV[i];
+        CardTabUV[i]       = CardUV[i];
+        CardTabBorderUV[i] = CardBorderUV[i];
     }
     for (int c = 0; c < 4; c++) {
         CardTabUV[(12 + c) * 2 + 1]      = CardUV[(8 + c) * 2 + 1];
-        CardTabBordeUV[(12 + c) * 2 + 1] = CardBordeUV[(8 + c) * 2 + 1];
+        CardTabBorderUV[(12 + c) * 2 + 1] = CardBorderUV[(8 + c) * 2 + 1];
     }
 }
 
@@ -135,26 +135,26 @@ void Card::Resize(int w, int h) {
 }
 
 // Cambia el color del rectángulo
-void Card::SetColor(GLubyte red, GLubyte green, GLubyte blue) {
-    color[0] = red;
+void Card::SetColor(GLubyte net, GLubyte green, GLubyte blue) {
+    color[0] = net;
     color[1] = green;
     color[2] = blue;
 }
 
 // Renderiza el rectángulo
-void Card::RenderObject(bool usarColorPropio) {
-    if (usarColorPropio)
+void Card::RenderObject(bool useColorOwn) {
+    if (useColorOwn)
         w3dEngine::Color4ub(color[0], color[1], color[2], opacity);
 
     W3dDrawElemsB(mesh, CardUV, CardIndices, 54);
 }
 
 // Renderiza el rectángulo
-void Card::RenderBorder(bool usarColorPropio) {
-    if (usarColorPropio)
+void Card::RenderBorder(bool useColorOwn) {
+    if (useColorOwn)
         w3dEngine::Color4ub(color[0], color[1], color[2], opacity);
 
-    W3dDrawElemsB(mesh, CardBordeUV, CardBorderIndices, 48);
+    W3dDrawElemsB(mesh, CardBorderUV, CardBorderIndices, 48);
 }
 
 // versiones "pestania" (bottom recto): el color lo pone el caller
@@ -162,35 +162,35 @@ void Card::RenderObjectTab() {
     W3dDrawElemsB(mesh, CardTabUV, CardIndices, 54);
 }
 void Card::RenderBorderTab() {
-    W3dDrawElemsB(mesh, CardTabBordeUV, CardBorderIndices, 48);
+    W3dDrawElemsB(mesh, CardTabBorderUV, CardBorderIndices, 48);
 }
 // ---------------------------------------------------------------------------
 //  EL checkbox del editor (ver card.h). Tamaño y colores viven SOLO aca.
 // ---------------------------------------------------------------------------
-int CheckboxLado(){ return RenglonHeightGS; }
-const float* CheckboxColorCaja(bool on){
-    return ListaColores[static_cast<int>(on ? ColorID::grisUI : ColorID::background)];
+int CheckboxSide(){ return RowHeightGS; }
+const float* CheckboxBoxColor(bool on){
+    return ColorList[static_cast<int>(on ? ColorID::grayUI : ColorID::background)];
 }
-const float* CheckboxColorTilde(){ return ListaColores[static_cast<int>(ColorID::background)]; }
-const char*  CheckboxTilde(){ return "\xE2\x9C\x94"; }
+const float* CheckboxCheckColor(){ return ColorList[static_cast<int>(ColorID::background)]; }
+const char*  CheckboxCheck(){ return "\xE2\x9C\x94"; }
 
-void DibujarMuestraColor(int lado, const float* rgba){
-    static Card* caja = NULL;
-    if (!caja) caja = new Card(NULL, lado, lado);
-    caja->Resize(lado, lado);
+void DrawSampleColor(int side, const float* rgba){
+    static Card* box = NULL;
+    if (!box) box = new Card(NULL, side, side);
+    box->Resize(side, side);
     w3dEngine::Color4f(rgba[0], rgba[1], rgba[2], 1.0f);
-    caja->RenderObject(false);
+    box->RenderObject(false);
 }
-void DibujarCheckbox(int lado, bool on){
-    static Card* caja = NULL;
-    if (!caja) caja = new Card(NULL, lado, lado);
-    caja->Resize(lado, lado);
-    const float* c = CheckboxColorCaja(on);
+void DrawCheckbox(int side, bool on){
+    static Card* box = NULL;
+    if (!box) box = new Card(NULL, side, side);
+    box->Resize(side, side);
+    const float* c = CheckboxBoxColor(on);
     w3dEngine::Color4f(c[0], c[1], c[2], 1.0f);
-    caja->RenderObject(false);
+    box->RenderObject(false);
     if (on){
-        const float* t = CheckboxColorTilde();
+        const float* t = CheckboxCheckColor();
         w3dEngine::Color4f(t[0], t[1], t[2], 1.0f);
-        RenderBitmapText(CheckboxTilde(), textAlign::center, lado);
+        RenderBitmapText(CheckboxCheck(), textAlign::center, side);
     }
 }

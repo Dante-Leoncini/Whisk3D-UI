@@ -7,12 +7,12 @@ Tab::Tab(const std::string& Text, int Icon) {
     // (eran inicializadores de clase: C++03)
     text = Text;
     icon = Icon;
-    activa = false;
-    foco = false;
+    active = false;
+    focus = false;
     visible = true;
     hover = false;
     width = 10;
-    height = RenglonHeightGS;
+    height = RowHeightGS;
     sx = -10000;
     sy = -10000;
     card = new Card(NULL, 10, 10);
@@ -25,59 +25,59 @@ Tab::~Tab() {
 }
 
 void Tab::Resize(int maxW) {
-    int contenido = gapGS * 2;
-    if (icon >= 0) contenido += IconSizeGS;
-    if (icon >= 0 && !text.empty()) contenido += gapGS;
-    contenido += UTF8_Largo(text) * CharacterWidthGS;
+    int content = gapGS * 2;
+    if (icon >= 0) content += IconSizeGS;
+    if (icon >= 0 && !text.empty()) content += gapGS;
+    content += UTF8_Length(text) * CharacterWidthGS;
 
-    width = contenido;
+    width = content;
     if (width > maxW) width = maxW;
-    if (width < RenglonHeightGS) width = RenglonHeightGS;
-    height = RenglonHeightGS + bordersGS;
+    if (width < RowHeightGS) width = RowHeightGS;
+    height = RowHeightGS + bordersGS;
     card->Resize(width, height);
 }
 
 void Tab::Render() {
-    const float* gris = ListaColores[static_cast<int>(ColorID::gris)];
-    const float* fondo = ListaColores[static_cast<int>(ColorID::background)];
-    const float* blanco = ListaColores[static_cast<int>(ColorID::blanco)];
-    const float* grisUI = ListaColores[static_cast<int>(ColorID::grisUI)];
+    const float* gray = ColorList[static_cast<int>(ColorID::gray)];
+    const float* background = ColorList[static_cast<int>(ColorID::background)];
+    const float* white  = ColorList[static_cast<int>(ColorID::white)];
+    const float* grayUI = ColorList[static_cast<int>(ColorID::grayUI)];
 
     // cuerpo: la activa usa el color del contenido; la inactiva, mas
     // oscura (mezcla con el fondo); hover aclara un toque
     float r, g, b;
-    if (activa) {
-        r = gris[0]; g = gris[1]; b = gris[2];
+    if (active) {
+        r = gray[0]; g = gray[1]; b = gray[2];
     } else {
-        r = (gris[0] + fondo[0]) * 0.5f;
-        g = (gris[1] + fondo[1]) * 0.5f;
-        b = (gris[2] + fondo[2]) * 0.5f;
+        r = (gray[0] + background[0]) * 0.5f;
+        g = (gray[1] + background[1]) * 0.5f;
+        b = (gray[2] + background[2]) * 0.5f;
     }
-    if (hover && !activa) {
-        r += (gris[0] - r) * 0.5f;
-        g += (gris[1] - g) * 0.5f;
-        b += (gris[2] - b) * 0.5f;
+    if (hover && !active) {
+        r += (gray[0] - r) * 0.5f;
+        g += (gray[1] - g) * 0.5f;
+        b += (gray[2] - b) * 0.5f;
     }
 
     // fondo/borde con la version "tab": ARRIBA redondeado, ABAJO recto (sin
     // esquina ni borde inferior). La ACTIVA llega JUSTO al borde inferior de la barra (pisa la linea
     // del contenido y se funde); las inactivas quedan mas cortas abajo (dejan ver ese borde).
     // +GlobalScale-3: a escala 3 son +0px (coincide con el borde); antes (-2) se pasaba 1px abajo.
-    int h = activa ? (height + GlobalScale - 3) : (height - GlobalScale);
+    int h = active ? (height + GlobalScale - 3) : (height - GlobalScale);
     card->Resize(width, h);
     w3dEngine::Color4f(r, g, b, 1.0f);
     card->RenderObjectTab();
-    w3dEngine::Color4f(fondo[0], fondo[1], fondo[2], 1.0f);
+    w3dEngine::Color4f(background[0], background[1], background[2], 1.0f);
     card->RenderBorderTab();
 
     // contenido: icono + texto. Color: VERDE si esta enfocada con las flechas
     // (foco); BLANCA si es la activa (o hover); GRIS si es inactiva.
-    const float* accent = ListaColores[static_cast<int>(ColorID::accent)];
+    const float* accent = ColorList[static_cast<int>(ColorID::accent)];
     w3dEngine::PushMatrix();
     w3dEngine::Translatef((GLfloat)gapGS, 0, 0);
-    if (foco)               w3dEngine::Color4f(accent[0], accent[1], accent[2], 1.0f);
-    else if (activa||hover) w3dEngine::Color4f(blanco[0], blanco[1], blanco[2], 1.0f);
-    else                    w3dEngine::Color4f(grisUI[0], grisUI[1], grisUI[2], 1.0f);
+    if (focus)               w3dEngine::Color4f(accent[0], accent[1], accent[2], 1.0f);
+    else if (active||hover) w3dEngine::Color4f(white[0], white[1], white[2], 1.0f);
+    else                    w3dEngine::Color4f(grayUI[0], grayUI[1], grayUI[2], 1.0f);
     if (icon >= 0) {
         w3dEngine::PushMatrix();
         w3dEngine::Translatef(0, (GLfloat)((height - IconSizeGS) / 2), 0);

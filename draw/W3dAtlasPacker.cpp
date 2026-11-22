@@ -16,13 +16,13 @@ static void Blit(unsigned char* canvas, int cw, int ch,
 }
 
 // (x,y,w,h) pisa algun item FIJO? devuelve su borde derecho para saltearlo
-static bool PisaFijo(const W3dAtlasItem* items, int n, int gutter,
-                     int x, int y, int w, int h, int* outSalto) {
+static bool OverwritesFixed(const W3dAtlasItem* items, int n, int gutter,
+                     int x, int y, int w, int h, int* outJump) {
     for (int i = 0; i < n; i++) {
-        if (!items[i].fijo) continue;
+        if (!items[i].fixed) continue;
         if (x < items[i].x + items[i].w + gutter && x + w > items[i].x &&
             y < items[i].y + items[i].h + gutter && y + h > items[i].y) {
-            *outSalto = items[i].x + items[i].w + gutter;
+            *outJump = items[i].x + items[i].w + gutter;
             return true;
         }
     }
@@ -39,28 +39,28 @@ bool W3dAtlasPack(W3dAtlasItem* items, int n, int gutter,
         // los fijos tienen que entrar tal cual
         bool ok = true;
         for (int i = 0; i < n && ok; i++)
-            if (items[i].fijo && (items[i].x + items[i].w > W || items[i].y + items[i].h > H))
+            if (items[i].fixed && (items[i].x + items[i].w > W || items[i].y + items[i].h > H))
                 ok = false;
         if (!ok) continue;
 
         // los sueltos: filas de izquierda a derecha, salteando los fijos
-        int x = 0, y = 0, filaAlto = 0;
+        int x = 0, y = 0, rowHeight = 0;
         for (int i = 0; i < n && ok; i++) {
-            if (items[i].fijo) continue;
+            if (items[i].fixed) continue;
             int w = items[i].w + gutter, h = items[i].h + gutter;
             for (;;) {
                 if (x + w > W) {                    // fin de fila: bajar
-                    y += filaAlto ? filaAlto : h;
-                    filaAlto = 0;
+                    y += rowHeight ? rowHeight : h;
+                    rowHeight = 0;
                     x = 0;
                     if (y + h > H) { ok = false; break; }
                     continue;
                 }
-                int salto = 0;
-                if (PisaFijo(items, n, gutter, x, y, w, h, &salto)) { x = salto; continue; }
+                int jump = 0;
+                if (OverwritesFixed(items, n, gutter, x, y, w, h, &jump)) { x = jump; continue; }
                 items[i].x = x; items[i].y = y;
                 x += w;
-                if (h > filaAlto) filaAlto = h;
+                if (h > rowHeight) rowHeight = h;
                 break;
             }
         }

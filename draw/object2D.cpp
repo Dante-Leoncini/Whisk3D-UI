@@ -14,7 +14,7 @@ Object2DType Object2D::getType() {
 }
 
 // Render del objeto base
-void Object2D::RenderObject(bool usarColorPropio) {
+void Object2D::RenderObject(bool useColorOwn) {
     // vacío: los hijos lo implementan
 }
 
@@ -27,12 +27,12 @@ Object2D::~Object2D() {
 }
 
 // Render general (incluye los hijos)
-void Object2D::Render(bool usarColorPropio) {
+void Object2D::Render(bool useColorOwn) {
     if (!visible) return;
 
-    RenderObject(usarColorPropio);
+    RenderObject(useColorOwn);
 
     for (size_t c = 0; c < Childrens.size(); c++) {
-        Childrens[c]->Render(usarColorPropio);
+        Childrens[c]->Render(useColorOwn);
     }
 }

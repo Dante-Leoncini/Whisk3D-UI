@@ -2,7 +2,7 @@
 
 // Variables globales
 GLshort IconMesh[8] = { 0,0, 10,0, 0,10, 10,10 };
-GLshort IconLineMesh[8] = { 0,0, (GLshort)(RenglonHeight),0, 0, (GLshort)(RenglonHeight), (GLshort)(RenglonHeight), (GLshort)(RenglonHeight) };
+GLshort IconLineMesh[8] = { 0,0, (GLshort)(RowHeight),0, 0, (GLshort)(RowHeight), (GLshort)(RowHeight), (GLshort)(RowHeight) };
 
 int IconSize = 10;
 int IconSizeGS = IconSize;
@@ -15,40 +15,40 @@ std::vector<IconUV*> IconsUV;
 void SetIconScale(int scale){
     IconSizeGS = IconSize * scale;
     IconMesh[2] = IconMesh[5] = IconMesh[6] = IconMesh[7] = IconSize * scale;
-    IconLineMesh[2] = IconLineMesh[5] = IconLineMesh[6] = IconLineMesh[7] = (GLshort)(RenglonHeight * scale);
+    IconLineMesh[2] = IconLineMesh[5] = IconLineMesh[6] = IconLineMesh[7] = (GLshort)(RowHeight * scale);
 }
 
 // el nombre de cada icono, EN EL ORDEN del enum (para los pngs individuales del skin)
-static const char* KNombres[ICON_TOTAL] = {
+static const char* KNames[ICON_TOTAL] = {
     "camera", "light", "mesh", "visible", "hidden", "archive", "line", "arrow",
     "arrowRight", "mirror", "array", "gamepad", "instance", "constraint", "curve",
-    "textura", "empty", "lista", "cuadricula", "carpeta", "foto", "object",
-    "material", "plane", "circle", "cono", "normalVertex", "normalCustom",
-    "normalFace", "cilindro", "selVertex", "selEdge", "selFace", "pivotMedian",
+    "texture", "empty", "list", "grid", "folder", "photo", "object",
+    "material", "plane", "circle", "cone", "normalVertex", "normalCustom",
+    "normalFace", "cylinder", "selVertex", "selEdge", "selFace", "pivotMedian",
     "pivotIndividual", "pivotActive", "pivotCursor", "notifError", "notifOk",
-    "modificador", "armature", "keyframe", "monitor", "snap", "guardar", "camera_off",
-    "borrar", "mas", "seleccion",
+    "modifier", "armature", "keyframe", "monitor", "snap", "save", "camera_off",
+    "trash", "plus", "selection",
     "falloff_custom", "falloff_smoother", "falloff_sphere", "falloff_root",
     "falloff_sharp", "falloff_linear", "falloff_constant",
-    "menos", "igual", "niebla", "limpiarz", "recorte", "hitbox",
-    "animacion", "prefab", "libreria",
-    "sonido", "script", "video", "filtro",
-    "candado",
+    "minus", "equal", "fog", "clearz", "clip", "hitbox",
+    "animation", "prefab", "lib",
+    "sound", "script", "video", "filter",
+    "lock",
     "interp_constant", "interp_linear", "interp_bezier",
-    "numero", "reloj", "columnas", "filas", "maximizar", "minimizar", "expandir",
-    "candado_abierto", "consola",
-    "interp_sine", "interp_quad", "interp_cubic", "interp_quart", "interp_quint", "interp_expo", "interp_circ", "interp_back", "interp_bounce", "interp_elastic", "ease_auto", "ease_in", "ease_out", "ease_inout", "grabar",
+    "number", "clock", "columns", "rows", "maximize", "minimize", "expand",
+    "lock_open", "console",
+    "interp_sine", "interp_quad", "interp_cubic", "interp_quart", "interp_quint", "interp_expo", "interp_circ", "interp_back", "interp_bounce", "interp_elastic", "ease_auto", "ease_in", "ease_out", "ease_inout", "record",
     "handle_free", "handle_aligned", "handle_vector", "handle_auto", "handle_autoclamped", "handle_flat",
-    "tijera", "copiar", "pegar", "intercambiar", "cruz", "esfera", "deshacer", "rehacer", "atajo", "recargar", "usuarios", "cerrar", "raton"
+    "scissors", "copy", "paste", "swap", "cross", "sphere", "undo", "redo", "shortcut", "reload", "users", "close", "mouse"
 };
-const char* IconoNombre(int i) {
-    return (i >= 0 && i < (int)ICON_TOTAL) ? KNombres[i] : "";
+const char* IconName(int i) {
+    return (i >= 0 && i < (int)ICON_TOTAL) ? KNames[i] : "";
 }
 
-int IconoIndice(const char* nombre) {
-    if (!nombre || !*nombre) return -1;
+int IconIndex(const char* name) {
+    if (!name || !*name) return -1;
     for (int i = 0; i < (int)ICON_TOTAL; i++) {
-        const char* a = KNombres[i]; const char* b = nombre;
+        const char* a = KNames[i]; const char* b = name;
         while (*a && *a == *b) { a++; b++; }
         if (!*a && !*b) return i;
     }
@@ -57,8 +57,8 @@ int IconoIndice(const char* nombre) {
 
 // la tabla LEGACY: donde vive cada icono ADENTRO de font.png (sigue siendo el
 // fallback de los iconos sin png individual, y el camino entero sin atlas/)
-static const IconRect* TablaLegacy() {
-    static IconRect lista[ICON_TOTAL] = {
+static const IconRect* TableLegacy() {
+    static IconRect list[ICON_TOTAL] = {
         {  1, 117, 10, 10 }, // camera
         { 13, 117, 10, 10 }, // light
         { 24, 117, 10, 10 }, // mesh
@@ -170,7 +170,7 @@ static const IconRect* TablaLegacy() {
         {  72, 117, 10, 10 }, // handle_auto
         {  72, 117, 10, 10 }, // handle_autoclamped
         {  72, 117, 10, 10 }, // handle_flat
-        {  72, 117, 10, 10 }, // tijera (sin arte en font.png: su png en atlas/iconos/)
+        {  72, 117, 10, 10 }, // tijera (sin arte en font.png: su png en atlas/icons/)
         {  72, 117, 10, 10 }, // copiar
         {  72, 117, 10, 10 }, // pegar
         {  72, 117, 10, 10 }, // intercambiar (idem)
@@ -184,11 +184,11 @@ static const IconRect* TablaLegacy() {
         {  72, 117, 10, 10 }, // cerrar (idem: una X, cancelar)
         {  72, 117, 10, 10 }  // raton (idem: el modo de seleccion del timeline)
     };
-    return lista;
+    return list;
 }
 
-void CrearIconosDesde(const IconRect* lista, int texW, int texH){
-    const IconRect* legacy = TablaLegacy();
+void CreateIconsFrom(const IconRect* list, int texW, int texH){
+    const IconRect* legacy = TableLegacy();
 
     // limpia por si se llama más de una vez
     IconsUV.clear();
@@ -197,7 +197,7 @@ void CrearIconosDesde(const IconRect* lista, int texW, int texH){
         IconUV* NewIcon = new IconUV();
         // x = -1: el icono no tiene png individual -> su arte de siempre en font.png
         // (que el atlas dinamico deja ENTERO en el (0,0), asi el rect legacy vale igual)
-        const IconRect& r = (lista[i].x >= 0) ? lista[i] : legacy[i];
+        const IconRect& r = (list[i].x >= 0) ? list[i] : legacy[i];
 
         GLfloat u1 = (GLfloat)r.x / texW;
         GLfloat u2 = (GLfloat)(r.x + r.w) / texW;
@@ -210,10 +210,10 @@ void CrearIconosDesde(const IconRect* lista, int texW, int texH){
         NewIcon->uvs[6] = u2; NewIcon->uvs[7] = v2; // bottom-right
 
 #ifdef W3D_SYMBIAN
-        static const int KOrden[6] = { 0, 1, 2, 2, 1, 3 };
+        static const int KOrder[6] = { 0, 1, 2, 2, 1, 3 };
         for (int t = 0; t < 6; t++) {
-            NewIcon->uvsTri[t*2 + 0] = NewIcon->uvs[KOrden[t]*2 + 0];
-            NewIcon->uvsTri[t*2 + 1] = NewIcon->uvs[KOrden[t]*2 + 1];
+            NewIcon->uvsTri[t*2 + 0] = NewIcon->uvs[KOrder[t]*2 + 0];
+            NewIcon->uvsTri[t*2 + 1] = NewIcon->uvs[KOrder[t]*2 + 1];
         }
 #endif
 
@@ -221,6 +221,6 @@ void CrearIconosDesde(const IconRect* lista, int texW, int texH){
     }
 }
 
-void CrearIconos(int texW, int texH){
-    CrearIconosDesde(TablaLegacy(), texW, texH);
+void CreateIcons(int texW, int texH){
+    CreateIconsFrom(TableLegacy(), texW, texH);
 }

@@ -33,15 +33,15 @@ void Rec2D::SetSize(GLshort x, GLshort y, GLshort w, GLshort h) {
 }
 
 // Cambia el color del rectángulo
-void Rec2D::SetColor(GLubyte red, GLubyte green, GLubyte blue) {
-    color[0] = red;
+void Rec2D::SetColor(GLubyte net, GLubyte green, GLubyte blue) {
+    color[0] = net;
     color[1] = green;
     color[2] = blue;
 }
 
 // Renderiza el rectángulo
-void Rec2D::RenderObject(bool usarColorPropio) {
-    if (usarColorPropio)
+void Rec2D::RenderObject(bool useColorOwn) {
+    if (useColorOwn)
         w3dEngine::Color4ub(color[0], color[1], color[2], opacity);
 
     w3dEngine::VertexPointer2f(0, verticesTri);

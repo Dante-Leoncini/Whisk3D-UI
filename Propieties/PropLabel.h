@@ -10,14 +10,14 @@
 // disponible (Resize lo recalcula al achicar el area) -> ocupa tantas filas como haga falta para leerlo entero.
 class PropLabel : public PropertieBase {
     public:
-        bool oculto;
-        bool wrap;                       // word-wrap multilinea (por espacios)
-        bool rojo;                       // un ERROR (el rojo de los errores del editor), no un aviso gris
-        std::vector<std::string> lineas; // lineas ya cortadas (las recalcula Resize en modo wrap)
+        bool hidden;
+        bool wrap;                      // word-wrap multilinea (por espacios)
+        bool red;                       // un ERROR (el rojo de los errores del editor), no un aviso gris
+        std::vector<std::string> lines; // lineas ya cortadas (las recalcula Resize en modo wrap)
 
         PropLabel(const std::string& Name, bool Wrap = false);
 
-        bool Seleccionable() { return false; }
+        bool Selectable() { return false; }
         int Resize(int w);
 
         void RenderPropertiBox(Card* propertiBox);
