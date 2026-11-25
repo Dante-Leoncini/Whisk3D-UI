@@ -18,6 +18,8 @@ class PropButton : public PropertieBase {
         bool hidden; // true: no ocupa fila (material por defecto)
         bool gray;   // true: se dibuja atenuado y NO ejecuta su accion (ej: Render Animation sin animaciones)
         void (*action)(); // que hace el boton al activarse (o NULL)
+        static PropButton* running;   // el boton que esta corriendo su accion (una accion compartida por varias filas
+                                      // -el desplegable de una tarjeta declarada- sabe cual la llamo)
         // (animable: el selector de la "Camara activa", AnimCamActive: el rombo guarda el corte en el frame actual)
         // (con label) BOTONES CHICOS de solo icono A LA DERECHA del boton: los de un MAPA del material (numero / textura
         // y su capa UV). 'slotsExtras' reserva el lugar de varios aunque la fila tenga menos: asi el ULTIMO (la UV) queda

@@ -75,7 +75,14 @@ PropListMeshParts::PropListMeshParts(const std::string& Name):
     sideBtn[2] = new Button("", (int)IconType::list, false);                              // opciones
     for (int k = 0; k < 3; k++) { sideBtn[k]->rowHeight = true; sideBtn[k]->centered = true; }
     sideBtn[0]->help = "Move Up"; sideBtn[1]->help = "Move Down"; sideBtn[2]->help = "Options";   // (el cartelito)
-};
+}
+
+// (los creaba el constructor y nadie los liberaba: cuatro botones por lista y por panel, o sea por proyecto abierto)
+PropListMeshParts::~PropListMeshParts() {
+    delete rowButton;
+    for (int i = 0; i < 3; i++) delete sideBtn[i];
+}
+
 bool PropListMeshParts::SideEnabled(int k) const {
     const int n = ListCount();
     if (n <= 0 || selectIndex < 0 || selectIndex >= n) return false;

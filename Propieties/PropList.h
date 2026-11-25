@@ -60,11 +60,14 @@ class PropList : public PropertieBase {
         bool Cancel() W3D_OVERRIDE;
 
         PropertyType GetType() W3D_OVERRIDE;
+        virtual Button* RenameField() { return 0; }   // el boton que se vuelve el campo de renombrar una fila (o NULL)
 };
 
 class PropListMeshParts : public PropList {
     public:
         PropListMeshParts(const std::string& Name);
+        ~PropListMeshParts();   // (sus botones: el de renombrar en linea y los tres del costado)
+        Button* RenameField() W3D_OVERRIDE { return rowButton; }
 
         Mesh* mesh;
         Armature* arm;  // fuente cuando modo == 5 (clips de animacion del esqueleto)

@@ -116,9 +116,16 @@ int PropButton::Advance() const {
     return (withLabel ? RowHeightGS : button->height) + gapGS;
 }
 
+PropButton* PropButton::running = 0;
+
 bool PropButton::EditPropertie(){
     if (gray) return false;   // atenuado (ej: Render Animation sin animaciones): no ejecuta la accion
-    if (action) action(); // la accion del boton (click o enter)
+    if (action) {   // la accion del boton (click o enter)
+        PropButton* before = running;
+        running = this;
+        action();
+        running = before;
+    }
     return false; // un boton no entra en modo edicion
 }
 
