@@ -78,7 +78,7 @@ class PropListMeshParts : public PropList {
         Object* obj;
         int rowsMax;   // alto de la VENTANA (ajustable arrastrando)
         int scrollRow; // primera fila visible
-        int mode;      // 0 = mesh parts; 1 = UV maps; 2 = colores; 3 = modificadores; 4 = vertex groups; 5 = animaciones (armature); 6 = huesos (armature); 7 = animaciones del OBJETO (vertex anims del mesh); 8 = huesos 2D del armature 2D ACTIVO; 10 = armatures 2D del mesh (Mesh::armatures2d); 11 = stack de constraints (Object::constraints, va por 'obj'); 12 = scripts lua del objeto (Object::scriptData, va por 'obj'; el ORDEN es el de ejecucion); 13 = el arbol del MIX de animaciones (ganchos Mix*)
+        int mode;      // 0 = mesh parts; 1 = UV maps; 2 = colores; 3 = modificadores; 4 = vertex groups; 5 = animaciones (armature); 6 = huesos (armature); 7 = animaciones del OBJETO (vertex anims del mesh); 8 = huesos 2D del armature 2D ACTIVO; 10 = armatures 2D del mesh (Mesh::armatures2d); 11 = stack de constraints (Object::constraints, va por 'obj'); 12 = scripts lua del objeto (Object::scriptData, va por 'obj'; el ORDEN es el de ejecucion); 13 = el arbol del MIX de animaciones (ganchos Mix*); 19 = stack de constraints del hueso ACTIVO del armature (va por 'arm', Pose Mode)
         // LO QUE SE HACE CON UNA FILA (lo pone el panel al armar la lista; NULL = esa lista no lo tiene). Actuan sobre
         // la fila ACTIVA: el que las llama la elige antes. Con ellas la lista muestra el TACHO a la derecha de cada fila
         // (si hay mas de 'minItems'), el menu contextual (click derecho / mantener y soltar), renombra con doble click

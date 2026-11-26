@@ -7,7 +7,14 @@
 // con TRIANGLES/LINES por DrawArrays (glDrawElements GL_LINES no anda en el N95).
 namespace gfx = w3dEngine;
 
+// (las ranuras tienen que durar hasta que la GPU LEA los vertices. En la PSP y la 3DS la lista del cuadro los lee
+//  despues, asi que hacen falta muchas; con GL, GLdc, Vulkan y el lote de GLES2 se leen -o se copian- en la llamada
+//  misma, y 256 ranuras eran 256 KB de la RAM de la Dreamcast y del N95 para nada)
+#if defined(W3D_PSP) || defined(W3D_3DS) || defined(W3D_VITA)
 static const int KPoolSlots = 256;
+#else
+static const int KPoolSlots = 16;
+#endif
 static GLfloat gPoolV[KPoolSlots][128]; // hasta 64 vertices xy float
 static GLfloat gPoolU[KPoolSlots][128];
 static int gPoolIdx = 0;

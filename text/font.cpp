@@ -271,6 +271,10 @@ Font::Font(int texW, int texH, GLuint textureID)
     addGlyph(0x00A1, 55, 64, 5, 11); // ¡
     addGlyph(0x00B0, 61, 64, 5, 11); // °
     addGlyph('|', 67, 64, 5, 11);
+    // la tabla del camino rapido: lo MISMO que resuelve FindGlyph para cada ASCII que esta en font.png (la '\' es la
+    // '/' espejada); el resto (';' '^' '`' '~' del extendido, lo que no hay) queda NULL y va por FindGlyph
+    for (int c = 0; c < 128; c++)
+        asciiUV[c] = (c == 0x5C || atlas.find((uint16_t)c) != atlas.end()) ? getUVTri((uint16_t)c) : NULL;
 }
 
 // ================= API =================

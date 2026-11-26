@@ -39,7 +39,7 @@ struct W3dTextAtlas {
     bool pixelPerfect; // fuente PIXEL (NEAREST): dibujar SOLO a multiplos enteros y pen entero
     std::map<unsigned, W3dAtlasGlyph> glyphs;
     W3dTextAtlas() : tex(0), atlasW(0), atlasH(0), fontPx(1), lineH(0), ascent(0),
-                     mix(gfx::MixPremult), pixelPerfect(false) {}
+                     mix(gfx::MixPremult), pixelPerfect(false), lowN(0), lowOf(0) {}
 
     // lectura little-endian de un buffer
     static unsigned rdU16(const unsigned char* p){ return (unsigned)p[0] | ((unsigned)p[1]<<8); }
@@ -99,10 +99,27 @@ struct W3dTextAtlas {
         return tex != 0 && !glyphs.empty();
     }
 
+    // EL CAMINO RAPIDO (casi todo el texto es Latin-1): los glifos de 0..255 en una tabla, en vez de buscar en el mapa
+    // por cada letra de cada cuadro. Apunta a los nodos del mapa (no se mueven: el mapa nunca borra), se arma la primera
+    // vez que se pide un glifo (el mapa lo llenan Load y Font2D antes de dibujar) y se rehace si el mapa crecio o si
+    // este atlas es una COPIA de otro (la tabla de la copia apuntaria a los nodos del original)
     const W3dAtlasGlyph* Glyph(unsigned cp) const {
+        if (cp < 256) {
+            if (lowOf != this || lowN != glyphs.size()) BuildLow();
+            return low[cp];
+        }
         std::map<unsigned, W3dAtlasGlyph>::const_iterator it = glyphs.find(cp);
         return it == glyphs.end() ? 0 : &it->second;
     }
+    void BuildLow() const {
+        for (unsigned c = 0; c < 256; c++) low[c] = 0;
+        for (std::map<unsigned, W3dAtlasGlyph>::const_iterator it = glyphs.begin(); it != glyphs.end() && it->first < 256; ++it)
+            low[it->first] = &it->second;
+        lowN = glyphs.size(); lowOf = this;
+    }
+    mutable const W3dAtlasGlyph* low[256];
+    mutable size_t lowN;
+    mutable const W3dTextAtlas* lowOf;
 
     // ancho del texto a tamanio 'px' (alto de fuente en unidades del ortho)
     float TextWidth(const char* s, float px) const {

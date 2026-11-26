@@ -116,9 +116,11 @@ void GroupPropertie::Resize(int Width, int Height){
     PropColLabel    = colLabel;
     g_propKeyBtnCol = keyBtnCol;   // las filas con rombo (ej: un desplegable animable) se achican para dejarle lugar
 
+    rowH.assign(properties.size(), 0);
     if (open){
         for (size_t i = 0; i < properties.size(); ++i){
-            height += properties[i]->Resize(width);
+            rowH[i] = properties[i]->Resize(width);
+            height += rowH[i];
         }
     }
     card->Resize(Width, height);
@@ -178,11 +180,24 @@ void GroupPropertie::button_right(){
     properties[selectIndex]->button_right();
 };
 
+int g_propClipTop = -1000000000, g_propClipBottom = 1000000000;
+// la Y (local a la tarjeta) de la primera fila: el borde y el renglon del titulo (ver Render)
+static int RowsTop() { return borderGS + RowHeightGS + gapGS; }
+bool GroupPropertie::RowOutside(size_t i, int y) const {
+    if (rowH.size() != properties.size() || i >= rowH.size()) return false;   // (sin medir: RenderRow, una lista cambiada)
+    const int h = rowH[i];
+    if (h <= 0) return false;   // (no ocupa lugar: su Render no dibuja nada)
+    // (con una fila de margen: el borde de la caja y el rombo del keyframe asoman un pixel de la fila)
+    return y + h < g_propClipTop - (int)RowHeightGS || y > g_propClipBottom + (int)RowHeightGS;
+}
+
 void GroupPropertie::RenderPropertiBox(){
     PropColLabel    = colLabel; // para las filas de ancho completo
     g_propKeyBtnCol = keyBtnCol;
     w3dEngine::Translatef((GLfloat)colLabel, -GlobalScale, 0);
-    for (size_t i = 0; i < properties.size(); ++i){
+    int y = RowsTop();
+    for (size_t i = 0; i < properties.size(); y += RowAdvance(i), ++i){
+        if (RowOutside(i, y)) { w3dEngine::Translatef(0, (GLfloat)rowH[i], 0); continue; }
         Card* cardToUse = propertiBox;
 
         if (properties[i]->GetType() == PropertyType::Bool){
@@ -252,7 +267,9 @@ void GroupPropertie::RenderPropertiBox(){
 void GroupPropertie::RenderPropertiValue(){
     PropColLabel = colLabel; g_propKeyBtnCol = keyBtnCol;
     w3dEngine::Translatef((GLfloat)(colLabel+borderGS), 0, 0);
-    for (size_t i = 0; i < properties.size(); ++i){
+    int y = RowsTop();
+    for (size_t i = 0; i < properties.size(); y += RowAdvance(i), ++i){
+        if (RowOutside(i, y)) { w3dEngine::Translatef(0, (GLfloat)rowH[i], 0); continue; }
         //si es checkbox
         if (properties[i]->GetType() == PropertyType::Bool){
             SetColorID(ColorID::background, 1.0f);
@@ -280,7 +297,9 @@ void GroupPropertie::RenderPropertiValue(){
 void GroupPropertie::RenderPropertiLabel(){
     PropColLabel = colLabel;
     w3dEngine::Translatef((GLfloat)(colLabel - gapGS), 0, 0);
-    for (size_t i = 0; i < properties.size(); ++i){
+    int y = RowsTop();
+    for (size_t i = 0; i < properties.size(); y += RowAdvance(i), ++i){
+        if (RowOutside(i, y)) { w3dEngine::Translatef(0, (GLfloat)rowH[i], 0); continue; }
         if (selectIndex == i){
             SetColorID(ColorID::accent, 1.0f);
         }

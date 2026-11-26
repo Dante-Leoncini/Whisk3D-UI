@@ -162,6 +162,7 @@ int PropListMeshParts::ListCount() const {
     if (mode == 8) return mesh ? (int)mesh->Arm2DBones().size() : 0; // huesos 2D del ARMATURE 2D ACTIVO
     if (mode == 10) return mesh ? (int)mesh->armatures2d.size() : 0; // ARMATURES 2D del mesh (una malla puede tener varios)
     if (mode == 11) return obj ? obj->ConstraintsCount() : 0;        // constraints: los tiene CUALQUIER objeto, va por 'obj'
+    if (mode == 19) return arm ? arm->BoneConstraintsCount() : 0;    // constraints del hueso ACTIVO (Pose Mode)
     if (mode == 12) return (obj && obj->scriptData) ? (int)obj->scriptData->scripts.size() : 0; // scripts lua
     if (!mesh) return 0;
     if (mode == 1) return (int)mesh->uvMaps.size();
@@ -184,6 +185,7 @@ std::string PropListMeshParts::ListName(int i) const {
     if (mode == 8) return (mesh && i >= 0 && i < (int)mesh->Arm2DBones().size()) ? mesh->Arm2DBones()[i].name : std::string();
     if (mode == 10) return (mesh && i >= 0 && i < (int)mesh->armatures2d.size() && mesh->armatures2d[i]) ? mesh->armatures2d[i]->name : std::string();
     if (mode == 11) return obj ? obj->ConstraintName(i) : std::string(); // (el accesor ya clampea el indice)
+    if (mode == 19) return arm ? arm->BoneConstraintName(i) : std::string();
     if (mode == 12) {   // scripts lua: se muestra el NOMBRE DE ARCHIVO (la ruta no entra ni sirve)
         if (!obj || !obj->scriptData) return std::string();
         if (i < 0 || i >= (int)obj->scriptData->scripts.size()) return std::string();
@@ -224,6 +226,7 @@ void PropListMeshParts::ListSelect(int i) {
     // constraints: SIEMPRE por SetActiveConstraint (clampea; -1 = ninguno). Elegir uno no
     // recalcula nada -- el stack se evalua al vuelo al dibujar, no hornea geometria.
     if (mode == 11) { if (obj) obj->SetActiveConstraint(i); return; }
+    if (mode == 19) { if (arm) arm->SetActiveBoneConstraint(i); return; }
     // scripts lua: elegir uno solo cambia CUAL se muestra abajo (no re-ejecuta nada;
     // el orden de la lista sigue siendo el orden de ejecucion)
     if (mode == 12) { if (obj && obj->scriptData) obj->scriptData->active = i; return; }
@@ -545,6 +548,7 @@ int PropListMeshParts::Resize(int w){
     // panel, como los modificadores) porque el stack es POR OBJETO: cambiar de objeto
     // seleccionado tiene que mover el resaltado sin que haga falta tocar ningun boton.
     else if (obj && mode == 11) selectIndex = obj->activeConstraint;
+    else if (arm && mode == 19) selectIndex = arm->ActiveBoneConstraint();
     else if (mode == 13) selectIndex = MixActiveRow ? MixActiveRow() : -1;
     else if (mode == 17) selectIndex = LayerTexActiveRow ? LayerTexActiveRow() : -1;
     else if (mode == 18) selectIndex = LayerMatActiveRow ? LayerMatActiveRow() : -1;

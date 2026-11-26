@@ -64,6 +64,10 @@ class Font {
         // Resuelve las derivadas de font.png ('\\', el '?' invertido), las cirilicas iguales a una latina (que
         // usan la de font.png) y lo que esta en el extendido. false = no lo tiene: devuelve el '?' de font.png.
         bool FindGlyph(uint16_t cp, const GLfloat*& uv, bool& ext);
+        // EL CAMINO RAPIDO del texto (casi todo es ASCII): el UV de font.png de un ASCII (cp < 128), o NULL si ese
+        // caracter no esta en font.png (sale del extendido o es el '?': FindGlyph). Un ASCII nunca es compuesto ni baja
+        // de la celda, asi que con esto alcanza: sin buscar en el mapa ni en las tablas por cada letra de cada cuadro.
+        const GLfloat* AsciiUV(uint16_t cp) const { return asciiUV[cp]; }
         // Letra COMPUESTA (letra base + marca: a con acento, c cedilla, i con dieresis, la breve de la i corta
         // rusa...): false si 'cp' no lo es. 'base' = la letra sin la marca. La marca: si es el agudo o la tilde
         // sale de font.png, con su propia malla (una franja de 2px arriba); si no, es la celda entera del
@@ -92,6 +96,7 @@ class Font {
         int texHeight;
 
         std::map<uint16_t, Glyph> atlas;
+        const GLfloat* asciiUV[128];   // AsciiUV: se arma una vez, al terminar de cargar el atlas (el constructor)
 
         GLshort scale;        // la ultima que paso SetScale (la usan los offsets en px)
         GLshort mesh[8];      // (default en el constructor: C++03)

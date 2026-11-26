@@ -63,7 +63,15 @@ void RenderBitmapText(const std::string& text, textAlign align, int maxPixels){
     int drawn = 0;
     while (i < text.size() && drawn < drawChars) {
         uint16_t cp = UTF8_Char(text.c_str(), i);
-        if (cp != 0x20) {
+        const GLfloat* uvA = (cp < 0x80) ? WhiskFont->AsciiUV(cp) : NULL;
+        if (uvA && cp != 0x20) {
+            // ASCII de font.png (casi todo el texto): ni compuesta, ni del extendido, ni baja de la celda
+            const float dx = x0 + (float)(drawn * cw);
+            for (int v = 0; v < 6; v++) {
+                vbuf.push_back(quad[v*2] + dx); vbuf.push_back(quad[v*2+1]);
+                ubuf.push_back(uvA[v*2]);       ubuf.push_back(uvA[v*2+1]);
+            }
+        } else if (cp != 0x20) {
             // COMPUESTA (letra con acento, cedilla, dieresis...): se dibuja la LETRA BASE y la marca encima (o abajo)
             uint16_t base = cp;
             const GLfloat* um = 0; const GLfloat* mm = 0; bool extMark = false;
