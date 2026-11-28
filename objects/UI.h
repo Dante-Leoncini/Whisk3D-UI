@@ -41,6 +41,11 @@ public:
                          // Apagado por defecto: lo normal es verla como overlay (simula la ventana).
     bool sameAsRender;   // true (default): el lienzo es el tamano del render. false: responsive.
     float width, height; // el lienzo propio (solo cuenta en responsive)
+    bool fillScreen;     // (solo con tamano fijo) en el JUEGO COMPILADO el lienzo CRECE hasta llenar la pantalla en vez de
+                         // ir encajado con bandas: el diseno (width x height) es el minimo y crece hacia el lado que
+                         // sobra, con escala entera si queda cerca (pixeles parejos). Los scripts ven el tamano de
+                         // verdad con screen()/safeArea() y acomodan lo suyo. Apagado por defecto (los .w3dui de antes).
+    float fillBaseW, fillBaseH;   // (runtime, no se guarda) el tamano de diseno antes de crecer; 0 = todavia no crecio
     int resPreset;       // preset elegido, en lineas: 2160/1080/720/480/240 (etiqueta del boton)
     int aspectPreset;    // 0 = 16:9, 1 = 4:3, 2 = 1:1
     float opacity;       // 0..1: atenua la interfaz ENTERA (los hijos la heredan)
@@ -84,6 +89,8 @@ public:
         showIn3D = false;
         sameAsRender = true;
         width = 640.0f; height = 480.0f;
+        fillScreen = false;
+        fillBaseW = fillBaseH = 0.0f;
         resPreset = 480; aspectPreset = 1;
         opacity = 1.0f;
         padLeft = padRight = padArr = padBottom = 0.0f;

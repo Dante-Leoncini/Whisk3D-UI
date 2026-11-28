@@ -388,6 +388,7 @@ bool UI2DSave(UI* u, const std::string& path, const std::string& baseRel) {
     FieldB(f, 2, "inTree", u->inTree);
     FieldF(f, 2, "width", u->width);
     FieldF(f, 2, "height", u->height);
+    if (u->fillScreen) FieldB(f, 2, "fillScreen", true);   // (solo prendido: los .w3dui de siempre no cambian)
     FieldF(f, 2, "globalScale", u->scaleGlobal);
     FieldB(f, 2, "equalScaleEditor", u->equalScaleEditor);
     FieldColor(f, 2, "color", u->color, false);
@@ -755,6 +756,7 @@ UI* UI2DLoad(const std::string& path) {
         u->inTree = JB(v, "inTree", false);   // (sin la clave: un proyecto de antes -> al final, como se veia)
         u->width = JF(v, "width", u->width);
         u->height = JF(v, "height", u->height);
+        u->fillScreen = JB(v, "fillScreen", false);
         u->scaleGlobal = JF(v, "globalScale", u->scaleGlobal);
         u->equalScaleEditor = JB(v, "equalScaleEditor", u->equalScaleEditor);
         JColor(v, "color", u->color);
