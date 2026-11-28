@@ -9,6 +9,7 @@ Button::Button(const std::string& Text, int Icon, bool Adapt){
     icon = Icon;
     adapt = Adapt;
     dropdown = false;
+    joinNext = false;
     caretMenu = false;
     rowHeight = false;
     centered = false;

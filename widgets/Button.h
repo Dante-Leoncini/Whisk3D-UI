@@ -39,6 +39,8 @@ class Button {
                           // (ej: el menu "Object" sin nada seleccionado)
         bool hover;
         bool separator;  // toolbar: una LINEA VERTICAL antes del boton (arranca otro grupo, estilo Inkscape)
+        bool joinNext;   // barra: el que sigue va PEGADO, sin hueco (varios botones que se ven como uno alargado:
+                         // el selector vertice / arista / cara)
         bool focusMenu;  // menu enfocado con el teclado: borde+texto VERDE
         int width, height;
         int sx, sy;      // rect ABSOLUTO del ultimo render (hover/click)
